@@ -10,14 +10,11 @@ Base = declarative_base()
 class Transaction(Base):
     __tablename__ = 'transaction'
     
-    txid = Column('txid', String(64), primary_key=True)
-    
-    out_address = Column('out_address', String(20), primary_key=True)
+    tx_id = Column('tx_id', String(64), primary_key=True)
+    out_wallet_id = Column('out_wallet_id', String(20), primary_key=True)
     value = Column('value', Float)
 
-
-
     def __repr__(self):
-       return f"User(id={self.txid!r}, value={self.value!r}, out_address={self.out_address!r})"
+       return f"User(id={self.tx_id!r}, value={self.value!r}, out_wallet_id={self.out_wallet_id!r})"
 
 Base.metadata.create_all(engine)

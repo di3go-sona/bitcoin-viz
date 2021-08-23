@@ -1,5 +1,4 @@
 import subprocess, json, sys
-from sqlalchemy.orm import session
 from tqdm import tqdm
 from loguru import logger
 
@@ -34,21 +33,20 @@ def download_transactions(c_bstart, c_bend):
                         assert(len(addrs) == 1)
                         addr = addrs.pop()
 
-                        t = Transaction(txid=txid,  value=value, out_address=addr)
+                        t = Transaction(tx_id=txid,  value=value, out_wallet_id=addr)
                         logger.debug(f"{t}")
                         
                         db.add(t)
                             
                     except KeyError:
-                        logger.warning(f"Address not found for txid: {txid} in blockhash: {block['hash']} ")
-                        break
+                        logger.warning(f"Address not found for txid: {txid} in blockhash: {block_hash} ")
                     except AssertionError:
-                        logger.warning(f"Multiple ddresses found for txid: {txid} in blockhash: {block['hash']} ")
-                        break
-        try:
-            db.commit()
-        except:
-            db.rollback()
+                        logger.warning(f"Multiple ddresses found for txid: {txid} in blockhash: {block_hash} ")
+                        
+            try:
+                db.commit()
+            except:
+                db.rollback()
 
 
 
