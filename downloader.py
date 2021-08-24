@@ -12,7 +12,7 @@ logger.add(sys.stderr, level="INFO")
 
 
 BLOCK_END  = 216782
-BLOCK_RANGE = 100
+BLOCK_RANGE = 1
 BLOCK_START = BLOCK_END - BLOCK_RANGE
 
 def download_transactions(c_bstart, c_bend):
