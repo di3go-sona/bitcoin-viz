@@ -37,6 +37,8 @@ d3.select('svg')
 d3.json("/graph").then( function( data) {
   graph_data = data
 
+
+
   // Initialize the links
   const link = svg
     .selectAll("line")
@@ -50,11 +52,10 @@ d3.json("/graph").then( function( data) {
     .selectAll("circle")
     .data(data.nodes)
     .join("circle")
-      .attr("r", 6)
       .style("fill", node_color)
       .attr("x", Math.random * svg.width )
       .attr("y", Math.random * svg.height )
-      .attr("r", function(d) { return (Math.log(d.w+1)+1) * 5; })
+      .attr("r", function(d) { return ((Math.log(d.w+1)+1) * 5 ) || 6; })
       
 
   // Let's list the force we wanna apply on the network
@@ -63,8 +64,10 @@ d3.json("/graph").then( function( data) {
                               .id(function(d) { return d.id; })                     // This provide  the id of a node
                               .links(data.links)                                    // and this the list of links
                         )
-                        .force("charge", d3.forceManyBody())         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-                        .force("center", d3.forceCenter(width / 2, height / 2))     // This force attracts nodes to the center of the svg area
+                        .force("charge", d3.forceManyBody()
+                                           .distanceMax(400)
+                                           .strength(function(d){return d.w * -20 }))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
+                        .force("center", d3.forceCenter(width /2 , height/2 ))     // This force attracts nodes to the center of the svg area
                         .on("tick", ticked);
 
   // This function is run at each iteration of the force algorithm, updating the nodes position.
