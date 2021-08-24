@@ -10,10 +10,9 @@ function node_color(node){
     return  "#69b3a2"
   } else {
     return "#de6262"
-  }
-  
-  
+  }  
 }
+
 // append the svg object to the body of the page
 const svg = d3.select("#my_dataviz")
 .append("svg")
@@ -36,7 +35,6 @@ d3.select('svg')
   .call(zoom);
 
 d3.json("/graph").then( function( data) {
-  console.log(data)
   graph_data = data
 
   // Initialize the links
@@ -56,6 +54,7 @@ d3.json("/graph").then( function( data) {
       .style("fill", node_color)
       .attr("x", Math.random * svg.width )
       .attr("y", Math.random * svg.height )
+      .attr("r", function(d) { return (Math.log(d.w+1)+1) * 5; })
       
 
   // Let's list the force we wanna apply on the network

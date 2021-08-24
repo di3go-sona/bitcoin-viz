@@ -1,6 +1,7 @@
 from flask import Flask, render_template
+import json 
 
-from loader import get_graph_json
+import loader
 
 
 app = Flask(__name__, static_folder='static/', template_folder='templates/', )
@@ -11,4 +12,4 @@ def index():
 
 @app.route("/graph")
 def graph():
-    return get_graph_json()
+    return json.dumps(loader.get_weigthed_graph())
