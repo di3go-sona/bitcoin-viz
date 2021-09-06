@@ -55,7 +55,7 @@ def download_block(block_height):
                 vout_address = addrs[0]
                 vout_value = vout['value']
                 vout_id = vout['n']
-                vout = TransactionVout(transaction_id=transaction_id, address=vout_address, value=vout_value, id = vout_id)
+                vout = TransactionVout(transaction_id=transaction_id, address=vout_address, value=vout_value, id=vout_id)
 
                 db.add(vout)
                     
