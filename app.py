@@ -3,7 +3,7 @@ import json
 import loader
 
 
-app = Flask(__name__, static_folder='static/', template_folder='templates/', )
+app = Flask(__name__, static_folder='static/', template_folder='templates/')
 
 @app.route("/")
 def index():
@@ -12,6 +12,10 @@ def index():
 @app.route("/timeline")
 def timeline():
     return render_template('timeline.html.j2')
+
+@app.route("/timeline/csv")
+def timeline_json():
+    return loader.get_blocks()
     
 @app.route("/graph")
 def graph():

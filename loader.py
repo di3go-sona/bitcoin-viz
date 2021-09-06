@@ -2,7 +2,6 @@ from database import Transaction, engine, Session
 from sqlalchemy import select, distinct
 
 
-
 def get_wallets_ids():
     query = """SELECT DISTINCT(out_wallet_id) FROM 'transaction' """
     with Session(engine) as db:
@@ -53,3 +52,13 @@ def get_weigthed_graph():
     return {'nodes':  get_weigthed_nodes(), 'links':  get_links() }
 
 
+### Timeline endpoints
+
+def get_blocks():   
+    query = """SELECT hash, time, n_tx FROM blocks ORDER BY time ASC"""
+    with Session(engine) as db:
+        cur = db.execute(query)
+        blocks = cur.fetchall()
+        res = ["hash,time,n_tx"] + ["{},{},{}".format(*b) for b in blocks]
+        return "\n".join(res)
+    

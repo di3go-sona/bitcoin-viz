@@ -1,106 +1,54 @@
-// var ticks = 0;
-// var graph_data;
-// // set the dimensions and margins of the graph
-// const margin = {top: 10, right: 30, bottom: 30, left: 40},
-//   width = window.innerWidth - margin.left - margin.right,
-//   height = window.innerHeight  - margin.top - margin.bottom;
+// set the dimensions and margins of the graph
+const margin = {top: 30, right: 30, bottom: 70, left: 60},
+    width = window.innerWidth - margin.left - margin.right,
+    height = window.innerHeight - margin.top - margin.bottom;
 
-// function node_color(node){
-//   if (node.type == "wallet"){
-//     return  "#69b3a2"
-//   } else {
-//     return "#de6262"
-//   }  
-// }
-// function node_opacity(node){
-//   if (node.type == "wallet"){
-//     return  "#69b3a2"
-//   } else {
-//     return "#de6262"
-//   }  
-// }
+// append the svg object to the body of the page
+const svg = d3.select("#timeline")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-// // append the svg object to the body of the page
-// const svg = d3.select("#my_dataviz")
-// .append("svg")
-//   .attr("width", width + margin.left + margin.right)
-//   .attr("height", height + margin.top + margin.bottom)
-// .append("g")
-//   .attr("transform",
-//         `translate(${margin.left}, ${margin.top})`);
+var dataset
 
-// // Add zoom stuff
-// function handleZoom(e) {
-//   d3.select('svg g')
-//     .attr('transform', e.transform);
-// }
+// Parse the Data
+// d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv").then( function(data) {
+d3.csv("/timeline/csv").then( function(data) {
 
-// let zoom = d3.zoom()
-//   .on('zoom', handleZoom);
+    // Debugging purpose
+    dataset = data
 
-// d3.select('svg')
-//   .call(zoom);
+    // X axis
+    const x = d3.scaleBand()
+                .range([ 0, width ])
+                .domain(data.map(b => new Date(b.time)))
+                .padding(0.1);
 
-// d3.json("/graph").then( function( data) {
-//   graph_data = data
+    svg.append("g")
+       .attr("transform", `translate(0, ${height})`)
+       .call(d3.axisBottom(x))
+       .selectAll("text")
+          .attr("transform", "translate(-10,0)rotate(-45)")
+          .style("text-anchor", "end");
 
+    // Add Y axis
+    const y = d3.scaleLinear()
+                .domain([0, 3000])
+                .range([ height, 0]);
 
+    svg.append("g")
+       .call(d3.axisLeft(y));
 
-//   // Initialize the links
-//   const link = svg
-//     .selectAll("line")
-//     .data(data.links)
-//     .join("line")
-//       .style("stroke", "#aaa") 
-//       .attr('marker-end','url(#arrowhead)')
+    // Bars
+    svg.selectAll("mybar")
+       .data(data)
+       .join("rect")
+       .attr("x", d => x(new Date(d.time)))
+       .attr("y", d => y(parseInt(d.n_tx)))
+       .attr("width", x.bandwidth())
+       .attr("height", d => height - y(d.n_tx))
+       .attr("fill", "#69b3a2")
 
-//   // Initialize the nodes
-//   const node = svg
-//     .selectAll("circle")
-//     .data(data.nodes)
-//     .join("circle")
-//       .style("fill", node_color)
-//       // .style("opacity", .5) 
-//       .attr("x", Math.random * svg.width )
-//       .attr("y", Math.random * svg.height )
-//       .attr("r", function(d) { return ((Math.log(d.w+1)+1) * 5 ) || 6; })
-
-      
-
-
-
-//   // Let's list the force we wanna apply on the network
-//   const simulation =  d3.forceSimulation(data.nodes)
-//                         .alphaDecay(0.05)
-//                         // .alphaTarget(0.4) // stay hot
-//                         .force("link", d3.forceLink()                               // This force provides links between nodes
-//                               .id(function(d) { return d.id; })                     // This provide  the id of a node
-//                               .links(data.links)                                    // and this the list of links
-//                               )
-//                         .force("charge", d3.forceManyBody()
-//                                            .strength(function(d){return d.w* -1 })
-//                                            .distanceMax(1024)
-//                                            )
-                                          
-//                                                     // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-//                         // .force("collide", d3.forceCollide().radius(d => d.r + 1), )
-//                         .force("center", d3.forceCenter(width/2  , height/2 ))     // This force attracts nodes to the center of the svg area
-//                         .on("tick", ticked);
-
-
-//   // This function is run at each iteration of the force algorithm, updating the nodes position.
-//   function ticked() {
-//     ticks +=1
-
-//     link
-//         .attr("x1", function(d) { return d.source.x; })
-//         .attr("y1", function(d) { return d.source.y; })
-//         .attr("x2", function(d) { return d.target.x; })
-//         .attr("y2", function(d) { return d.target.y; });
-
-//     node
-//          .attr("cx", function (d) { return d.x+1; })
-//          .attr("cy", function(d) { return d.y-1; });
-//   }
-
-// });
+})
