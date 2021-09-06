@@ -22,7 +22,7 @@ def download_transactions(c_bstart, c_bend):
         block = json.loads(raw_block)
         txs = block['tx']
         with Session(engine) as db:
-            for tx in txs:
+            for num, tx in enumerate(txs):
                 vouts = tx['vout']
                 vins = tx['vin']
                 for vout in vouts:
@@ -33,7 +33,7 @@ def download_transactions(c_bstart, c_bend):
                         assert(len(addrs) == 1)
                         addr = addrs.pop()
 
-                        t = Transaction(tx_id=txid,  value=value, out_wallet_id=addr)
+                        t = Transaction(tx_id=txid,  value=value, out_wallet_id=addr, tx_num=num)
                         logger.debug(f"{t}")
                         
                         db.add(t)
