@@ -5,7 +5,7 @@ from sqlalchemy.orm import declarative_base, Session, relationship
 from sqlalchemy.sql.schema import ForeignKey
 
 
-engine = create_engine("sqlite+pysqlite:///bitcoinviz_db.sqlite", echo=True, future=True)
+engine = create_engine("sqlite+pysqlite:///bitcoinviz_db.sqlite", echo=False, future=True)
 Base = declarative_base()
 
 class Block(Base):
@@ -20,7 +20,7 @@ class Block(Base):
     #TO-DO: avg/tot amount transactions, sort on time
 
     # Foreign Key
-    transactions = relationship('Transaction', back_populates='transactions')
+    transactions = relationship('Transaction', back_populates='block')
 
     def __repr__(self):
        return f"Block(height={self.height!r}, time={self.time!r}, size={self.size!r})"
@@ -28,19 +28,20 @@ class Block(Base):
 class Transaction(Base):
     __tablename__ = 'transactions'
     
-    tx_id = Column('tx_id', String(64), primary_key=True)
-    out_wallet_id = Column('out_wallet_id', String(20))
+    id = Column('id', String(64), primary_key=True)
     # tot_value = Column('tot_value', Float) as dynamic query
 
     # Foreign Key
     block_hash = Column('block_hash', String(64), ForeignKey('blocks.hash'))
-    block = relationship('Block', back_populates='blocks')
+    block = relationship('Block', back_populates='transactions')
 
     # Foreign Key
     vouts = relationship('TransactionVout')
 
     def __repr__(self):
-       return f"User(id={self.tx_id!r}, value={self.value!r}, out_wallet_id={self.out_wallet_id!r})"
+    #    return f"User(id={self.id!r}, value={self.value!r})"
+        return f"Transaction(id={self.id!r})"
+    
 
 class TransactionVout(Base):
     __tablename__ = 'transaction_vouts'
@@ -50,7 +51,7 @@ class TransactionVout(Base):
     address = Column('address', String(64))
 
     # Foreign Key
-    transaction_id = Column('transaction_id', String(64), ForeignKey('transactions.tx_id'), primary_key=True)
+    transaction_id = Column('transaction_id', String(64), ForeignKey('transactions.id'), primary_key=True)
 
 
 Base.metadata.create_all(engine)
