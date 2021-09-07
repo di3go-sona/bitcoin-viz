@@ -15,18 +15,24 @@ function format_date(date, isFull) {
 }
 
 // set the dimensions and margins of the graph
-const margin = {top: 40, right: 50, bottom: 40, left: 50},
-      width = window.innerWidth*3 - margin.left - margin.right,
-      height = window.innerWidth/7 - margin.top - margin.bottom;
+const margin_y = {top: 40, right: 0, bottom: 40, left: 50},
+      width_y = 55 - margin_y.left - margin_y.right,
+      height_y = window.innerWidth/7 - margin_y.top - margin_y.bottom;
+
+const margin_x = {top: 40, right: 50, bottom: 40, left: 1},
+      width_x = window.innerWidth*3 - margin_x.left - margin_x.right,
+      height_x = window.innerWidth/7 - margin_x.top - margin_x.bottom;
 
 // append the svg object to the body of the page
-const svg = d3.select("#timeline")
-   .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+const svg_y = d3.select("#timeline1")
+                .append("svg")
+                .attr("width", width_y + margin_y.left + margin_y.right)
+                .attr("height", height_y + margin_y.top + margin_y.bottom)
 
-const svg_margined = svg.append("g") 
-                        .attr("transform", `translate(${margin.left},${margin.top})`)
+const svg_x = d3.select("#timeline2")
+                .append("svg")
+                .attr("width", width_x + margin_x.left + margin_x.right)
+                .attr("height", height_x + margin_x.top + margin_x.bottom)
 
 var dataset
 
@@ -51,29 +57,38 @@ d3.csv("/timeline/csv").then( function(data) {
 
    // X axis scale
    const xScale = d3.scaleBand()
-                .range([0, width])
+                .range([0, width_x])
                 .domain(data.map(b => new Date(b.time)))
                 .padding(0.4);
 
    const labels_ordinal = d3.scaleOrdinal()
                            .domain(data.map(b => b.time))
                            .range(labels_color)
-   
-   // Y axis scale
-   const yScale = d3.scaleLinear()
-               .domain([0, d3.max(data.map(b => parseInt(b.n_tx)))])
-               .range([height, 0]);
+
+   const svg_margined_x = svg_x.append("g") 
+                                .attr("transform", `translate(${margin_x.left},${margin_x.top})`)
 
    // X Axis
-   const x_axis = svg_margined.append("g")
-                     .attr("transform", `translate(0, ${height})`)
-                     .call(d3.axisBottom(xScale))
+   const x_axis = svg_margined_x.append("g")
+                              .attr("transform", `translate(0, ${height_x})`)
+                              .attr("class", "x axis")
+                              .call(d3.axisBottom(xScale))
 
-   const y_axis = svg_margined.append("g")
-                     .call(d3.axisLeft(yScale));
+   // Y axis scale
+   const yScale = d3.scaleLinear()
+                    .domain([0, d3.max(data.map(b => parseInt(b.n_tx)))])
+                    .range([height_y, 0]);
+
+   const svg_margined_y = svg_y.append("g") 
+                               .attr("transform", `translate(${margin_y.left},${margin_y.top})`)
+
+   // Y Axis
+   const y_axis = svg_margined_y.append("g")
+                                .attr("class", "y axis")
+                                .call(d3.axisLeft(yScale));
 
    // Bars
-   svg_margined.selectAll(".bar")
+   svg_margined_x.selectAll(".bar")
       .data(data)
       .join("rect")
       .attr("id", b => "rect_" + b.hash)
@@ -84,11 +99,11 @@ d3.csv("/timeline/csv").then( function(data) {
       .attr("x", b => xScale(new Date(b.time)))
       .attr("width", xScale.bandwidth())
       .attr("height", 0)
-      .attr("y", height)
+      .attr("y", height_y)
       .transition()
          .duration(1000)
          .attr("y", b => yScale(parseInt(b.n_tx)))
-         .attr("height", b => height - yScale(parseInt(b.n_tx)))
+         .attr("height", b => height_y - yScale(parseInt(b.n_tx)))
 
    // Setting labels
    x_axis.selectAll("text")
@@ -98,7 +113,7 @@ d3.csv("/timeline/csv").then( function(data) {
       .call(function(t) { 
          t.each(function(d) {
             var self = d3.select(this)
-            var split = format_date(new Date(self.text()), labels_ordinal(self.text())=="black" ).split(' ')  // get the text and split it
+            var split = format_date(new Date(self.text()), labels_ordinal(self.text())=="black").split(' ')  // get the text and split it
             self.text(l => '')
             if (split.length > 1) {
                self.append("tspan")
@@ -118,31 +133,5 @@ d3.csv("/timeline/csv").then( function(data) {
             }
          })
       })
-
-
-
-   
-//    // //Drag
-//    // var zoom = d3.zoom()
-//    //            .scaleExtent([1, 1])
-//    //            .translateExtent([[0, 1000], [width, height]])
-//    //            .on("zoom", zoomed);
-   
-//    // function zoomed(event, d) {
-//    //    svg.attr('transform', event.transform)
-//    // }
-   
-//    // svg.call(zoom);
-
-
-   
-   const zoom = d3.zoom()
-    .on('zoom', (event) => {
-      svg.attr('transform', event.transform);
-    })
-    .scaleExtent([1, 40]);
-
-   svg.call(zoom)
-//    console.log(d3.select("svg"))
 
 })
