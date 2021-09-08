@@ -15,21 +15,21 @@ function format_date(date, isFull) {
 }
 
 // set the dimensions and margins of the graph
-const margin_y = {top: 40, right: 0, bottom: 40, left: 50},
-      width_y = 55 - margin_y.left - margin_y.right,
-      height_y = window.innerWidth/7 - margin_y.top - margin_y.bottom;
+const margin_y = {top: 40, right: 0, bottom: 40, left: 10},
+      width_y  = (70 - margin_y.left - margin_y.right),
+      height_y = (window.innerWidth/7 - margin_y.top - margin_y.bottom)
 
-const margin_x = {top: 40, right: 50, bottom: 40, left: 1},
-      width_x = window.innerWidth*3 - margin_x.left - margin_x.right,
-      height_x = window.innerWidth/7 - margin_x.top - margin_x.bottom;
+const margin_x = {top: 40, right: 10, bottom: 40, left: 0},
+      width_x  = (window.innerWidth*3 - margin_x.left - margin_x.right),
+      height_x = (window.innerWidth/7 - margin_x.top - margin_x.bottom)
 
 // append the svg object to the body of the page
-const svg_y = d3.select("#timeline1")
+const svg_y = d3.select("#col-y-axis")
                 .append("svg")
                 .attr("width", width_y + margin_y.left + margin_y.right)
                 .attr("height", height_y + margin_y.top + margin_y.bottom)
 
-const svg_x = d3.select("#timeline2")
+const svg_x = d3.select("#col-x-axis")
                 .append("svg")
                 .attr("width", width_x + margin_x.left + margin_x.right)
                 .attr("height", height_x + margin_x.top + margin_x.bottom)
@@ -66,7 +66,7 @@ d3.csv("/timeline/csv").then( function(data) {
                            .range(labels_color)
 
    const svg_margined_x = svg_x.append("g") 
-                                .attr("transform", `translate(${margin_x.left},${margin_x.top})`)
+                                .attr("transform", `translate(${margin_x.left-1},${margin_x.top})`)
 
    // X Axis
    const x_axis = svg_margined_x.append("g")
@@ -80,12 +80,25 @@ d3.csv("/timeline/csv").then( function(data) {
                     .range([height_y, 0]);
 
    const svg_margined_y = svg_y.append("g") 
-                               .attr("transform", `translate(${margin_y.left},${margin_y.top})`)
+                               .attr("transform", `translate(${margin_y.left+width_y-1},${margin_y.top})`)
+
+   //Y axis label
+   const label_y_axis =  svg_margined_y.append("text").attr("transform", "rotate(-90)")
+                                       .attr("y", 0 - margin_y.left - width_y + 5)
+                                       .attr("x",0 - (height_y / 2))
+                                       .attr("dy", ".8em")
+                                       .style("text-anchor", "middle")
+                                       .text("Transactions"); 
 
    // Y Axis
    const y_axis = svg_margined_y.append("g")
                                 .attr("class", "y axis")
                                 .call(d3.axisLeft(yScale));
+
+   // tooltips
+   var tooltip = d3.select('body').append('div')
+                                  .attr('class', 'tooltip')
+                                  .style("opacity", 0);
 
    // Bars
    svg_margined_x.selectAll(".bar")
@@ -93,17 +106,49 @@ d3.csv("/timeline/csv").then( function(data) {
       .join("rect")
       .attr("id", b => "rect_" + b.hash)
       .attr("class", "bar")
-      .attr("hash", b => b.hash)
-      .attr("fill", "#69b3a2")
-      .attr("opacity", 0.75)
       .attr("x", b => xScale(new Date(b.time)))
       .attr("width", xScale.bandwidth())
-      .attr("height", 0)
-      .attr("y", height_y)
+      .attr("height", height_x)
+      .attr("y", 0)
+      .attr("fill", "#69b3a2")
+      .attr("opacity", 0.75)
       .transition()
          .duration(1000)
          .attr("y", b => yScale(parseInt(b.n_tx)))
          .attr("height", b => height_y - yScale(parseInt(b.n_tx)))
+
+   svg_margined_x.selectAll(".background-bar")
+      .data(data)
+      .join("rect")
+      .attr("id", b => "bg_rect_" + b.hash)
+      .attr("class", "background-bar")
+      .attr("fill", "transparent")
+      .attr("hash", b => b.hash)
+      .attr("x", b => xScale(new Date(b.time)))
+      .attr("width", xScale.bandwidth())
+      .attr("height", height_x)
+      .attr("y", 0)
+      .on("mouseover", function(event, d) {
+         tooltip.style('opacity', '.8');
+      })
+      .on("mousemove", function(event, d) {
+         tooltip_width = tooltip.node().getBoundingClientRect().width
+         tooltip_height = tooltip.node().getBoundingClientRect().height
+
+         tooltip.transition()
+           .duration(200)
+           .style("opacity", .75)
+         tooltip
+           .html(`Block num: ${d.height}<hr class="my-1"/>N. tx: ${d.n_tx}`)
+           .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 10)+'px' : (event.pageX - 10 - tooltip_width)+'px')
+           .style('top', (event.pageY - tooltip_height - 10) + 'px')
+         console.log(event.pageX < window.innerWidth/2)
+      })
+      .on("mouseout", function(event, d) {
+         tooltip.transition()
+            .duration(500)
+            .style("opacity", 0)
+      })
 
    // Setting labels
    x_axis.selectAll("text")
@@ -116,22 +161,12 @@ d3.csv("/timeline/csv").then( function(data) {
             var split = format_date(new Date(self.text()), labels_ordinal(self.text())=="black").split(' ')  // get the text and split it
             self.text(l => '')
             if (split.length > 1) {
-               self.append("tspan")
-                     .attr("x", 0)
-                     .attr("dy","1em")
-                     .text(split[0])
-               self.append("tspan")
-                     .attr("x", 0)
-                     .attr("dy","1em")
-                     .text(split[1])
+               self.append("tspan").attr("x", 0).attr("dy","1em").text(split[0])
+               self.append("tspan").attr("x", 0).attr("dy","1em").text(split[1])
             }
             else {
-               self.append("tspan")
-                     .attr("x", 0)
-                     .attr("dy","2em")
-                     .text(split[0])
+               self.append("tspan").attr("x", 0).attr("dy","2em").text(split[0])
             }
          })
       })
-
 })

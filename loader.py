@@ -55,10 +55,10 @@ def get_weigthed_graph():
 ### Timeline endpoints
 
 def get_blocks():   
-    query = """SELECT hash, time, n_tx FROM blocks ORDER BY time ASC"""
+    query = """SELECT hash, time, n_tx, height FROM blocks ORDER BY time ASC"""
     with Session(engine) as db:
         cur = db.execute(query)
         blocks = cur.fetchall()
-        res = ["hash,time,n_tx"] + ["{},{},{}".format(*b) for b in blocks]
+        res = ["hash,time,n_tx,height"] + ["{},{},{},{}".format(*b) for b in blocks]
         return "\n".join(res)
     
