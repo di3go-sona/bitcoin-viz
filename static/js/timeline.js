@@ -187,7 +187,21 @@ d3.csv("/timeline/csv").then( function(data) {
 })
 
 // Forcing timeline to be open totally scrolled
-document.getElementById('col-x-axis').scroll({
+document.getElementById("col-x-axis").scroll({
    left: width_x,
-   behavior: 'smooth'
- });
+   behavior: "smooth"
+ })
+
+ $("#arrow-down-timeline").click(function() {
+   timeline_body =  $("#timeline-body")
+   if ($(timeline_body).hasClass("active")) {
+      $(timeline_body).hide(500)
+      $(timeline_body).removeClass("active")
+      $("#arrow-down-timeline").css({'transform': 'rotate(' + 180 + 'deg)'})
+   }
+   else {
+      $(timeline_body).show(500)
+      $(timeline_body).addClass("active")
+      $("#arrow-down-timeline").css({'transform': 'rotate(' + 360 + 'deg)'})
+   }
+ })
