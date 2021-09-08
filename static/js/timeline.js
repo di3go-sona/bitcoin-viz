@@ -13,11 +13,11 @@ function format_date(date, isFull) {
 // Set the dimensions and margins of the graph
 const margin_y = {top: 40, right: 0, bottom: 40, left: 10},
       width_y  = (70 - margin_y.left - margin_y.right),
-      height_y = (window.innerWidth/7 - margin_y.top - margin_y.bottom)
+      height_y = (window.innerHeight/4 - margin_y.top - margin_y.bottom)
 
 const margin_x = {top: 40, right: 10, bottom: 40, left: 0},
       width_x  = (window.innerWidth*3 - margin_x.left - margin_x.right),
-      height_x = (window.innerWidth/7 - margin_x.top - margin_x.bottom)
+      height_x = (window.innerHeight/4 - margin_x.top - margin_x.bottom)
 
 // Append the svg object to the body of the page
 const svg_y = d3.select("#col-y-axis")

@@ -10,3 +10,32 @@
     border-radius: 8px;
     pointer-events: none;
 }
+
+input[type="radio"] {
+    /* remove standard background appearance */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /* create custom radiobutton appearance */
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    padding: 3px;
+    /* background-color only for content */
+    background-clip: content-box;
+    border: 1px solid #bbbbbb;
+    background-color: #e7e6e7;
+    border-radius: 50%;
+  }
+
+  input.radio_transactions[type="radio"]:checked {
+    background-color: #69b3a2;
+  }
+
+  input.radio_bitcoins[type="radio"]:checked {
+    background-color: red;
+  }
+
+  input.radio_usd[type="radio"]:checked {
+    background-color: yellow;
+  }
