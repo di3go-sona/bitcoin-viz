@@ -5,16 +5,12 @@ function format_date(date, isFull) {
    hours = date.getHours().toString().padStart(2, "0")
    minutes = date.getMinutes().toString().padStart(2, "0")
    seconds = date.getSeconds().toString().padStart(2, "0")
-
-   if (isFull) {
-      return day+'/'+month+'/'+year+' '+hours+':'+minutes+':'+seconds
-   }
-   else {
-      return hours+':'+minutes+':'+seconds
-   }
+   
+   if (isFull) return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`
+   else        return `${hours}:${minutes}:${seconds}`
 }
 
-// set the dimensions and margins of the graph
+// Set the dimensions and margins of the graph
 const margin_y = {top: 40, right: 0, bottom: 40, left: 10},
       width_y  = (70 - margin_y.left - margin_y.right),
       height_y = (window.innerWidth/7 - margin_y.top - margin_y.bottom)
@@ -23,7 +19,7 @@ const margin_x = {top: 40, right: 10, bottom: 40, left: 0},
       width_x  = (window.innerWidth*3 - margin_x.left - margin_x.right),
       height_x = (window.innerWidth/7 - margin_x.top - margin_x.bottom)
 
-// append the svg object to the body of the page
+// Append the svg object to the body of the page
 const svg_y = d3.select("#col-y-axis")
                 .append("svg")
                 .attr("width", width_y + margin_y.left + margin_y.right)
@@ -51,7 +47,7 @@ d3.csv("/timeline/csv").then( function(data) {
          last_hour = time.getHours()
       }
       else {
-         labels_color.push("#ccc")
+         labels_color.push("gray")
       }
    }
 
@@ -145,6 +141,17 @@ d3.csv("/timeline/csv").then( function(data) {
                         .duration(500)
                         .style("opacity", 0)
                   })
+                  .on("click", function(event, d) {
+                     clicked_bar = d3.select("#rect_"+d.hash)
+                     if(clicked_bar.node().getAttribute("class").split(/\s+/).includes("selected")) {
+                        clicked_bar.transition().duration(200).attr("opacity", 0.15)
+                        clicked_bar.node().classList.remove("selected")
+                     }
+                     else if(d3.selectAll(".bar.selected").nodes().length < 5){
+                        clicked_bar.transition().duration(200).attr("opacity", 0.8)
+                        clicked_bar.node().classList.add("selected")
+                     }
+                  })
 
    // Background
    bar_wrappers.append("rect")
@@ -157,21 +164,30 @@ d3.csv("/timeline/csv").then( function(data) {
       .attr("height", b =>  height_y - yScale(Math.max( parseInt(b.n_tx ), 800 )))
       .attr("y", b =>  yScale(Math.max( parseInt(b.n_tx ), 800 )) )
 
+   var theshold = d3.max(data.map(b => b.height))-5
+   const bars_color_ordinal = d3.scaleOrdinal()
+                                .domain(data.map(b => b.hash))
+                                .range(data.map(b => (b.height>theshold) ? 0.8:0.15))
+   
    // Foreground
    bar_wrappers.append('rect')
       .attr("id", b => "rect_" + b.hash)
-      .attr("class", "bar")
+      .attr("class", b => bars_color_ordinal(b.hash)==0.8? "bar selected":"bar")
       .attr("x", b => xScale(new Date(b.time)))
       .attr("width", xScale.bandwidth())
       .attr("height", height_x)
       .attr("y", 0)
       .attr("fill", "#69b3a2")
-      .attr("opacity", 0.75)
-      .on("click", function(event, d) {
-         console.log("ciao")
-      })
+      .attr("opacity", b => bars_color_ordinal(b.hash))
       .transition()
-         .duration(1000)
+         .duration(2000)
          .attr("y", b => yScale(parseInt(b.n_tx)))
          .attr("height", b => height_y - yScale(parseInt(b.n_tx)))
+
 })
+
+// Forcing timeline to be open totally scrolled
+document.getElementById('col-x-axis').scroll({
+   left: width_x,
+   behavior: 'smooth'
+ });
