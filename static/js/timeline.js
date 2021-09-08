@@ -74,6 +74,26 @@ d3.csv("/timeline/csv").then( function(data) {
                               .attr("class", "x axis")
                               .call(d3.axisBottom(xScale))
 
+   // Setting labels x axis
+   x_axis.selectAll("text")
+   .attr("fill", l => labels_ordinal(l))
+   .style("text-anchor", "center")
+   .style("font-size", "12px")
+   .call(function(t) { 
+      t.each(function(d) {
+         var self = d3.select(this)
+         var split = format_date(new Date(self.text()), labels_ordinal(self.text())=="black").split(' ')  // get the text and split it
+         self.text(l => '')
+         if (split.length > 1) {
+            self.append("tspan").attr("x", 0).attr("dy","1em").text(split[0])
+            self.append("tspan").attr("x", 0).attr("dy","1em").text(split[1])
+         }
+         else {
+            self.append("tspan").attr("x", 0).attr("dy","2em").text(split[0])
+         }
+      })
+   })
+
    // Y axis scale
    const yScale = d3.scaleLinear()
                     .domain([0, d3.max(data.map(b => parseInt(b.n_tx)))])
@@ -101,9 +121,44 @@ d3.csv("/timeline/csv").then( function(data) {
                                   .style("opacity", 0);
 
    // Bars
-   svg_margined_x.selectAll(".bar")
-      .data(data)
-      .join("rect")
+   bar_wrappers = svg_margined_x.selectAll(".wrapper-bar")
+                  .data(data)
+                  .join("g")
+                  .attr("class", "wrapper-bar")
+                  .on("mouseover", function(event, d) {
+                     tooltip.style('opacity', '.8');
+                  })
+                  .on("mousemove", function(event, d) {
+                     tooltip_width = tooltip.node().getBoundingClientRect().width
+                     tooltip_height = tooltip.node().getBoundingClientRect().height
+
+                     tooltip.transition()
+                     .duration(200)
+                     .style("opacity", .75)
+                     tooltip
+                     .html(`Block num: ${d.height}<hr class="my-1"/>N. tx: ${d.n_tx}`)
+                     .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
+                     .style('top', (event.pageY - tooltip_height - 2) + 'px')
+                  })
+                  .on("mouseout", function(event, d) {
+                     tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0)
+                  })
+
+   // Background
+   bar_wrappers.append("rect")
+      .attr("id", b => "bg_rect_" + b.hash)
+      .attr("class", "background-bar")
+      .attr("fill", "transparent")
+      .attr("hash", b => b.hash)
+      .attr("x", b => xScale(new Date(b.time)))
+      .attr("width", xScale.bandwidth())
+      .attr("height", b =>  height_y - yScale(Math.max( parseInt(b.n_tx ), 800 )))
+      .attr("y", b =>  yScale(Math.max( parseInt(b.n_tx ), 800 )) )
+
+   // Foreground
+   bar_wrappers.append('rect')
       .attr("id", b => "rect_" + b.hash)
       .attr("class", "bar")
       .attr("x", b => xScale(new Date(b.time)))
@@ -119,57 +174,4 @@ d3.csv("/timeline/csv").then( function(data) {
          .duration(1000)
          .attr("y", b => yScale(parseInt(b.n_tx)))
          .attr("height", b => height_y - yScale(parseInt(b.n_tx)))
-      
-
-   svg_margined_x.selectAll(".background-bar")
-      .data(data)
-      .join("rect")
-      .attr("id", b => "bg_rect_" + b.hash)
-      .attr("class", "background-bar")
-      .attr("fill", "transparent")
-      .attr("hash", b => b.hash)
-      .attr("x", b => xScale(new Date(b.time)))
-      .attr("width", xScale.bandwidth())
-      .attr("height", height_x)
-      .attr("y", 0)
-      .on("mouseover", function(event, d) {
-         tooltip.style('opacity', '.8');
-      })
-      .on("mousemove", function(event, d) {
-         tooltip_width = tooltip.node().getBoundingClientRect().width
-         tooltip_height = tooltip.node().getBoundingClientRect().height
-
-         tooltip.transition()
-           .duration(200)
-           .style("opacity", .75)
-         tooltip
-           .html(`Block num: ${d.height}<hr class="my-1"/>N. tx: ${d.n_tx}`)
-           .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
-           .style('top', (event.pageY - tooltip_height - 2) + 'px')
-      })
-      .on("mouseout", function(event, d) {
-         tooltip.transition()
-            .duration(500)
-            .style("opacity", 0)
-      })
-
-   // Setting labels
-   x_axis.selectAll("text")
-      .attr("fill", l => labels_ordinal(l))
-      .style("text-anchor", "center")
-      .style("font-size", "12px")
-      .call(function(t) { 
-         t.each(function(d) {
-            var self = d3.select(this)
-            var split = format_date(new Date(self.text()), labels_ordinal(self.text())=="black").split(' ')  // get the text and split it
-            self.text(l => '')
-            if (split.length > 1) {
-               self.append("tspan").attr("x", 0).attr("dy","1em").text(split[0])
-               self.append("tspan").attr("x", 0).attr("dy","1em").text(split[1])
-            }
-            else {
-               self.append("tspan").attr("x", 0).attr("dy","2em").text(split[0])
-            }
-         })
-      })
 })
