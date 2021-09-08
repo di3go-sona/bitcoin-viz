@@ -112,10 +112,14 @@ d3.csv("/timeline/csv").then( function(data) {
       .attr("y", 0)
       .attr("fill", "#69b3a2")
       .attr("opacity", 0.75)
+      .on("click", function(event, d) {
+         console.log("ciao")
+      })
       .transition()
          .duration(1000)
          .attr("y", b => yScale(parseInt(b.n_tx)))
          .attr("height", b => height_y - yScale(parseInt(b.n_tx)))
+      
 
    svg_margined_x.selectAll(".background-bar")
       .data(data)
@@ -140,9 +144,8 @@ d3.csv("/timeline/csv").then( function(data) {
            .style("opacity", .75)
          tooltip
            .html(`Block num: ${d.height}<hr class="my-1"/>N. tx: ${d.n_tx}`)
-           .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 10)+'px' : (event.pageX - 10 - tooltip_width)+'px')
-           .style('top', (event.pageY - tooltip_height - 10) + 'px')
-         console.log(event.pageX < window.innerWidth/2)
+           .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
+           .style('top', (event.pageY - tooltip_height - 2) + 'px')
       })
       .on("mouseout", function(event, d) {
          tooltip.transition()
