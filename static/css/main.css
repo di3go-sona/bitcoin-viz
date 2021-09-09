@@ -32,10 +32,14 @@ input[type="radio"] {
     background-color: #69b3a2;
   }
 
+  input.radio_size[type="radio"]:checked {
+    background-color: purple;
+  }
+
   input.radio_bitcoins[type="radio"]:checked {
-    background-color: red;
+    background-color: orange;
   }
 
   input.radio_usd[type="radio"]:checked {
-    background-color: yellow;
+    background-color: green;
   }

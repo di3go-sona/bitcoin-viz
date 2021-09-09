@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import json 
 import loader
 
@@ -14,8 +14,13 @@ def timeline():
     return render_template('timeline.html.j2')
 
 @app.route("/timeline/csv")
-def timeline_json():
-    return loader.get_blocks()
+def timeline_csv_base():
+    param = request.args.get("param")
+    return loader.get_blocks(param)
+
+# @app.route("/timeline/csv/bitcoins")
+# def timeline_csv_bitcoins():
+#     return loader.get_tot_value_per_block()
     
 @app.route("/graph")
 def graph():

@@ -24,20 +24,41 @@ const svg_y = d3.select("#col-y-axis")
                 .append("svg")
                 .attr("width", width_y + margin_y.left + margin_y.right)
                 .attr("height", height_y + margin_y.top + margin_y.bottom)
+                .append("g") 
+                .attr("transform", `translate(${margin_y.left+width_y-1},${margin_y.top})`)
 
 const svg_x = d3.select("#col-x-axis")
                 .append("svg")
                 .attr("width", width_x + margin_x.left + margin_x.right)
                 .attr("height", height_x + margin_x.top + margin_x.bottom)
+                .append("g") 
+                .attr("transform", `translate(${margin_x.left-1},${margin_x.top})`)
 
-var dataset
+// var dataset
 
-// // Parse the Data
-d3.csv("/timeline/csv").then( function(data) {
+// X axis scale
+const xScale = d3.scaleBand()
+                 .range([0, width_x])
+                 .padding(0.4)
+
+// X Axis
+const x_axis = svg_x.append("g")
+                    .attr("transform", `translate(0, ${height_x})`)
+                    .attr("class", "x axis")
+
+// Y axis scale
+const yScale = d3.scaleLinear()
+                 .range([height_y, 0])
+
+const y_axis = svg_y.append("g")
+                    .attr("class", "y axis")
+
+// Parse the Data
+d3.csv("/timeline/csv?param=transactions").then( function(data) {
 
    // Debugging purpose
-   dataset = data
-
+   // dataset = data
+   
    //Setting labels color
    last_hour = null
    labels_color = []
@@ -51,26 +72,15 @@ d3.csv("/timeline/csv").then( function(data) {
       }
    }
 
-   // X axis scale
-   const xScale = d3.scaleBand()
-                .range([0, width_x])
-                .domain(data.map(b => new Date(b.time)))
-                .padding(0.4);
-
-   const labels_ordinal = d3.scaleOrdinal()
-                           .domain(data.map(b => b.time))
-                           .range(labels_color)
-
-   const svg_margined_x = svg_x.append("g") 
-                                .attr("transform", `translate(${margin_x.left-1},${margin_x.top})`)
-
    // X Axis
-   const x_axis = svg_margined_x.append("g")
-                              .attr("transform", `translate(0, ${height_x})`)
-                              .attr("class", "x axis")
-                              .call(d3.axisBottom(xScale))
+   xScale.domain(data.map(b => new Date(b.time)))
+   x_axis.call(d3.axisBottom(xScale))
 
    // Setting labels x axis
+   const labels_ordinal = d3.scaleOrdinal()
+                            .domain(data.map(b => b.time))
+                            .range(labels_color)
+
    x_axis.selectAll("text")
    .attr("fill", l => labels_ordinal(l))
    .style("text-anchor", "center")
@@ -90,39 +100,32 @@ d3.csv("/timeline/csv").then( function(data) {
       })
    })
 
-   // Y axis scale
-   const yScale = d3.scaleLinear()
-                    .domain([0, d3.max(data.map(b => parseInt(b.n_tx)))])
-                    .range([height_y, 0]);
-
-   const svg_margined_y = svg_y.append("g") 
-                               .attr("transform", `translate(${margin_y.left+width_y-1},${margin_y.top})`)
+   // Y axis
+   yScale.domain([0, d3.max(data.map(b => parseInt(b.bar_value)))])
 
    //Y axis label
-   const label_y_axis =  svg_margined_y.append("text").attr("transform", "rotate(-90)")
+   const label_y_axis =  svg_y.append("text").attr("transform", "rotate(-90)")
                                        .attr("y", 0 - margin_y.left - width_y + 5)
                                        .attr("x",0 - (height_y / 2))
-                                       .attr("dy", ".8em")
+                                       .attr("dy", ".6em")
+                                       .attr("class", "label-y")
                                        .style("text-anchor", "middle")
-                                       .text("Transactions"); 
+                                       .text("Transactions")
 
-   // Y Axis
-   const y_axis = svg_margined_y.append("g")
-                                .attr("class", "y axis")
-                                .call(d3.axisLeft(yScale));
+   y_axis.call(d3.axisLeft(yScale))
 
    // tooltips
    var tooltip = d3.select('body').append('div')
                                   .attr('class', 'tooltip')
-                                  .style("opacity", 0);
+                                  .style("opacity", 0)
 
    // Bars
-   bar_wrappers = svg_margined_x.selectAll(".wrapper-bar")
+   bar_wrappers = svg_x.selectAll(".wrapper-bar")
                   .data(data)
                   .join("g")
                   .attr("class", "wrapper-bar")
                   .on("mouseover", function(event, d) {
-                     tooltip.style('opacity', '.8');
+                     tooltip.style('opacity', '.8')
                   })
                   .on("mousemove", function(event, d) {
                      tooltip_width = tooltip.node().getBoundingClientRect().width
@@ -132,7 +135,7 @@ d3.csv("/timeline/csv").then( function(data) {
                      .duration(200)
                      .style("opacity", .75)
                      tooltip
-                     .html(`Block num: ${d.height}<hr class="my-1"/>N. tx: ${d.n_tx}`)
+                     .html(`Block num: ${d.height}<hr class="my-1"/>${$("input[type='radio']:checked").next().text()}: ${d.bar_value}`)
                      .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
                      .style('top', (event.pageY - tooltip_height - 2) + 'px')
                   })
@@ -146,10 +149,30 @@ d3.csv("/timeline/csv").then( function(data) {
                      if(clicked_bar.node().getAttribute("class").split(/\s+/).includes("selected")) {
                         clicked_bar.transition().duration(200).attr("opacity", 0.15)
                         clicked_bar.node().classList.remove("selected")
+                        svg_x.select("#selection_rect_"+d.hash).remove()
                      }
                      else if(d3.selectAll(".bar.selected").nodes().length < 5){
                         clicked_bar.transition().duration(200).attr("opacity", 0.8)
                         clicked_bar.node().classList.add("selected")
+                        console.log(clicked_bar.node())
+                        svg_x
+                           .append("svg")
+                           .attr("id", "selection_rect_"+d.hash)
+                           .attr("class", "tick-selected")
+                           // .attr("for", d.hash)
+                           .attr("xmlns", "http://www.w3.org/2000/svg")
+                              .attr("x", parseFloat($(clicked_bar.node()).attr("x")) + parseFloat($(clicked_bar.node()).attr("width"))/2 - 15)
+                              .attr("y", $(clicked_bar.node()).attr("y") - 40)
+                              .attr("opacity", 1)
+                              .attr("width", "30")
+                              .attr("height", "30")
+                              .attr("viewBox", "0 0 24 24")
+                              .attr("stroke", $(clicked_bar.node()).attr("fill"))
+                              .attr("fill", "none")
+                              .attr("stroke-width", "2.5")
+                              .attr("stroke-linecap", "round")
+                              .attr("stroke-linejoin", "round")
+                              .append("polyline").attr("points", "20 6 9 17 4 12")
                      }
                   })
 
@@ -161,8 +184,8 @@ d3.csv("/timeline/csv").then( function(data) {
       .attr("hash", b => b.hash)
       .attr("x", b => xScale(new Date(b.time)))
       .attr("width", xScale.bandwidth())
-      .attr("height", b =>  height_y - yScale(Math.max( parseInt(b.n_tx ), 800 )))
-      .attr("y", b =>  yScale(Math.max( parseInt(b.n_tx ), 800 )) )
+      .attr("y", b => Math.min(yScale(parseInt(b.bar_value)), height_y/2))
+      .attr("height", b =>  Math.max(height_y - yScale(parseInt(b.bar_value)), height_y/2))
 
    var theshold = d3.max(data.map(b => b.height))-5
    const bars_color_ordinal = d3.scaleOrdinal()
@@ -180,10 +203,32 @@ d3.csv("/timeline/csv").then( function(data) {
       .attr("fill", "#69b3a2")
       .attr("opacity", b => bars_color_ordinal(b.hash))
       .transition()
-         .duration(2000)
-         .attr("y", b => yScale(parseInt(b.n_tx)))
-         .attr("height", b => height_y - yScale(parseInt(b.n_tx)))
-
+         .duration(1500)
+         .attr("y", b => yScale(parseInt(b.bar_value)))
+         .attr("height", b => height_y - yScale(parseInt(b.bar_value)))
+   
+   // Add selected image to pre selected bars
+   bar_wrappers.selectAll(".bar.selected").each(function(d) {
+      svg_x
+         .append("svg")
+         .attr("id", "selection_rect_"+d.hash)
+         .attr("class", "tick-selected")
+         // .attr("for", d.hash)
+         .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("y", yScale(parseInt(d.bar_value)) - 40)
+            .attr("x", parseFloat($(this).attr("x")) + parseFloat($(this).attr("width"))/2 - 15)
+            .attr("opacity", 1)
+            .attr("width", "30")
+            .attr("height", "30")
+            .attr("viewBox", "0 0 24 24")
+            .attr("stroke", $(this).attr("fill"))
+            .attr("fill", "none")
+            .attr("stroke-width", "2.5")
+            .attr("stroke-linecap", "round")
+            .attr("stroke-linejoin", "round")
+            .append("polyline").attr("points", "20 6 9 17 4 12")
+   })
+   
 })
 
 // Forcing timeline to be open totally scrolled
@@ -192,7 +237,7 @@ document.getElementById("col-x-axis").scroll({
    behavior: "smooth"
  })
 
- $("#arrow-down-timeline").click(function() {
+$("#arrow-down-timeline").click(function() {
    timeline_body =  $("#timeline-body")
    if ($(timeline_body).hasClass("active")) {
       $(timeline_body).hide(500)
@@ -204,4 +249,37 @@ document.getElementById("col-x-axis").scroll({
       $(timeline_body).addClass("active")
       $("#arrow-down-timeline").css({'transform': 'rotate(' + 360 + 'deg)'})
    }
+ })
+
+$("input[type='radio']").click(function(){
+
+   plot_name = $(this).val()
+   bg_color = $(this).css("background-color")
+   svg_y.select("text.label-y").transition().duration(500).text($(this).next().text())
+
+   d3.csv("/timeline/csv?param="+plot_name).then( function(data) {
+
+      yScale.domain([0, d3.max(data.map(b => parseInt(b.bar_value)))])
+      
+      var cazzo = svg_x.selectAll("rect.bar")
+                       .data(data)
+      
+      bar_wrappers.data(data).join("g")
+
+      svg_x.selectAll("rect.bar")
+         .join("rect") // Add a new rect for each new elements
+         .transition() 
+         .duration(500)
+            .attr("y", d => yScale(d.bar_value))
+            .attr("height", d => height_y - yScale(d.bar_value))
+            .attr("fill", bg_color)
+
+      y_axis.transition().duration(500).call(d3.axisLeft(yScale))
+
+      bar_wrappers.selectAll(".bar.selected").each(function(d) {
+         d3.select("#selection_rect_"+d.hash).transition().duration(500).attr("stroke", bg_color).attr("y", yScale(d.bar_value) - 40)
+      })
+
+   })
+
  })

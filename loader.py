@@ -1,3 +1,4 @@
+from re import match
 from database import Transaction, engine, Session
 from sqlalchemy import select, distinct
 
@@ -54,11 +55,41 @@ def get_weigthed_graph():
 
 ### Timeline endpoints
 
-def get_blocks():   
-    query = """SELECT hash, time, n_tx, height FROM blocks ORDER BY time ASC"""
+def get_blocks(param):   
+
+    if (param == "transactions"):
+        query = """SELECT hash, height, time, n_tx FROM blocks ORDER BY time ASC"""
+        
+    elif (param == "size"):
+        query = """SELECT hash, height, time, size FROM blocks ORDER BY time ASC"""
+
+    elif (param == "bitcoins"):
+        query = """ SELECT block_hash, height, time, block_tot_value.tot_value 
+                FROM 
+                
+                (SELECT block_hash, sum(tx_tot_value.tot_value) as tot_value
+                
+                FROM 
+                
+                (SELECT transaction_id, sum(value) as tot_value
+                FROM transaction_vouts
+                GROUP BY transaction_id) as tx_tot_value
+                
+                JOIN transactions ON tx_tot_value.transaction_id=transactions.id
+                GROUP BY block_hash) as block_tot_value
+
+                JOIN blocks ON blocks.hash=block_tot_value.block_hash
+                ORDER BY time ASC
+            """
+
+    elif (param == "usd"):
+        query = """SELECT hash, height, time, n_tx FROM blocks ORDER BY time ASC"""
+        
+    else:
+        return ""
+
     with Session(engine) as db:
         cur = db.execute(query)
         blocks = cur.fetchall()
-        res = ["hash,time,n_tx,height"] + ["{},{},{},{}".format(*b) for b in blocks]
+        res = ["hash,height,time,bar_value"] + ["{},{},{},{}".format(*b) for b in blocks]
         return "\n".join(res)
-    
