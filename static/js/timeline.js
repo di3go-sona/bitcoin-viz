@@ -260,18 +260,15 @@ $("input[type='radio']").click(function(){
    d3.csv("/timeline/csv?param="+plot_name).then( function(data) {
 
       yScale.domain([0, d3.max(data.map(b => parseInt(b.bar_value)))])
-      
-      var cazzo = svg_x.selectAll("rect.bar")
-                       .data(data)
-      
-      bar_wrappers.data(data).join("g")
 
-      svg_x.selectAll("rect.bar")
+      bar_wrappers.data(data)
+
+      svg_x.selectAll("rect.bar").data(data)
          .join("rect") // Add a new rect for each new elements
          .transition() 
          .duration(500)
-            .attr("y", d => yScale(d.bar_value))
-            .attr("height", d => height_y - yScale(d.bar_value))
+            .attr("y", d => yScale(parseInt(d.bar_value)))
+            .attr("height", d => height_y - yScale(parseInt(d.bar_value)))
             .attr("fill", bg_color)
 
       y_axis.transition().duration(500).call(d3.axisLeft(yScale))
