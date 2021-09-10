@@ -11,20 +11,22 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   </head>
 
-  <body style="background-color: red;">
+  <body>
 
     {# Floating menu #}
-    <div style="position: absolute; top: 0; height: 100%; z-index: 20;">
-      <div class="container px-0" style="max-height: 100%;">
-        <div class="card text-center">
-        ciao
+    <div style="position: absolute; top: 20px; max-width: 25%; z-index: 10;">
+      <div class="container px-0 floating-menu-container">
+        <div class="card text-center h-100 w-100">
+          <div class="card-header text-center">
+            Anvedi come balla nando
+          </div>
         </div>
       </div>
     </div>
 
     {# Timeline fixed div #}
     <div style="position: absolute; bottom: 0; width: 100%; z-index: 10;">
-      <div class="container px-0" style="max-width: 100%;">
+      <div class="container px-0 timeline-container" style="max-width: 100%;">
         <div class="card">
           <div class="card-header text-center">
               Blockchain Timeline
@@ -66,5 +68,8 @@
   </body>
 
   <script src="/static/js/timeline.js"></script>
+  <script>
+    $(".floating-menu-container").css("height", window.innerHeight - $(".timeline-container").height() - $(".floating-menu-container").parent().offset()["top"]*2)
+  </script>
 
 </html>
