@@ -82,8 +82,8 @@ def get_blocks(param):
                 ORDER BY time ASC
             """
 
-    elif (param == "usd"):
-        query = """SELECT hash, height, time, n_tx FROM blocks ORDER BY time ASC"""
+    # elif (param == "usd"):
+    #     query = """SELECT hash, height, time, n_tx FROM blocks ORDER BY time ASC"""
         
     else:
         return ""

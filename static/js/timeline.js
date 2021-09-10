@@ -242,12 +242,12 @@ $("#arrow-down-timeline").click(function() {
    if ($(timeline_body).hasClass("active")) {
       $(timeline_body).hide(500)
       $(timeline_body).removeClass("active")
-      $("#arrow-down-timeline").css({'transform': 'rotate(' + 180 + 'deg)'})
+      $("#arrow-down-timeline").first().css({'transform': 'rotate(' + 180 + 'deg)'})
    }
    else {
       $(timeline_body).show(500)
       $(timeline_body).addClass("active")
-      $("#arrow-down-timeline").css({'transform': 'rotate(' + 360 + 'deg)'})
+      $("#arrow-down-timeline").first().css({'transform': 'rotate(' + 360 + 'deg)'})
    }
  })
 

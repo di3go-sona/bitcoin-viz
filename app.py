@@ -17,10 +17,6 @@ def timeline():
 def timeline_csv_base():
     param = request.args.get("param")
     return loader.get_blocks(param)
-
-# @app.route("/timeline/csv/bitcoins")
-# def timeline_csv_bitcoins():
-#     return loader.get_tot_value_per_block()
     
 @app.route("/graph")
 def graph():
