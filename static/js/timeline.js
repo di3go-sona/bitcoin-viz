@@ -11,11 +11,11 @@ function format_date(date, isFull) {
 }
 
 // Set the dimensions and margins of the graph
-const margin_y = {top: 40, right: 0, bottom: 40, left: 10},
+const margin_y = {top: 40, right: 0, bottom: 60, left: 10},
       width_y  = (70 - margin_y.left - margin_y.right),
       height_y = (window.innerHeight/4 - margin_y.top - margin_y.bottom)
 
-const margin_x = {top: 40, right: 10, bottom: 40, left: 0},
+const margin_x = {top: 40, right: 10, bottom: 60, left: 0},
       width_x  = (window.innerWidth*3 - margin_x.left - margin_x.right),
       height_x = (window.innerHeight/4 - margin_x.top - margin_x.bottom)
 
@@ -64,7 +64,7 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
    labels_color = []
    for (let time of data.map(b => new Date(b.time))) {
       if (last_hour == null || time.getHours() != last_hour) {
-         labels_color.push("black")
+         labels_color.push("white")
          last_hour = time.getHours()
       }
       else {
@@ -88,7 +88,7 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
    .call(function(t) { 
       t.each(function(d) {
          var self = d3.select(this)
-         var split = format_date(new Date(self.text()), labels_ordinal(self.text())=="black").split(' ')  // get the text and split it
+         var split = format_date(new Date(self.text()), labels_ordinal(self.text())=="white").split(' ')  // get the text and split it
          self.text(l => '')
          if (split.length > 1) {
             self.append("tspan").attr("x", 0).attr("dy","1em").text(split[0])
@@ -109,6 +109,7 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
                                        .attr("x",0 - (height_y / 2))
                                        .attr("dy", ".6em")
                                        .attr("class", "label-y")
+                                       .attr("fill", "white")
                                        .style("text-anchor", "middle")
                                        .text("Transactions")
 
@@ -237,19 +238,19 @@ document.getElementById("col-x-axis").scroll({
    behavior: "smooth"
  })
 
-$("#arrow-down-timeline").click(function() {
-   timeline_body =  $("#timeline-body")
-   if ($(timeline_body).hasClass("active")) {
-      $(timeline_body).hide(500)
-      $(timeline_body).removeClass("active")
-      $("#arrow-down-timeline").first().css({'transform': 'rotate(' + 180 + 'deg)'})
-   }
-   else {
-      $(timeline_body).show(500)
-      $(timeline_body).addClass("active")
-      $("#arrow-down-timeline").first().css({'transform': 'rotate(' + 360 + 'deg)'})
-   }
- })
+// $("#arrow-down-timeline").click(function() {
+//    timeline_body =  $("#timeline-body")
+//    if ($(timeline_body).hasClass("active")) {
+//       $(timeline_body).hide(500)
+//       $(timeline_body).removeClass("active")
+//       $("#arrow-down-timeline").first().css({'transform': 'rotate(' + 180 + 'deg)'})
+//    }
+//    else {
+//       $(timeline_body).show(500)
+//       $(timeline_body).addClass("active")
+//       $("#arrow-down-timeline").first().css({'transform': 'rotate(' + 360 + 'deg)'})
+//    }
+//  })
 
 $("input[type='radio']").click(function(){
 

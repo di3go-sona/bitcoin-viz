@@ -1,4 +1,27 @@
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: #1e1e1ef0;
+  font-family: Courier New;
+}
+
+hr {
+  background-color: #414040;
+  margin-top: 5px;
+  margin-bottom: 15px;
+}
+
+.card-styled {
+  color: white; 
+  background-color: #1e1e1ecc; 
+  border: 2px solid #414040;
+}
+
 .tooltip {
+
     position: absolute;
     text-align: left;
     max-width: 200px;
@@ -18,28 +41,24 @@ input[type="radio"] {
     appearance: none;
     /* create custom radiobutton appearance */
     display: inline-block;
-    width: 15px;
-    height: 15px;
-    padding: 3px;
+    width: 16px;
+    height: 16px;
+    padding: 2px;
     /* background-color only for content */
     background-clip: content-box;
-    border: 1px solid #bbbbbb;
-    background-color: #e7e6e7;
+    border: 1px solid grey;
+    background-color: grey;
     border-radius: 50%;
   }
 
   input.radio_transactions[type="radio"]:checked {
-    background-color: #69b3a2;
+    background-color: #75ccb8;
   }
 
   input.radio_size[type="radio"]:checked {
-    background-color: purple;
+    background-color: rgb(194, 197, 30);
   }
 
   input.radio_bitcoins[type="radio"]:checked {
     background-color: orange;
-  }
-
-  input.radio_usd[type="radio"]:checked {
-    background-color: green;
   }
