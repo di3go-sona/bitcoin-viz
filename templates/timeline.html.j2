@@ -16,26 +16,16 @@
     <div class="row mx-0 h-100">
 
       {# Floating menus #}
-      <div class="col-sm-2 p-0 h-100">
+      <div class="col-sm-4 p-0 h-100">
 
-        <div class="card card-styled m-2">
+        <div id="clusters-card" class="card card-styled m-2">
           <div class="card-body p-3">
-            Data options
-            <hr/>
-            <button type="button" class="btn btn-block btn-info">Combine by address</button>
-            <button type="button" class="btn btn-block btn-info" disabled>Uncombine all</button>
-          </div>
-
-        </div>
-
-        <div class="card card-styled m-2">
-          <div class="card-body p-3">
-            Filter wallets
+            Clusters of wallets
             <hr/>
           </div>
         </div>
 
-        <div class="card card-styled m-2">
+        <div id="blocks-info-card" class="card card-styled mt-0 mb-2 mx-2">
           <div class="card-body p-3">
             Blocks information
             <hr/>
@@ -102,12 +92,18 @@
       </div>
 
       {# Graph + Timeline #}
-      <div class="col-sm-10 p-0 h-100">
+      <div class="col-sm-8 p-0 h-100">
 
         {# Graph #}
         <div id="graph-card" class="card card-styled mx-2 mt-2" style="border-radius: .25rem .25rem 0 0;">
-          <div class="card-body p-3">
-            Graph visualization
+          <div class="card-body pt-2 px-3 pb-3">
+            <div class="container-fluid row d-flex" style="align-items: center;">
+              Graph visualization
+              <div class="btn-group ml-auto" role="group">
+                <button type="button" class="btn-sm btn-info">Combine by address</button>
+                <button type="button" class="btn-sm btn-info" disabled>Uncombine all</button>
+              </div>
+            </div>
             <hr/>
           </div>
 
@@ -148,30 +144,11 @@
     <script src="/static/js/timeline.js"></script>
     <script>
       $("#graph-card").css("height", window.innerHeight - $("#timeline-card").height() - 2*$("#graph-card").offset()["top"])
+      $("#clusters-card").css("height", window.innerHeight - $("#blocks-info-card").height() - 3*$("#clusters-card").offset()["top"])
     </script>
 
   </body>
 </html>
-
-
-{# <div class="card-header text-center">
-                Blockchain Timeline
-                <button class="close" style="font-size: unset;" id="arrow-down-timeline">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
-                  </svg>
-                </button>
-              </div> #}
-
-    {# {# <div style="position: absolute; top: 20px; max-width: 25%; z-index: 10;">
-      <div class="container px-0 floating-menu-container">
-        <div class="card text-center h-100 w-100">
-          <div class="card-header text-center">
-            Anvedi come balla nando
-          </div>
-        </div>
-      </div>
-    </div> #}
 
     
 
