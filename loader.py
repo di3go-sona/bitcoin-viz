@@ -65,22 +65,22 @@ def get_blocks(param):
 
     elif (param == "bitcoins"):
         query = """ SELECT block_hash, height, time, block_tot_value.tot_value 
-                FROM 
-                
-                (SELECT block_hash, sum(tx_tot_value.tot_value) as tot_value
-                
-                FROM 
-                
-                (SELECT transaction_id, sum(value) as tot_value
-                FROM transaction_vouts
-                GROUP BY transaction_id) as tx_tot_value
-                
-                JOIN transactions ON tx_tot_value.transaction_id=transactions.id
-                GROUP BY block_hash) as block_tot_value
+                    FROM 
 
-                JOIN blocks ON blocks.hash=block_tot_value.block_hash
-                ORDER BY time ASC
-            """
+                    (SELECT block_hash, sum(tx_tot_value.tot_value) as tot_value
+
+                    FROM 
+
+                    (SELECT transaction_id, sum(value) as tot_value
+                    FROM outputs
+                    GROUP BY transaction_id) as tx_tot_value
+
+                    JOIN transactions ON tx_tot_value.transaction_id=transactions.id
+                    GROUP BY block_hash) as block_tot_value
+
+                    JOIN blocks ON blocks.hash=block_tot_value.block_hash
+                    ORDER BY time ASC
+                """
 
     # elif (param == "usd"):
     #     query = """SELECT hash, height, time, n_tx FROM blocks ORDER BY time ASC"""

@@ -16,7 +16,7 @@ const margin_y = {top: 40, right: 0, bottom: 60, left: 10},
       height_y = (window.innerHeight/4 - margin_y.top - margin_y.bottom)
 
 const margin_x = {top: 40, right: 10, bottom: 60, left: 0},
-      width_x  = (window.innerWidth*3 - margin_x.left - margin_x.right),
+      width_x  = (window.innerWidth - margin_x.left - margin_x.right),
       height_x = (window.innerHeight/4 - margin_x.top - margin_x.bottom)
 
 // Append the svg object to the body of the page
@@ -107,7 +107,7 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
    const label_y_axis =  svg_y.append("text").attr("transform", "rotate(-90)")
                                        .attr("y", 0 - margin_y.left - width_y + 5)
                                        .attr("x",0 - (height_y / 2))
-                                       .attr("dy", ".6em")
+                                       .attr("dy", ".45em")
                                        .attr("class", "label-y")
                                        .attr("fill", "white")
                                        .style("text-anchor", "middle")
