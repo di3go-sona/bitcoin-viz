@@ -64,27 +64,12 @@ def get_blocks(param):
         query = """SELECT hash, height, time, size FROM blocks ORDER BY time ASC"""
 
     elif (param == "bitcoins"):
-        query = """ SELECT block_hash, height, time, block_tot_value.tot_value 
-                    FROM 
-
-                    (SELECT block_hash, sum(tx_tot_value.tot_value) as tot_value
-
-                    FROM 
-
-                    (SELECT transaction_id, sum(value) as tot_value
-                    FROM outputs
-                    GROUP BY transaction_id) as tx_tot_value
-
-                    JOIN transactions ON tx_tot_value.transaction_id=transactions.id
-                    GROUP BY block_hash) as block_tot_value
-
-                    JOIN blocks ON blocks.hash=block_tot_value.block_hash
-                    ORDER BY time ASC
+        query = """ SELECT blocks.hash, blocks.height, blocks.time, sum(outputs.value)
+                    FROM blocks, transactions, outputs
+                    WHERE outputs.transaction_id = transactions.id AND transactions.block_hash=blocks.hash
+                    GROUP BY blocks.hash
+                    ORDER BY blocks.time ASC
                 """
-
-    # elif (param == "usd"):
-    #     query = """SELECT hash, height, time, n_tx FROM blocks ORDER BY time ASC"""
-        
     else:
         return ""
 
@@ -99,12 +84,12 @@ def get_transactions_size_info(hashes):
         stats = db.query(func.sum(Block.n_tx), func.avg(Block.n_tx), func.sum(Block.size), func.avg(Block.size)).filter(Block.hash.in_(hashes)).one()
         return {"total_txs": stats[0], "avg_txs": stats[1], "total_size": stats[2], "avg_size": stats[3]}
 
-def get_bitcoin_info(hashes):
-    return ""
+# def get_bitcoin_info(hashes):
+#     return ""
 
-def get_fees_info(hashes):
-    return ""
+# def get_fees_info(hashes):
+#     return ""
 
 def get_blocks_info(hashes):
-    return get_transactions_size_info(hashes)
-    # return {}
+    ts_stats = get_transactions_size_info(hashes)
+    return ts_stats
