@@ -17,8 +17,6 @@ class Block(Base):
     size = Column('size', Integer)
     height = Column('height', Integer)
 
-    #TO-DO: avg/tot amount transactions, sort on time
-
     # Foreign Key
     transactions = relationship('Transaction', back_populates='block')
 
@@ -29,29 +27,54 @@ class Transaction(Base):
     __tablename__ = 'transactions'
     
     id = Column('id', String(64), primary_key=True)
-    # tot_value = Column('tot_value', Float) as dynamic query
+    network_fee = Column('network_fee', Float)
 
     # Foreign Key
     block_hash = Column('block_hash', String(64), ForeignKey('blocks.hash'))
     block = relationship('Block', back_populates='transactions')
-
+    
     # Foreign Key
-    vouts = relationship('TransactionVout')
+    outputs = relationship('Output')
+    inputs = relationship('Input')
 
     def __repr__(self):
     #    return f"User(id={self.id!r}, value={self.value!r})"
         return f"Transaction(id={self.id!r})"
     
 
-class TransactionVout(Base):
-    __tablename__ = 'transaction_vouts'
+class Output(Base):
+    __tablename__ = 'outputs'
 
     id = Column('id', Integer, primary_key=True)
     value = Column('value', Float)
     address = Column('address', String(64))
+    type = Column('type', String(64))
 
     # Foreign Key
     transaction_id = Column('transaction_id', String(64), ForeignKey('transactions.id'), primary_key=True)
+
+class Input(Base):
+    __tablename__ = 'inputs'
+
+    id = Column('id', Integer, primary_key=True)
+    value = Column('value', Float)
+    address = Column('address', String(64))
+    type = Column('type', String(64))
+
+    # Foreign Key
+    transaction_id = Column('transaction_id', String(64), ForeignKey('transactions.id'), primary_key=True)
+
+class Wallet(Base):
+    __tablename__ = 'wallets'
+
+    id = Column('id', String(64), primary_key=True)
+    n_tx = Column('n_tx', Integer)
+    n_utx = Column('n_utx', Integer)
+    tot_received = Column('tot_received', Integer)
+    tot_sent = Column('tot_sent', Integer)
+    balance = Column('balance', Float)
+
+
 
 
 Base.metadata.create_all(engine)
