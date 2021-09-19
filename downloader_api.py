@@ -132,8 +132,7 @@ def get_last_block():
 
 if __name__ == '__main__':
 
-    # num_blocks = 10
-    num_blocks = 5
+    num_blocks = 10
     if len(sys.argv) < 2:
         print("Usage: downloader.py [num_blocks] ")
     else:
