@@ -132,14 +132,14 @@ def get_last_block():
 
 if __name__ == '__main__':
 
-    num_blocks = 10
+    num_blocks = 20
     if len(sys.argv) < 2:
         print("Usage: downloader.py [num_blocks] ")
     else:
         num_blocks = int(sys.argv[1])
 
     # last_block = get_last_block()
-    last_block = 701125
+    last_block = 701125 # versioned db
     
     for block_height in tqdm(range(last_block, last_block-num_blocks, -1)):
         logger.debug(f"Downloading block: {block_height}")
