@@ -10,6 +10,25 @@ function format_date(date, isFull) {
    else        return `${hours}:${minutes}:${seconds}`
 }
 
+function update_info_card() {
+   // Retrtieving selected indexes & hashes
+   var selected = d3.selectAll(".bar.selected").data()
+   var blocks_index = $.map(selected, function(item) { return item["height"] })
+   var blocks_hash = $.map(selected, function(item) { return item["hash"] })
+   
+   // Setting selected indexes
+   var list_indexes_html = ""
+   blocks_index.forEach(index => { list_indexes_html += "<li>" + index + "</li>" })
+   console.log(list_indexes_html)
+   $("#info-indexes").html(list_indexes_html)
+
+   // Setting selected infos
+   d3.json("/blocks_info?hashes=" + blocks_hash.join(":")).then(function(data) {
+      $("#info-transactions").text(`${data["total_txs"]}/${data["avg_txs"]}`)
+      $("#info-size").text(`${data["total_size"]}/${data["avg_size"]}`)
+   })
+}
+
 // Set the dimensions and margins of the graph
 const margin_y = {top: 40, right: 0, bottom: 60, left: 10},
       width_y  = (70 - margin_y.left - margin_y.right),
@@ -155,7 +174,7 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
                      else if(d3.selectAll(".bar.selected").nodes().length < 5){
                         clicked_bar.transition().duration(200).attr("opacity", 0.8)
                         clicked_bar.node().classList.add("selected")
-                        console.log(clicked_bar.node())
+                        // console.log(clicked_bar.node())
                         svg_x
                            .append("svg")
                            .attr("id", "selection_rect_"+d.hash)
@@ -175,6 +194,8 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
                               .attr("stroke-linejoin", "round")
                               .append("polyline").attr("points", "20 6 9 17 4 12")
                      }
+                     // Maybe we must find a better solution
+                     update_info_card()
                   })
 
    // Background
@@ -230,6 +251,7 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
             .append("polyline").attr("points", "20 6 9 17 4 12")
    })
    
+   update_info_card()
 })
 
 // Forcing timeline to be open totally scrolled
@@ -237,20 +259,6 @@ document.getElementById("col-x-axis").scroll({
    left: width_x,
    behavior: "smooth"
  })
-
-// $("#arrow-down-timeline").click(function() {
-//    timeline_body =  $("#timeline-body")
-//    if ($(timeline_body).hasClass("active")) {
-//       $(timeline_body).hide(500)
-//       $(timeline_body).removeClass("active")
-//       $("#arrow-down-timeline").first().css({'transform': 'rotate(' + 180 + 'deg)'})
-//    }
-//    else {
-//       $(timeline_body).show(500)
-//       $(timeline_body).addClass("active")
-//       $("#arrow-down-timeline").first().css({'transform': 'rotate(' + 360 + 'deg)'})
-//    }
-//  })
 
 $("input[type='radio']").click(function(){
 
@@ -279,5 +287,4 @@ $("input[type='radio']").click(function(){
       })
 
    })
-
  })

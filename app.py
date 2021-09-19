@@ -17,7 +17,13 @@ def timeline():
 def timeline_csv_base():
     param = request.args.get("param")
     return loader.get_blocks(param)
-    
+
+@app.route("/blocks_info")
+def get_blocks_info(): 
+    param = request.args.get("hashes")
+    hashes = param.split(":")
+    return loader.get_blocks_info(hashes)
+
 @app.route("/graph")
 def graph():
     return json.dumps(loader.get_weigthed_graph())
