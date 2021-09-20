@@ -5,7 +5,7 @@ from sqlalchemy.orm import declarative_base, Session, relationship
 from sqlalchemy.sql.schema import ForeignKey
 
 
-engine = create_engine("sqlite+pysqlite:///bitcoinviz_db.sqlite", echo=False, future=True)
+engine = create_engine("sqlite+pysqlite:///bitcoinviz_db.sqlite", echo=False)
 Base = declarative_base()
 
 class Block(Base):
@@ -69,10 +69,17 @@ class Wallet(Base):
 
     id = Column('id', String(64), primary_key=True)
     n_tx = Column('n_tx', Integer)
-    n_utx = Column('n_utx', Integer)
+
     tot_received = Column('tot_received', Integer)
-    tot_sent = Column('tot_sent', Integer)
+
     balance = Column('balance', Float)
+    pending = Column('pending', Float)
+
+
+
+
+
+
 
 
 

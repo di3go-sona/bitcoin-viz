@@ -2,7 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-//.DS_STORE
+
+.DS_STORE
+wallets/
+wallets_test
+
+
 # C extensions
 *.so
 

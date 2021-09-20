@@ -2,4 +2,5 @@ tqdm
 loguru
 flask
 sqlalchemy
-google-cloud-bigquery
+matplot
+scikit-learn
