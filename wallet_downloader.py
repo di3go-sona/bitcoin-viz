@@ -99,12 +99,6 @@ def download_wallet(addr):
 
 
 
-def download_wallets():
-    pass
-
-
-def download_wallets():
-    pass
 
 
 if __name__ == '__main__':
@@ -113,4 +107,4 @@ if __name__ == '__main__':
     for w in wallets:
         # download_wallet(w)
         threading.Thread(target=download_wallet, args=(w, )).start()
-        sleep(0.3)
+        sleep(0.25)
