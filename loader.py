@@ -79,10 +79,10 @@ def get_blocks(param):
         res = ["hash,height,time,bar_value"] + ["{},{},{},{}".format(*b) for b in blocks]
         return "\n".join(res)
 
-def get_transactions_size_info(hashes):
-    with Session(engine) as db:
-        stats = db.query(func.sum(Block.n_tx), func.avg(Block.n_tx), func.sum(Block.size), func.avg(Block.size)).filter(Block.hash.in_(hashes)).one()
-        return {"total_txs": stats[0], "avg_txs": stats[1], "total_size": stats[2], "avg_size": stats[3]}
+# def get_transactions_size_info(hashes):
+#     with Session(engine) as db:
+#         stats = db.query(func.sum(Block.n_tx), func.avg(Block.n_tx), func.sum(Block.size), func.avg(Block.size)).filter(Block.hash.in_(hashes)).one()
+#         return {"total_txs": stats[0], "avg_txs": stats[1], "total_size": stats[2], "avg_size": stats[3]}
 
 # def get_bitcoin_info(hashes):
 #     return ""
@@ -90,6 +90,6 @@ def get_transactions_size_info(hashes):
 # def get_fees_info(hashes):
 #     return ""
 
-def get_blocks_info(hashes):
-    ts_stats = get_transactions_size_info(hashes)
-    return ts_stats
+# def get_blocks_info(hashes):
+#     ts_stats = get_transactions_size_info(hashes)
+#     return ts_stats

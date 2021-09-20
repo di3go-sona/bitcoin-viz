@@ -10,32 +10,32 @@ function format_date(date, isFull) {
    else        return `${hours}:${minutes}:${seconds}`
 }
 
-function update_info_card() {
-   // Retrtieving selected indexes & hashes
-   var selected = d3.selectAll(".bar.selected").data()
-   var blocks_index = $.map(selected, function(item) { return item["height"] })
-   var blocks_hash = $.map(selected, function(item) { return item["hash"] })
+// function update_info_card() {
+//    // Retrtieving selected indexes & hashes
+//    var selected = d3.selectAll(".bar.selected").data()
+//    var blocks_index = $.map(selected, function(item) { return item["height"] })
+//    var blocks_hash = $.map(selected, function(item) { return item["hash"] })
    
-   // Setting selected indexes
-   var list_indexes_html = ""
-   blocks_index.forEach(index => { list_indexes_html += "<li>" + index + "</li>" })
-   console.log(list_indexes_html)
-   $("#info-indexes").html(list_indexes_html)
+//    // Setting selected indexes
+//    var list_indexes_html = ""
+//    blocks_index.forEach(index => { list_indexes_html += "<li>" + index + "</li>" })
+//    console.log(list_indexes_html)
+//    $("#info-indexes").html(list_indexes_html)
 
-   // Setting selected infos
-   d3.json("/blocks_info?hashes=" + blocks_hash.join(":")).then(function(data) {
-      $("#info-transactions").text(`${data["total_txs"]}/${data["avg_txs"]}`)
-      $("#info-size").text(`${data["total_size"]}/${data["avg_size"]}`)
-   })
-}
+//    // Setting selected infos
+//    d3.json("/blocks_info?hashes=" + blocks_hash.join(":")).then(function(data) {
+//       $("#info-transactions").text(`${data["total_txs"]}/${data["avg_txs"]}`)
+//       $("#info-size").text(`${data["total_size"]}/${data["avg_size"]}`)
+//    })
+// }
 
 // Set the dimensions and margins of the graph
-const margin_y = {top: 40, right: 0, bottom: 60, left: 10},
+const margin_y = {top: 40, right: 0, bottom: 60, left: 20},
       width_y  = (70 - margin_y.left - margin_y.right),
       height_y = (window.innerHeight/4 - margin_y.top - margin_y.bottom)
 
-const margin_x = {top: 40, right: 10, bottom: 60, left: 0},
-      width_x  = (window.innerWidth - margin_x.left - margin_x.right),
+const margin_x = {top: 40, right: 20, bottom: 60, left: 0},
+      width_x  = ($("#col-x-axis").width() - width_y - margin_y.left - margin_x.right),
       height_x = (window.innerHeight/4 - margin_x.top - margin_x.bottom)
 
 // Append the svg object to the body of the page
@@ -251,14 +251,14 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
             .append("polyline").attr("points", "20 6 9 17 4 12")
    })
    
-   update_info_card()
+   // update_info_card()
 })
 
 // Forcing timeline to be open totally scrolled
-document.getElementById("col-x-axis").scroll({
-   left: width_x,
-   behavior: "smooth"
- })
+// document.getElementById("col-x-axis").scroll({
+//    left: width_x,
+//    behavior: "smooth"
+//  })
 
 $("input[type='radio']").click(function(){
 

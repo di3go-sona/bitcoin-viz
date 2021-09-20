@@ -13,11 +13,19 @@
 
   <body>
 
-    <div class="row mx-0 h-100">
+    <div class="row mx-0">
 
-      {# Floating menus #}
-      <div class="col-sm-4 p-0 h-100">
+      {# Column for filters and clusters #}
+      <div class="col-sm-4 p-0">
 
+        <div id="filters-card" class="card card-styled m-2">
+          <div class="card-body p-3">
+            Filters
+            <hr/>
+            yeyeyeyeyeyye
+          </div>
+        </div>
+        
         <div id="clusters-card" class="card card-styled m-2">
           <div class="card-body p-3">
             Clusters of wallets
@@ -25,74 +33,12 @@
           </div>
         </div>
 
-        <div id="blocks-info-card" class="card card-styled mt-0 mb-2 mx-2">
-          <div class="card-body p-3">
-            Blocks information
-            <hr/>
-
-            <div class="row">
-              <div class="col">
-                Total/Avg transactions:
-              </div>
-              <div id="info-transactions" class="col">
-              </div>
-            </div>
-            <hr/>
-
-            <div class="row">
-              <div class="col">
-                Total/Avg size in bytes:
-              </div>
-              <div id="info-size" class="col">
-              </div>
-            </div>
-            <hr/>
-
-            <div class="row">
-              <div class="col">
-                Total/Avg bitcoin:
-              </div>
-              <div id="info-bitcoin" class="col">
-                32.0383982
-              </div>
-            </div>
-            <hr/>
-
-            <div class="row">
-              <div class="col">
-                Total/Avg fees:
-              </div>
-              <div id="info-fees" class="col">
-                24341
-              </div>
-            </div>
-            <hr/>
-
-            <div class="row">
-              <div class="col">
-                Selected indexes:
-              </div>
-              <div class="col">
-                <ul id="info-indexes">
-                  <li></li>
-                  <li></li>
-                  <li></li>
-                  <li></li>
-                  <li></li>
-                </ul>
-              </div>
-            </div>
-            
-          </div>
-        </div>
-
       </div>
 
-      {# Graph + Timeline #}
-      <div class="col-sm-8 p-0 h-100">
+      <div class="col-sm-8 p-0">
 
         {# Graph #}
-        <div id="graph-card" class="card card-styled mx-2 mt-2" style="border-radius: .25rem .25rem 0 0;">
+        <div id="graph-card" class="card card-styled m-2" style="border-radius: .25rem .25rem .25rem .25rem;">
           <div class="card-body pt-2 px-3 pb-3">
             <div class="container-fluid row d-flex" style="align-items: center;">
               Graph visualization
@@ -103,45 +49,50 @@
             </div>
             <hr/>
           </div>
-
         </div>
 
-        <div id="timeline-card" class="card card-styled mx-2 mb-2" style="border-radius: 0 0 .25rem .25rem; border-top: 0px;">
-          <div class="card-body p-3">
+      </div>
 
-            {# Radio buttons inline #}
-            <div class="row mx-1 d-flex justify-content-center">
-              <div class="form-check form-check-inline">
-                <input class="form-check-input radio_transactions" checked type="radio" name="inlineRadioOptions" id="radio_transactions" value="transactions">
-                <label class="form-check-label" for="radio_transactions">Transactions</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input radio_size" type="radio" name="inlineRadioOptions" id="radio_size" value="size">
-                <label class="form-check-label" for="radio_size">Size</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input radio_bitcoins" type="radio" name="inlineRadioOptions" id="radio_bitcoins" value="bitcoins">
-                <label class="form-check-label" for="radio_bitcoins">Tot. Bitcoins</label>
-              </div>
+    </div>
+
+    <div class="row mx-0">
+
+      <div id="timeline-card" class="card card-styled mx-2 mb-2 w-100" style="border-radius: .25rem .25rem .25rem .25rem;">
+        <div class="card-body p-3">
+
+          {# Radio buttons inline #}
+          <div class="row mx-1 d-flex justify-content-center">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input radio_transactions" checked type="radio" name="inlineRadioOptions" id="radio_transactions" value="transactions">
+              <label class="form-check-label" for="radio_transactions">Transactions</label>
             </div>
-
-            {# Timeline #}
-            <div class="row mx-1">
-              <div class="col-sm-auto p-0" id="col-y-axis">
-              </div>
-              <div class="col p-0" style="overflow: auto;" id="col-x-axis">
-              </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input radio_size" type="radio" name="inlineRadioOptions" id="radio_size" value="size">
+              <label class="form-check-label" for="radio_size">Size</label>
             </div>
-
+            <div class="form-check form-check-inline">
+              <input class="form-check-input radio_bitcoins" type="radio" name="inlineRadioOptions" id="radio_bitcoins" value="bitcoins">
+              <label class="form-check-label" for="radio_bitcoins">Tot. Bitcoins</label>
+            </div>
           </div>
+
+          {# Timeline #}
+          <div class="row mx-1">
+            <div class="col-sm-auto p-0" id="col-y-axis">
+            </div>
+            <div class="col p-0" style="overflow: auto;" id="col-x-axis">
+            </div>
+          </div>
+
         </div>
       </div>
+
     </div>
 
     <script src="/static/js/timeline.js"></script>
     <script>
       $("#graph-card").css("height", window.innerHeight - $("#timeline-card").height() - 2*$("#graph-card").offset()["top"])
-      $("#clusters-card").css("height", window.innerHeight - $("#blocks-info-card").height() - 3*$("#clusters-card").offset()["top"])
+      $("#clusters-card").css("height", $("#graph-card").height() - $("#graph-card").offset()["top"] - $("#filters-card").height())
     </script>
 
   </body>
