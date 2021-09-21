@@ -1,32 +1,19 @@
-
-
-
-import json
-import os
-import requests
+import json, os, requests, threading
 from sqlalchemy.sql.expression import join
 from database import *
-
 from loguru import logger
 from time import sleep
 
-import threading
-
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="credentials.json"
 os.makedirs('wallets', exist_ok=True)
 
-
-
-
-
-def get_wallets():
-    query = "SELECT DISTINCT(address) from outputs;"
+def get_all_wallets():
+    query = "SELECT DISTINCT(address) from outputs UNION SELECT DISTINCT(address) from inputs;"
     with Session(engine) as db:
         cur = db.execute(query)
         return [ v for v, in cur.fetchall() ]
 
-def get_wallets():
-    query = "SELECT DISTINCT(address) from outputs;"
+def get_remaining_wallets():
+    query = "SELECT DISTINCT(address) from outputs UNION SELECT DISTINCT(address) from inputs;"
     with Session(engine) as db:
         cur = db.execute(query)
         total_wallets = { v for v, in cur.fetchall() }
@@ -78,31 +65,25 @@ def download_wallet(addr):
     with open(os.path.join('wallets',f'{addr}.json'), 'w') as fout:
         json.dump(wallet_dic, fout)
 
-        w = Wallet()
-        w.id = addr
-        w.n_tx = wallet_dic['total_txs']
-        w.tot_received = wallet_dic['received_value']
-        w.balance = wallet_dic['balance']
-        w.pending = wallet_dic['pending_value']
+        # w = Wallet()
+        # w.id = addr
+        # w.n_tx = wallet_dic['total_txs']
+        # w.tot_received = wallet_dic['received_value']
+        # w.balance = wallet_dic['balance']
+        # w.pending = wallet_dic['pending_value']
         
         
-        with Session(engine) as db:
-            db.add(w)
-            try:
-                db.commit()
-            except Exception as e :
-                db.rollback()
-                logger.warning(f'Transaction aborted, {e}')
-
-
-
-
-
-
+        # with Session(engine) as db:
+        #     db.add(w)
+        #     try:
+        #         db.commit()
+        #     except Exception as e :
+        #         db.rollback()
+        #         logger.warning(f'Transaction aborted, {e}')
 
 
 if __name__ == '__main__':
-    wallets = get_wallets()
+    wallets = get_remaining_wallets()
     logger.info(f"Found {len(wallets)} unique wallet addresses")
     for w in wallets:
         # download_wallet(w)

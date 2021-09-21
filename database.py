@@ -64,24 +64,16 @@ class Input(Base):
     # Foreign Key
     transaction_id = Column('transaction_id', String(64), ForeignKey('transactions.id'), primary_key=True)
 
-class Wallet(Base):
-    __tablename__ = 'wallets'
+# class Wallet(Base):
+#     __tablename__ = 'wallets'
 
-    id = Column('id', String(64), primary_key=True)
-    n_tx = Column('n_tx', Integer)
+#     id = Column('id', String(64), primary_key=True)
+#     n_tx = Column('n_tx', Integer)
 
-    tot_received = Column('tot_received', Integer)
+#     tot_received = Column('tot_received', Integer)
 
-    balance = Column('balance', Float)
-    pending = Column('pending', Float)
-
-
-
-
-
-
-
-
+#     balance = Column('balance', Float)
+#     pending = Column('pending', Float)
 
 
 Base.metadata.create_all(engine)
