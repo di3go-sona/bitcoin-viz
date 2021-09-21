@@ -79,6 +79,37 @@ def get_blocks(param):
         res = ["hash,height,time,bar_value"] + ["{},{},{},{}".format(*b) for b in blocks]
         return "\n".join(res)
 
+
+### Wallets endpoints
+
+def get_wallets(blocks_list):
+
+    query = """
+            SELECT addr, pca_1, pca_2 FROM wallets_pca
+            LIMIT 15000
+            """
+
+    with Session(engine) as db:
+        cur = db.execute(query)
+        blocks = cur.fetchall()
+        res = ["addr,pca_1,pca_2"] + ["{},{},{}".format(*b) for b in blocks]
+        return "\n".join(res)
+
+def get_wallets_domain(blocks_list=[]):
+
+    query = """
+            SELECT min(pca_1), max(pca_2), min(pca_2), max(pca_2)
+            FROM wallets_pca
+            """
+
+    with Session(engine) as db:
+        cur = db.execute(query)
+        min_pca_1, max_pca_1, min_pca_2, max_pca_2 = cur.fetchone()
+        return min_pca_1, max_pca_1, min_pca_2, max_pca_2 
+
+
+
+
 # def get_transactions_size_info(hashes):
 #     with Session(engine) as db:
 #         stats = db.query(func.sum(Block.n_tx), func.avg(Block.n_tx), func.sum(Block.size), func.avg(Block.size)).filter(Block.hash.in_(hashes)).one()
@@ -93,3 +124,7 @@ def get_blocks(param):
 # def get_blocks_info(hashes):
 #     ts_stats = get_transactions_size_info(hashes)
 #     return ts_stats
+
+
+
+# get_wallets(701125)

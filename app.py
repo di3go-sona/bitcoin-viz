@@ -5,18 +5,33 @@ import loader
 
 app = Flask(__name__, static_folder='static/', template_folder='templates/')
 
-@app.route("/")
-def index():
-    return render_template('index.html.j2')
+# @app.route("/")
+# def index():
+#     return render_template('index.html.j2')
 
+min_pca_1, max_pca_1, min_pca_2, max_pca_2 = loader.get_wallets_domain()
+
+ctx={
+    'min_pca_1': min_pca_1,
+    'max_pca_1': max_pca_1,
+    'min_pca_2': min_pca_2,
+    'max_pca_2': max_pca_2
+}
+
+@app.route("/")
 @app.route("/timeline")
 def timeline():
-    return render_template('timeline.html.j2')
+    return render_template('timeline.html.j2',ctx=ctx)
 
 @app.route("/timeline/csv")
 def timeline_csv_base():
     param = request.args.get("param")
     return loader.get_blocks(param)
+
+@app.route("/clusters/csv")
+def clusters_csv_base():
+    param = request.args.get("param")
+    return loader.get_wallets(param)
 
 # @app.route("/blocks_info")
 # def get_blocks_info(): 
