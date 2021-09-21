@@ -17,6 +17,10 @@ def get_remaining_wallets():
     with Session(engine) as db:
         cur = db.execute(query)
         total_wallets = { v for v, in cur.fetchall() }
+        total_wallets.remove("coinbase")
+        total_wallets.remove("1HckjUpRGcrrRAtFaaCAUaGjsPx9oYmLaZ")
+        total_wallets.remove("bc1qwqdg6squsna38e46795at95yu9atm8azzmyvckulcc7kytlcckxswvvzej")
+        total_wallets.remove("1G47mSr3oANXMafVrR8UC4pzV7FEAzo3r9")
         local_wallets = { w.split('.')[0] for w in os.listdir('wallets/') }
         return list(total_wallets - local_wallets)
 
@@ -86,6 +90,8 @@ if __name__ == '__main__':
     wallets = get_remaining_wallets()
     logger.info(f"Found {len(wallets)} unique wallet addresses")
     for w in wallets:
+        print(w)
         # download_wallet(w)
-        threading.Thread(target=download_wallet, args=(w, )).start()
-        sleep(0.25)
+        # threading.Thread(target=download_wallet, args=(w, )).start()
+        download_wallet(w)
+        # sleep(0.25)
