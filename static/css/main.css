@@ -21,7 +21,6 @@ hr {
 }
 
 .tooltip {
-
     position: absolute;
     text-align: left;
     max-width: 200px;
@@ -32,6 +31,16 @@ hr {
     border: 0px;
     border-radius: 8px;
     pointer-events: none;
+}
+
+input[type="checkbox"] {
+  filter: hue-rotate(325deg);
+  cursor: pointer;
+}
+
+input[type="range"] {
+  filter: hue-rotate(325deg);
+  cursor: pointer;
 }
 
 input[type="radio"] {
@@ -49,6 +58,7 @@ input[type="radio"] {
     border: 1px solid grey;
     background-color: grey;
     border-radius: 50%;
+    cursor: pointer;
   }
 
   input.radio_transactions[type="radio"]:checked {
