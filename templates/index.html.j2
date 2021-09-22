@@ -5,16 +5,115 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Bitcoin Viz</title>
-
-    <link rel="link" href="/static/bower_components/bootstrap/dist/css/bootstrap.css">
-    {# <script src="/static/bower_components/d3/d3.min.js"></script> #}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/main.css">
     <script src="https://d3js.org/d3.v6.min.js"></script>
-
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   </head>
-  <body>
-    <div id="my_dataviz"></div>
 
-    <script src="/static/js/graph.js"></script>
+  <body>
+
+    <div class="row mx-0">
+
+      {# Column for Filters and Clusters #}
+      <div class="col-sm-4 p-0">
+
+        {# Filters #}
+        <div id="filters-card" class="card card-styled m-2">
+          <div class="card-body p-3">
+            Filters
+            <hr/>
+            yeyeyeyeyeyye
+          </div>
+        </div>
+        
+        {# Clusters #}
+        <div id="clusters-card" class="card card-styled m-2">
+          <div class="card-body p-3">
+            Clusters of wallets
+            <button type="button" class="btn-sm btn-info" id="start-clustering-button" >Start Clustering</button>
+            
+
+            <hr/>
+
+          </div>
+        </div>
+
+      </div>
+
+      {# Column for graph #}
+      <div class="col-sm-8 p-0">
+
+        {# Graph #}
+        <div id="graph-card" class="card card-styled m-2" style="border-radius: .25rem .25rem .25rem .25rem;">
+          <div class="card-body pt-2 px-3 pb-3">
+            <div class="container-fluid row d-flex" style="align-items: center;">
+              Graph visualization
+              <div class="ml-auto" role="group">
+                <button type="button" class="btn-sm btn-info" disabled="disabled">Combine by address</button>
+                <button type="button" class="btn-sm btn-outline-info">Uncombine all</button>
+              </div>
+            </div>
+            <hr/>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="row mx-0">
+
+      <div id="timeline-card" class="card card-styled mx-2 mb-2 w-100" style="border-radius: .25rem .25rem .25rem .25rem;">
+        <div class="card-body p-3">
+
+          {# Radio buttons inline #}
+          <div class="row mx-1 d-flex justify-content-center">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input radio_transactions" checked type="radio" name="inlineRadioOptions" id="radio_transactions" value="transactions">
+              <label class="form-check-label" for="radio_transactions">Transactions</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input radio_size" type="radio" name="inlineRadioOptions" id="radio_size" value="size">
+              <label class="form-check-label" for="radio_size">Size</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input radio_bitcoins" type="radio" name="inlineRadioOptions" id="radio_bitcoins" value="bitcoins">
+              <label class="form-check-label" for="radio_bitcoins">Tot. Bitcoins</label>
+            </div>
+          </div>
+
+          {# Timeline #}
+          <div class="row mx-1">
+            <div class="col-sm-auto p-0" id="col-y-axis">
+            </div>
+            <div class="col p-0" style="overflow: auto;" id="col-x-axis">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <script>
+      var min_pca_1 = {{ ctx.min_pca_1 }};
+      var max_pca_1 = {{ ctx.max_pca_1 }};
+      var min_pca_2 = {{ ctx.min_pca_2 }};
+      var max_pca_2 = {{ ctx.max_pca_2 }};
+      $("#graph-card").css("height", window.innerHeight - $("#timeline-card").height() - 2*$("#graph-card").offset()["top"])
+      $("#clusters-card").css("height", $("#graph-card").height() - $("#graph-card").offset()["top"] - $("#filters-card").height())
+      
+    </script>
+
+    <script src="/static/js/timeline.js"></script>
+    <script src="/static/js/clusters.js"></script>
+    
+
+
   </body>
 </html>
+
+    
+
+  
+
