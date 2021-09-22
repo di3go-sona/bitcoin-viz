@@ -85,14 +85,14 @@ def get_blocks(param):
 def get_wallets(blocks_list):
 
     query = """
-            SELECT addr, pca_1, pca_2 FROM wallets_pca
-            LIMIT 15000
+            SELECT addr, pca_1, pca_2, -1 FROM wallets_pca
+            LIMIT 10000
             """
 
     with Session(engine) as db:
         cur = db.execute(query)
         blocks = cur.fetchall()
-        res = ["addr,pca_1,pca_2"] + ["{},{},{}".format(*b) for b in blocks]
+        res = ["addr,pca_1,pca_2,cluster"] + ["{},{},{},{}".format(*b) for b in blocks]
         return "\n".join(res)
 
 def get_wallets_domain(blocks_list=[]):
