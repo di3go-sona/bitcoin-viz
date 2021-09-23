@@ -26,8 +26,9 @@ hr {
     max-width: 200px;
     max-height: 100px;
     padding: 8px;
-    font: 14px sans-serif;
-    background: lightsteelblue;
+    font: 14px Courier New;
+    background: #17a2b8;
+    color: white;
     border: 0px;
     border-radius: 8px;
     pointer-events: none;
@@ -77,4 +78,47 @@ input[type="radio"] {
     color: #17a2b8;
     border-color: #17a2b8;
     background-color: transparent;
+  }
+
+  .slider-styled {
+    height: 8px;
+  }
+
+  .slider-styled .noUi-connect {
+    background: #17a2b8;
+  }
+
+  .slider-styled .noUi-handle {
+    height: 18px;
+    width: 18px;
+    top: -5px;
+    right: -9px; /* half the width */
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  .slider-styled,
+  .slider-styled .noUi-handle {
+    box-shadow: none;
+  }
+
+  /* Hide markers on slider handles */
+  .slider-styled .noUi-handle::before,
+  .slider-styled .noUi-handle::after {
+    display: none;
+  }
+
+  .noUi-tooltip {
+    background-color: transparent;
+    border-color: transparent;
+    color: white;
+    font: 14px Courier New;
+  }
+
+  .noUi-value {
+    font-size: 14px;
+  }
+
+  .noUi-marker-horizontal.noUi-marker-large {
+    height: 10px;
   }

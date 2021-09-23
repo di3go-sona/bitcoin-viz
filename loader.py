@@ -1,3 +1,4 @@
+import json
 from re import match
 from database import Block, engine, Session
 from sqlalchemy import text, func
@@ -52,6 +53,17 @@ def get_graph():
 def get_weigthed_graph():
     return {'nodes':  get_weigthed_nodes(), 'links':  get_links() }
 
+### Filters endpoints
+
+def get_range_bitcoin():
+    query = """ SELECT min(tot_value), max(tot_value)
+                FROM transactions_ext
+            """
+    with Session(engine) as db:
+        cur = db.execute(query)
+        range = cur.fetchone()
+        res = json.dumps({'min': range[0], 'max': range[1]})
+        return res
 
 ### Timeline endpoints
 
@@ -107,23 +119,6 @@ def get_wallets_domain(blocks_list=[]):
         min_pca_1, max_pca_1, min_pca_2, max_pca_2 = cur.fetchone()
         return min_pca_1, max_pca_1, min_pca_2, max_pca_2 
 
-
-
-
-# def get_transactions_size_info(hashes):
-#     with Session(engine) as db:
-#         stats = db.query(func.sum(Block.n_tx), func.avg(Block.n_tx), func.sum(Block.size), func.avg(Block.size)).filter(Block.hash.in_(hashes)).one()
-#         return {"total_txs": stats[0], "avg_txs": stats[1], "total_size": stats[2], "avg_size": stats[3]}
-
-# def get_bitcoin_info(hashes):
-#     return ""
-
-# def get_fees_info(hashes):
-#     return ""
-
-# def get_blocks_info(hashes):
-#     ts_stats = get_transactions_size_info(hashes)
-#     return ts_stats
 
 
 

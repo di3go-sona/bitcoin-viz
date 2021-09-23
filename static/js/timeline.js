@@ -115,7 +115,7 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
 
    y_axis.call(d3.axisLeft(yScale))
 
-   // tooltips
+   // tooltip
    var tooltip = d3.select('body').append('div')
                                   .attr('class', 'tooltip')
                                   .style("opacity", 0)
@@ -135,9 +135,10 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
 
                      tooltip.transition()
                      .duration(200)
-                     .style("opacity", .75)
+                     .style("opacity", 1)
+                     .style("color", "white")
                      tooltip
-                     .html(`Block num: ${d.height}<hr class="my-1"/>${$("input[type='radio']:checked").next().text()}: ${d.bar_value}`)
+                     .html(`Block num: ${d.height}<hr class="my-1 bg-white"/>${$("input[type='radio']:checked").next().text()}: ${d.bar_value}`)
                      .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
                      .style('top', (event.pageY - tooltip_height - 2) + 'px')
                   })

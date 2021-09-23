@@ -10,6 +10,10 @@ app = Flask(__name__, static_folder='static/', template_folder='templates/')
 def index():
     return render_template('index.html.j2',ctx=ctx)
 
+@app.route("/range_bitcoin")
+def range_bitcoin():
+    return loader.get_range_bitcoin()
+
 @app.route("/timeline/csv")
 def timeline_csv_base():
     param = request.args.get("param")
@@ -19,8 +23,6 @@ def timeline_csv_base():
 def wallets_csv_base():
     blocks_list = request.args.get("blocks_list")
     return loader.get_wallets(blocks_list)
-
-
 
 @app.route("/wallets/clusters/start")
 def wallets_clusters_new():
@@ -32,13 +34,6 @@ def wallets_clusters_new():
 def wallets_clusters_csv_base():
     blocks_list = request.args.get("blocks_list")
     return get_clustering()
-
-
-# @app.route("/blocks_info")
-# def get_blocks_info(): 
-#     param = request.args.get("hashes")
-#     hashes = param.split(":")
-#     return loader.get_blocks_info(hashes)
 
 @app.route("/graph")
 def graph():
