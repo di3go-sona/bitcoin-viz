@@ -5,7 +5,6 @@ from context_loader import ctx
 from wallet_clustering import * 
 app = Flask(__name__, static_folder='static/', template_folder='templates/')
 
-
 @app.route("/")
 def index():
     return render_template('index.html.j2',ctx=ctx)
