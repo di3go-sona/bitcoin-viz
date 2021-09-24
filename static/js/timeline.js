@@ -54,7 +54,7 @@ const y_axis = svg_y.append("g")
 var radio_button = $("input[type='radio']:checked")
 
 // Parse the Data
-d3.csv(`/timeline/csv?plot=${$(radio_button).val()}`).then( function(data) {
+d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray().join(',')}`).then( function(data) {
 
    // Debugging purpose
    // dataset = data
@@ -235,7 +235,7 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}`).then( function(data) {
 
 function load_data(min, max, checkboxes) {
 
-   d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&min=${min}&max=${max}&types=${checkboxes.join(',')}`).then( function(data) {
+   d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&min=${min}&max=${max}&types=${checkboxes.toArray().join(',')}`).then( function(data) {
       svg_y.select("text.label-y").transition().duration(500).text($(radio_button).next().text())
       yScale.domain([0, d3.max(data.map(b => parseInt(b.bar_value)))])
       bar_wrappers.data(data)

@@ -19,7 +19,6 @@ def timeline_csv_base():
     min = request.args.get("min")
     max = request.args.get("max")
     types = request.args.get("types")
-    print( plot, min, max, types )
     return loader.get_blocks(plot, min, max, types)
 
 @app.route("/wallets/csv")
