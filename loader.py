@@ -67,15 +67,15 @@ def get_range_bitcoin():
 
 ### Timeline endpoints
 
-def get_blocks(param):   
+def get_blocks(plot, min, max, types):   
 
-    if (param == "transactions"):
+    if (plot == "transactions"):
         query = """SELECT hash, height, time, n_tx FROM blocks ORDER BY time ASC"""
         
-    elif (param == "size"):
+    elif (plot == "size"):
         query = """SELECT hash, height, time, size FROM blocks ORDER BY time ASC"""
 
-    elif (param == "bitcoins"):
+    elif (plot == "bitcoins"):
         query = """ SELECT blocks.hash, blocks.height, blocks.time, sum(outputs.value)
                     FROM blocks, transactions, outputs
                     WHERE outputs.transaction_id = transactions.id AND transactions.block_hash=blocks.hash

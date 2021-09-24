@@ -34,8 +34,6 @@ const svg_x = d3.select("#col-x-axis")
                 .append("g") 
                 .attr("transform", `translate(${margin_x.left-1},${margin_x.top})`)
 
-// var dataset
-
 // X axis scale
 const xScale = d3.scaleBand()
                  .range([0, width_x])
@@ -53,8 +51,10 @@ const yScale = d3.scaleLinear()
 const y_axis = svg_y.append("g")
                     .attr("class", "y axis")
 
+var radio_button = $("input[type='radio']:checked")
+
 // Parse the Data
-d3.csv("/timeline/csv?param=transactions").then( function(data) {
+d3.csv(`/timeline/csv?plot=${$(radio_button).val()}`).then( function(data) {
 
    // Debugging purpose
    // dataset = data
@@ -111,7 +111,7 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
                                        .attr("class", "label-y")
                                        .attr("fill", "white")
                                        .style("text-anchor", "middle")
-                                       .text("Transactions")
+                                       .text($(radio_button).next().text())
 
    y_axis.call(d3.axisLeft(yScale))
 
@@ -203,7 +203,7 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
       .attr("width", xScale.bandwidth())
       .attr("height", height_x)
       .attr("y", 0)
-      .attr("fill", "#69b3a2")
+      .attr("fill", $(radio_button).css("background-color"))
       .attr("opacity", b => bars_color_ordinal(b.hash))
       .transition()
          .duration(1500)
@@ -233,14 +233,10 @@ d3.csv("/timeline/csv?param=transactions").then( function(data) {
    })
 })
 
-$("input[type='radio']").click(function(){
+function load_data(min, max, checkboxes) {
 
-   plot_name = $(this).val()
-   bg_color = $(this).css("background-color")
-   svg_y.select("text.label-y").transition().duration(500).text($(this).next().text())
-
-   d3.csv("/timeline/csv?param="+plot_name).then( function(data) {
-
+   d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&min=${min}&max=${max}&types=${checkboxes.toArray().join()}`).then( function(data) {
+      svg_y.select("text.label-y").transition().duration(500).text($(radio_button).next().text())
       yScale.domain([0, d3.max(data.map(b => parseInt(b.bar_value)))])
 
       bar_wrappers.data(data)
@@ -251,13 +247,23 @@ $("input[type='radio']").click(function(){
          .duration(500)
             .attr("y", d => yScale(parseInt(d.bar_value)))
             .attr("height", d => height_y - yScale(parseInt(d.bar_value)))
-            .attr("fill", bg_color)
+            .attr("fill", $(radio_button).css("background-color"))
 
       y_axis.transition().duration(500).call(d3.axisLeft(yScale))
 
       bar_wrappers.selectAll(".bar.selected").each(function(d) {
-         d3.select("#selection_rect_"+d.hash).transition().duration(500).attr("stroke", bg_color).attr("y", yScale(d.bar_value) - 40)
+         d3.select("#selection_rect_"+d.hash).transition().duration(500).attr("stroke", $(radio_button).css("background-color")).attr("y", yScale(d.bar_value) - 40)
       })
 
    })
- })
+}
+
+$("input[type='radio']").click(function(){
+   radio_button = $(this)
+   load_data(min, max, checkboxes)
+})
+
+// Manage filters change custom event
+$(document).on("filters_changed", function( event ) {
+   load_data(min, max, checkboxes)
+});

@@ -16,8 +16,12 @@ def range_bitcoin():
 
 @app.route("/timeline/csv")
 def timeline_csv_base():
-    param = request.args.get("param")
-    return loader.get_blocks(param)
+    plot = request.args.get("plot")
+    min = request.args.get("min")
+    max = request.args.get("max")
+    types = request.args.get("types")
+    print( plot, min, max, types )
+    return loader.get_blocks(plot, min, max, types)
 
 @app.route("/wallets/csv")
 def wallets_csv_base():
