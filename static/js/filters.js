@@ -71,3 +71,14 @@ $("#apply-button").click(function() {
         $(document).trigger("filters_changed")
     }
 })
+
+$("#reset-button").click(function() {
+    min = slider_container.noUiSlider.options['range']['min'][0]
+    max = slider_container.noUiSlider.options['range']['max'][0]
+    slider_container.noUiSlider.set([min, max])
+    
+    $("input[type='checkbox']").prop('checked', true)
+    checkboxes = $("input[type='checkbox']:checked").map(function(i) { return $(this).attr("id") })
+
+    $(document).trigger("filters_changed")
+})
