@@ -23,9 +23,9 @@
 
         {# Filters #}
         <div id="filters-card" class="card card-styled m-2">
-          <div class="card-body pt-2 px-3 pb-3">
+          <div class="card-body px-2 pt-0 pb-2">
 
-            <div class="container-fluid row d-flex m-0" style="align-items: center;">
+            <div class="container-fluid row d-flex m-0 pt-2" style="align-items: center;">
               Filters
               <div class="ml-auto" role="group">
                 <button id="apply-button" type="button" class="btn-sm btn-info">Apply</button>
@@ -73,8 +73,8 @@
         
         {# Clusters #}
         <div id="clusters-card" class="card card-styled m-2">
-          <div class="card-body pt-2 px-3 pb-3">
-            <div class="container-fluid row d-flex m-0" style="align-items: center;">
+          <div class="card-body px-2 pt-0 pb-2">
+            <div class="container-fluid row d-flex m-0 pt-2" style="align-items: center;">
               Clusters of wallets
               <button type="button" class="btn-sm btn-info ml-auto" id="start-clustering-button">Start Clustering</button>
             </div>
@@ -89,15 +89,17 @@
 
         {# Graph #}
         <div id="graph-card" class="card card-styled m-2" style="border-radius: .25rem .25rem .25rem .25rem;">
-          <div class="card-body pt-2 px-3 pb-3">
-            <div class="container-fluid row d-flex m-0" style="align-items: center;">
+          <div class="card-body p-0" style="display: table;">
+            <div class="container-fluid row d-flex m-0 pt-2 px-3" style="align-items: center;">
               Graph visualization
               <div class="ml-auto" role="group">
                 <button type="button" class="btn-sm btn-info" disabled="disabled">Combine by address</button>
                 <button type="button" class="btn-sm btn-outline-info">Uncombine all</button>
               </div>
             </div>
-            <hr/>
+            <hr class="mb-0 mx-2"/>
+            <div id="graph-container" class="h-100" style="display: table-row;">
+            </div>
           </div>
         </div>
 
@@ -152,7 +154,7 @@
       $("#clusters-card").css("height", $("#graph-card").height() - $("#graph-card").offset()["top"] - $("#filters-card").height())
     </script>
     <script src="/static/js/clusters.js"></script>
-
+    <script src="/static/js/graph.js"></script>
   </body>
 </html>
 
