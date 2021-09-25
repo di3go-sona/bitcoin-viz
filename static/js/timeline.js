@@ -146,12 +146,13 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
                   })
                   .on("click", function(event, d) {
                      clicked_bar = d3.select("#rect_"+d.hash)
-                     if(clicked_bar.node().getAttribute("class").split(/\s+/).includes("selected")) {
-                        clicked_bar.transition().duration(200).attr("opacity", 0.15)
-                        clicked_bar.node().classList.remove("selected")
-                        tm_svg_x.select("#selection_rect_"+d.hash).remove()
-                     }
-                     else if(d3.selectAll(".bar.selected").nodes().length < 5){
+                     prev_clicked = d3.select(".bar.selected")
+
+                     if (clicked_bar.node() != prev_clicked.node()) {
+                        prev_clicked.transition().duration(200).attr("opacity", 0.15)
+                        prev_clicked.node().classList.remove("selected")
+                        tm_svg_x.select("#selection_rect_"+prev_clicked.data()[0].hash).remove()
+                        
                         clicked_bar.transition().duration(200).attr("opacity", 0.8)
                         clicked_bar.node().classList.add("selected")
                         tm_svg_x
@@ -171,6 +172,8 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
                               .attr("stroke-linecap", "round")
                               .attr("stroke-linejoin", "round")
                               .append("polyline").attr("points", "20 6 9 17 4 12")
+                        
+                        $(document).trigger("block_changed")
                      }
                   })
 
@@ -185,7 +188,7 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
       .attr("y", b => Math.min(tm_yScale(parseInt(b.bar_value)), tm_height_y/2))
       .attr("height", b =>  Math.max(tm_height_y - tm_yScale(parseInt(b.bar_value)), tm_height_y/2))
 
-   var theshold = d3.max(data.map(b => b.height))-5
+   var theshold = d3.max(data.map(b => b.height))-1
    const bars_color_ordinal = d3.scaleOrdinal()
                                 .domain(data.map(b => b.hash))
                                 .range(data.map(b => (b.height>theshold) ? 0.8:0.15))
@@ -248,7 +251,6 @@ function load_data(min, max, checkboxes) {
       bar_wrappers.selectAll(".bar.selected").each(function(d) {
          d3.select("#selection_rect_"+d.hash).transition().duration(500).attr("stroke", $(radio_button).css("background-color")).attr("y", tm_yScale(d.bar_value) - 40)
       })
-
    })
 }
 
@@ -258,6 +260,7 @@ $("input[type='radio']").click(function(){
 })
 
 // Manage filters change custom event
-$(document).on("filters_changed", function( event ) {
+$(document).on("filters_changed", function(event) {
    load_data(min, max, checkboxes)
+   setTimeout(function(){ $(document).trigger("load_new_graph") }, 1000);
 });

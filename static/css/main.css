@@ -122,3 +122,18 @@ input[type="radio"] {
   .noUi-marker-horizontal.noUi-marker-large {
     height: 10px;
   }
+
+  .legend-dot {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .legend-dot.wallets {
+    background-color: #69b3a2;
+  }
+
+  .legend-dot.transactions {
+    background-color: #de6262;
+  }
