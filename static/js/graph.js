@@ -7,21 +7,13 @@ const graph_margin = {top: 0, right: 0, bottom: 0, left: 0},
       graph_height = $("#graph-container").height() - graph_margin.top - graph_margin.bottom
 
 function node_color(node){
-  if (node.type == "wa_in"){
+  if (node.type == "wa"){
     return  "#69b3a2"
   } else {
     return "#de6262"
   }  
 }
-// function node_opacity(node){
-//   if (node.type == "wallet"){
-//     return  "#69b3a2"
-//   } else {
-//     return "#de6262"
-//   }  
-// }
 
-// append the svg object to the body of the page
 const graph_svg = d3.select("#graph-container")
                     .append("svg")
                       .attr("width", graph_width)
@@ -29,16 +21,27 @@ const graph_svg = d3.select("#graph-container")
                     .append("g")
 
 // Add zoom stuff
-// function handleZoom(e) {
-//   d3.select('svg g')
-//     .attr('transform', e.transform);
-// }
+function handleZoom(e) {
+  graph_svg.attr('transform', e.transform);
+}
+let zoom = d3.zoom().on('zoom', handleZoom);
+d3.select("#graph-container > svg").call(zoom);
 
-// let zoom = d3.zoom()
-//   .on('zoom', handleZoom);
+// Per-type markers, as they don't inherit styles.
+graph_svg.append("defs").selectAll("marker")
+        .data(["line-end-arrow"])
+        .join("marker")
+        .attr("id", d => `arrow-${d}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 19)
+        .attr("refY", 0)
+        .attr("markerWidth", 3)
+        .attr("markerHeight", 3)
+        .attr("orient", "auto") 
+        .append("path")
+        .attr("fill", "#999")
+        .attr("d", 'M0,-5L10,0L0,5');
 
-// d3.select('svg')
-//   .call(zoom);
 drag = simulation => {
   
   function dragstarted(event) {
@@ -64,43 +67,60 @@ drag = simulation => {
       .on("end", dragended);
 }
 
+var simulation
 
-d3.json("/graph").then( function(data) {
-  graph_data = data
-  console.log(data)
+function display_graph(data) {
+   simulation = d3.forceSimulation(data.nodes)
+                        .force("link", d3.forceLink(data.links).id(d => d.id))
+                        .force("charge", d3.forceManyBody().strength(-10).distanceMax(1000))
+                        .force("center", d3.forceCenter(graph_width / 2, graph_height / 2))
+                        .alphaMin(0.1);
 
-  const simulation = d3.forceSimulation(data.nodes)
-                      .force("link", d3.forceLink(data.links).id(d => d.id))
-                      .force("charge", d3.forceManyBody().strength(-2))
-                      .force("center", d3.forceCenter(graph_width / 2, graph_height / 2));
-
-  const link = graph_svg.append("g")
+  const links = graph_svg.append("g")
                           .attr("stroke", "#999")
                           .attr("stroke-opacity", 0.6)
                         .selectAll("line")
                         .data(data.links)
                         .join("line")
-                          .attr("stroke-width", 2);
+                          .attr("class", "graph-line")
+                          .attr("stroke-width", 2)
+                          .attr("marker-end", d => `url(${new URL(`#arrow-line-end-arrow`, location)})`);
 
-  const node = graph_svg.append("g")
+    const nodes = graph_svg.append("g")
                           .attr("stroke", "#fff")
                           .attr("stroke-width", 1.5)
                         .selectAll("circle")
                         .data(data.nodes)
                         .join("circle")
+                          .attr("class", "graph-circle")
                           .attr("r", 5)
                           .attr("fill", n => node_color(n))
                           .call(drag(simulation));
-  
+
   simulation.on("tick", () => {
-    link
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
-    node
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y);
+    links
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
+    nodes
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y);
   });
-                  
+} 
+
+d3.json(`/graph?${checkboxes.toArray().join(',')}`).then(function(data) {
+  display_graph(data)
+});
+
+// Manage filters change custom event
+$(document).on("load_new_graph", function( event ) {
+  simulation.stop()
+  d3.selectAll("circle.graph-circle").transition().duration(500).attr("r", 0).remove()
+  d3.selectAll("line.graph-line").transition().duration(500).attr("opacitiy", 0).remove()
+
+  d3.json(`/graph?&min=${min}&max=${max}&types=${checkboxes.toArray().join(',')}`).then(function(data) {
+    display_graph(data)
+  });
+
 });

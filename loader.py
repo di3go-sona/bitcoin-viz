@@ -5,57 +5,9 @@ from sqlalchemy import text, func
 
 ### Graph endpoints
 
-# def get_wallets_address():
-
-#     query = f"""
-#                 SELECT DISTINCT(inputs.address)
-#                 FROM inputs JOIN 
-#                 (
-#                     SELECT DISTINCT(transactions.id) as id 
-#                     FROM transactions
-#                     WHERE transactions.block_hash IN {blocks}
-#                 )
-#                 as tx_filtered ON inputs.transaction_id=tx_filtered.id
-#             """
-
-#     with Session(engine) as db:
-#         cur = db.execute(query)
-#         return cur.fetchall()
-
-# def get_weighted_transactions_ids():
-#     query = """SELECT tx_id, sum(value) FROM 'transaction' GROUP BY tx_id """
-#     with Session(engine) as db:
-
-#         cur = db.execute(query)
-#         return cur.fetchall()
-
-# def get_transactions():
-#     query = """SELECT out_wallet_id, tx_id FROM 'transaction' """
-#     with Session(engine) as db:
-
-#         cur = db.execute(query)
-#         return cur.fetchall()
-
-# def get_nodes():
-#     nwallets = [ {"id": addr, "type": "wallet"} for addr, in get_wallets_address() ]
-#     ntransactions = [ {"id": id, "type": "transaction"} for id, in get_transactions_ids() ]
-#     return nwallets + ntransactions
-
-# def get_weigthed_nodes():
-#     nwallets = [ {"id": id, "type": "wallet", "w":0 } for id, in get_wallets_ids() ]
-#     ntransactions = [ {"id": id, "type": "transaction","w":w} for id,w in get_weighted_transactions_ids() ]
-#     return nwallets + ntransactions
-
-# def get_links():
-#     ltransactions = [ {"source": w, "target": t} for w,t in get_transactions() ]
-#     return ltransactions
-
-# def get_graph():
-#     return {'nodes':  get_nodes(), 'links':  get_links() }
-
 def get_inputs_links(transactions_ids):
     query = f"""
-                SELECT DISTINCT(inputs.address), inputs.transaction_id
+                SELECT inputs.address, inputs.transaction_id
                 FROM inputs
                 WHERE inputs.transaction_id IN {tuple(transactions_ids)}
              """
@@ -65,7 +17,7 @@ def get_inputs_links(transactions_ids):
 
 def get_outputs_links(transactions_ids):
     query = f"""
-                SELECT DISTINCT(outputs.address), outputs.transaction_id
+                SELECT outputs.address, outputs.transaction_id
                 FROM outputs
                 WHERE outputs.transaction_id IN {tuple(transactions_ids)}
              """
@@ -76,29 +28,44 @@ def get_outputs_links(transactions_ids):
 def get_transactions_ids(blocks):
     query = f"""
                 SELECT DISTINCT(transactions.id) as id 
-                FROM transactions
-                WHERE transactions.block_hash IN {blocks}
-                LIMIT 1000
+                FROM transactions_ext
+                WHERE transactions_ext.block_hash IN {blocks}
+                LIMIT 500
             """
     with Session(engine) as db:
         cur = db.execute(query)
         return cur.fetchall()
 
 
-def get_weigthed_graph():
+def get_weigthed_graph(min, max, types):
 
     # Must be an input parameter 
+    range = json.loads(get_range_bitcoin())
+    local_min = min if min is not None else range['min']
+    local_max = max if max is not None else range['max']
+
+    local_types = "('%s')" % "', '".join(types.split(","))
+    types_clause = f"AND transactions_ext.type in {local_types}"
+
     blocks = "('%s')" % "', '".join(['00000000000000000006467d4ceb7b301b679b4146d7269a270091e5c82938aa'])
 
     transactions_ids = [tx_id[0] for tx_id in get_transactions_ids(blocks)]
-    links = get_inputs_links(transactions_ids)
-    inputs_address = set([link[0] for link in links])
 
-    tx_json    = [{"id": tx_id, "type": "tx"}     for tx_id in transactions_ids]
-    links_json = [{"source": link[0], "target": link[1]} for link in links]
-    in_json    = [{"id": in_addr, "type": "wa_in"}   for in_addr in inputs_address]
+    inputs_links = get_inputs_links(transactions_ids)
+    inputs_address = set([link[0] for link in inputs_links])
 
-    return {'nodes':  tx_json + in_json, 'links':  links_json}
+    outputs_links = get_outputs_links(transactions_ids)
+    outputs_address = set([link[0] for link in outputs_links])
+
+    tx_json = [{"id": tx_id, "type": "tx"}     for tx_id in transactions_ids]
+
+    inputs_links_json  = [{"source": link[0], "target": link[1]}  for link in inputs_links]
+    outputs_links_json = [{"source": link[1], "target": link[0]} for link in outputs_links]
+
+    in_json    = [{"id": in_addr, "type": "wa"}    for in_addr in inputs_address]
+    out_json   = [{"id": out_addr, "type": "wa"}   for out_addr in outputs_address]
+
+    return {'nodes':  tx_json + in_json + out_json, 'links':  inputs_links_json + outputs_links_json}
 
 ### Filters endpoints
 

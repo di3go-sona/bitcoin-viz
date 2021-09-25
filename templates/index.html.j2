@@ -91,10 +91,16 @@
         <div id="graph-card" class="card card-styled m-2" style="border-radius: .25rem .25rem .25rem .25rem;">
           <div class="card-body p-0" style="display: table;">
             <div class="container-fluid row d-flex m-0 pt-2 px-3" style="align-items: center;">
-              Graph visualization
-              <div class="ml-auto" role="group">
-                <button type="button" class="btn-sm btn-info" disabled="disabled">Combine by address</button>
-                <button type="button" class="btn-sm btn-outline-info">Uncombine all</button>
+              Directed graph visualization
+              <div class="ml-auto" style="display: table;" role="group">
+                <div class="form-check form-check-inline mx-0" style="display: display:table-cell; vertical-align:middle;">
+                  <span class="legend-dot wallets mx-2"></span>
+                  <label class="form-check-label" style="margin-top: .2rem">Wallets</label>
+                </div>
+                <div class="form-check form-check-inline mr-0 ml-2" style="display: display:table-cell; vertical-align:middle;">
+                  <span class="legend-dot transactions mx-2"></span>
+                  <label class="form-check-label" style="margin-top: .2rem">Transactions</label>
+                </div>
               </div>
             </div>
             <hr class="mb-0 mx-2"/>
