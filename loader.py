@@ -25,11 +25,11 @@ def get_outputs_links(transactions_ids):
         cur = db.execute(query)
         return cur.fetchall()
 
-def get_transactions_ids(blocks):
+def get_transactions_ids(block, min, max, types_clause):
     query = f"""
-                SELECT DISTINCT(transactions.id) as id 
+                SELECT DISTINCT(transactions_ext.id) as id 
                 FROM transactions_ext
-                WHERE transactions_ext.block_hash IN {blocks}
+                WHERE transactions_ext.block_hash = '{block}' AND transactions_ext.tot_value >= {min} AND transactions_ext.tot_value <= {max} {types_clause}
                 LIMIT 500
             """
     with Session(engine) as db:
@@ -37,9 +37,8 @@ def get_transactions_ids(blocks):
         return cur.fetchall()
 
 
-def get_weigthed_graph(min, max, types):
+def get_weigthed_graph(block, min, max, types):
 
-    # Must be an input parameter 
     range = json.loads(get_range_bitcoin())
     local_min = min if min is not None else range['min']
     local_max = max if max is not None else range['max']
@@ -47,9 +46,9 @@ def get_weigthed_graph(min, max, types):
     local_types = "('%s')" % "', '".join(types.split(","))
     types_clause = f"AND transactions_ext.type in {local_types}"
 
-    blocks = "('%s')" % "', '".join(['00000000000000000006467d4ceb7b301b679b4146d7269a270091e5c82938aa'])
+    local_block = block if block is not None else '00000000000000000006467d4ceb7b301b679b4146d7269a270091e5c82938aa'
 
-    transactions_ids = [tx_id[0] for tx_id in get_transactions_ids(blocks)]
+    transactions_ids = [tx_id[0] for tx_id in get_transactions_ids(local_block, local_min, local_max, types_clause)]
 
     inputs_links = get_inputs_links(transactions_ids)
     inputs_address = set([link[0] for link in inputs_links])

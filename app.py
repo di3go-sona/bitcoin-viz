@@ -39,7 +39,8 @@ def wallets_clusters_csv_base():
 
 @app.route("/graph")
 def graph():
+    block = request.args.get("block")
     min = request.args.get("min")
     max = request.args.get("max")
     types = request.args.get("types")
-    return json.dumps(loader.get_weigthed_graph(min, max, types))
+    return json.dumps(loader.get_weigthed_graph(block, min, max, types))

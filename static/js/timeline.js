@@ -173,7 +173,7 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
                               .attr("stroke-linejoin", "round")
                               .append("polyline").attr("points", "20 6 9 17 4 12")
                         
-                        $(document).trigger("load_new_cluster")
+                        $(document).trigger("block_changed")
                      }
                   })
 
@@ -251,7 +251,6 @@ function load_data(min, max, checkboxes) {
       bar_wrappers.selectAll(".bar.selected").each(function(d) {
          d3.select("#selection_rect_"+d.hash).transition().duration(500).attr("stroke", $(radio_button).css("background-color")).attr("y", tm_yScale(d.bar_value) - 40)
       })
-      setTimeout(function(){ $(document).trigger("load_new_graph") }, 800);
    })
 }
 
@@ -261,6 +260,7 @@ $("input[type='radio']").click(function(){
 })
 
 // Manage filters change custom event
-$(document).on("filters_changed", function( event ) {
+$(document).on("filters_changed", function(event) {
    load_data(min, max, checkboxes)
+   setTimeout(function(){ $(document).trigger("load_new_graph") }, 1000);
 });
