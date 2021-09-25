@@ -9,7 +9,7 @@ def get_inputs_links(transactions_ids):
     query = f"""
                 SELECT inputs.address, inputs.transaction_id
                 FROM inputs
-                WHERE inputs.transaction_id IN {tuple(transactions_ids)}
+                WHERE inputs.transaction_id IN {"('%s')" % "', '".join(transactions_ids)}
              """
     with Session(engine) as db:
         cur = db.execute(query)
@@ -19,7 +19,7 @@ def get_outputs_links(transactions_ids):
     query = f"""
                 SELECT outputs.address, outputs.transaction_id
                 FROM outputs
-                WHERE outputs.transaction_id IN {tuple(transactions_ids)}
+                WHERE outputs.transaction_id IN {"('%s')" % "', '".join(transactions_ids)}
              """
     with Session(engine) as db:
         cur = db.execute(query)
@@ -54,7 +54,7 @@ def get_weigthed_graph(block, min, max, types):
     inputs_address = set([link[0] for link in inputs_links])
 
     outputs_links = get_outputs_links(transactions_ids)
-    outputs_address = set([link[0] for link in outputs_links])
+    outputs_address = set([link[0] for link in outputs_links]).difference(inputs_address)
 
     tx_json = [{"id": tx_id, "type": "tx"}     for tx_id in transactions_ids]
 
