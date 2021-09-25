@@ -2,6 +2,8 @@ import json
 from re import match
 from database import Block, engine, Session
 from sqlalchemy import text, func
+import pandas as pd 
+
 
 ### Graph endpoints
 
@@ -161,27 +163,54 @@ def get_blocks(plot, min, max, types):
 
 ### Wallets endpoints
 
-def get_wallets(blocks_list):
+def get_wallets(block_hash):
+
+    query = f"""
+    SELECT addr,pca_1,pca_2
+    FROM 
+        (SELECT DISTINCT transactions.block_hash, inputs.address
+        FROM inputs, transactions
+        WHERE 
+        inputs.transaction_id == transactions.id
+        UNION 
+        SELECT DISTINCT transactions.block_hash, outputs.address
+        FROM outputs, transactions
+        WHERE 
+        outputs.transaction_id == transactions.id
+        ) AS io, wallets_pca
+    WHERE 
+    io.block_hash == '{block_hash}'
+        AND 
+    io.address == wallets_pca.addr
+    """
+
+    data = pd.read_sql_query(query, engine)
+    res = {
+        "min_pca_1" : data['pca_1'].min(),
+        "max_pca_1" : data['pca_1'].max(),
+        "min_pca_2" : data['pca_2'].min(),
+        "max_pca_2" : data['pca_2'].max(),
+        "csv" : data.to_csv()
+    }
+
+
+    return json.dumps(res)
+
+
+
+def get_last_block():
 
     query = """
-            SELECT addr, pca_1, pca_2, -1 FROM wallets_pca
-            LIMIT 10000
+            SELECT  hash
+            FROM blocks
+            ORDER BY time desc
+            LIMIT 1
             """
 
     with Session(engine) as db:
         cur = db.execute(query)
-        blocks = cur.fetchall()
-        res = ["addr,pca_1,pca_2,cluster"] + ["{},{},{},{}".format(*b) for b in blocks]
-        return "\n".join(res)
+        last_block, = cur.fetchone()
+        return last_block
 
-def get_wallets_domain(blocks_list=[]):
 
-    query = """
-            SELECT min(pca_1), max(pca_2), min(pca_2), max(pca_2)
-            FROM wallets_pca
-            """
-
-    with Session(engine) as db:
-        cur = db.execute(query)
-        min_pca_1, max_pca_1, min_pca_2, max_pca_2 = cur.fetchone()
-        return min_pca_1, max_pca_1, min_pca_2, max_pca_2 
+get_wallets("000000000000000000014752692f020bbbb1dabb18dd753bca1a60c9c8b92941")

@@ -7,8 +7,6 @@ var last_clusters = null;
 function get_color(cluster){
 
     switch (cluster) {
-        case "-1":
-            return "white"
         case "0":
             return "#69b3a2"
         case "1":
@@ -17,7 +15,7 @@ function get_color(cluster){
             return "green"
         
         default:
-            return "red"
+            return "white"
     }
 
 }
@@ -42,11 +40,6 @@ function arraysEqual(a, b) {
 
 
 function update_clustering(){
-
-    // console.log(i)
-
- 
-        // console.log("Giada e' patata ogni secondo")
         d3.csv("/wallets/clusters/csv").then( function(data) {
             if (arraysEqual(last_clusters, data) ) return
             console.log(data)
@@ -71,6 +64,8 @@ function start_clustering(){
     
 }
 
+
+
 $('#start-clustering-button').click(start_clustering)
 
 // append the svg object to the body of the page
@@ -81,12 +76,23 @@ const svg = d3.select("#clusters-card")
     .append("g")
     .attr("transform", `translate(${clusters_margin.left}, ${clusters_margin.top})`);
 
-//Read the data
-d3.csv("/wallets/csv").then( function(data) {
+function handleZoom(e) {
+    g.attr('transform', e.transform);
+}
 
+let zoom = d3.zoom()
+  .on('zoom', handleZoom);
+
+d3.select('svg')
+  .call(zoom);
+
+//Read the data
+d3.json("/wallets").then( function(data_wrapper) {
+
+    data = d3.csvParse(data_wrapper.csv)
     // Add X axis
     const x = d3.scaleLinear()
-    .domain([min_pca_1,max_pca_1])
+    .domain([data_wrapper.min_pca_1,data_wrapper.max_pca_1])
     .range([ 0, width ]);
     svg.append("g")
     .attr("transform", `translate(0, ${height})`)
@@ -94,7 +100,7 @@ d3.csv("/wallets/csv").then( function(data) {
 
     // Add Y axis
     const y = d3.scaleLinear()
-    .domain([min_pca_2,max_pca_2])
+    .domain([data_wrapper.min_pca_2,data_wrapper.max_pca_2])
     .range([ height, 0]);
     svg.append("g")
     .call(d3.axisLeft(y));

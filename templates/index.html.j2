@@ -77,8 +77,10 @@
             <div class="container-fluid row d-flex m-0 pt-2" style="align-items: center;">
               Clusters of wallets
               <button type="button" class="btn-sm btn-info ml-auto" id="start-clustering-button">Start Clustering</button>
+              
             </div>
             <hr/>
+            <div id="graph-container" class="h-100" style="display: table-row;">
           </div>
         </div>
 
@@ -140,13 +142,7 @@
       </div>
 
     </div>
-    <script>
-      var min_pca_1 = {{ ctx.min_pca_1 }};
-      var max_pca_1 = {{ ctx.max_pca_1 }};
-      var min_pca_2 = {{ ctx.min_pca_2 }};
-      var max_pca_2 = {{ ctx.max_pca_2 }};
-      
-    </script>
+
     <script src="/static/js/filters.js"></script>
     <script src="/static/js/timeline.js"></script>
     <script>

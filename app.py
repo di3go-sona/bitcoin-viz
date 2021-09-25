@@ -1,13 +1,12 @@
 from flask import Flask, render_template, request, redirect
 import json 
 import loader
-from context_loader import ctx
 from wallet_clustering import * 
 app = Flask(__name__, static_folder='static/', template_folder='templates/')
 
 @app.route("/")
 def index():
-    return render_template('index.html.j2',ctx=ctx)
+    return render_template('index.html.j2')
 
 @app.route("/range_bitcoin")
 def range_bitcoin():
@@ -21,10 +20,13 @@ def timeline_csv_base():
     types = request.args.get("types")
     return loader.get_blocks(plot, min, max, types)
 
-@app.route("/wallets/csv")
+@app.route("/wallets")
 def wallets_csv_base():
-    blocks_list = request.args.get("blocks_list")
-    return loader.get_wallets(blocks_list)
+    block_hash = request.args.get("block_hash", loader.get_last_block())
+    return loader.get_wallets(block_hash)
+
+
+
 
 @app.route("/wallets/clusters/start")
 def wallets_clusters_new():
