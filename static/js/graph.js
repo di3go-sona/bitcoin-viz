@@ -70,7 +70,8 @@ drag = simulation => {
 var simulation
 
 function display_graph(data) {
-   simulation = d3.forceSimulation(data.nodes)
+  
+  simulation = d3.forceSimulation(data.nodes)
                         .force("link", d3.forceLink(data.links).id(d => d.id))
                         .force("charge", d3.forceManyBody().strength(-10).distanceMax(1000))
                         .force("center", d3.forceCenter(graph_width / 2, graph_height / 2))

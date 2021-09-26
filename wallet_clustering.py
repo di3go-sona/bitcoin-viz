@@ -53,10 +53,9 @@ def get_clustering():
     clusters, last = clusters_queue.get(True, 2)
     return {
         "last": last,
-        "domain": [0,1,2,3,4,5,6,7,8,9],
         "csv" : clusters.to_csv()
         }
 
         
 
-start_clustering()
+# start_clustering()
