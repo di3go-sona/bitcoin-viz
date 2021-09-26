@@ -69,10 +69,31 @@ drag = simulation => {
 
 var simulation
 
+function distance_link(d) {
+
+  var n_links = 0
+  if (d["source"]["type"] == "tx") {
+    n_links = d["source"]["n_links"]
+  }
+  else {
+    n_links = d["target"]["n_links"]
+  }
+
+  if (n_links > 10){
+    n = parseInt(n_links / 10)
+    steps = [...Array(n).keys()]
+    taken = steps[Math.floor(Math.random() * steps.length)]
+    return 40 + (taken * 5)
+  } 
+  else{
+    return 40
+  }                    
+}
+
 function display_graph(data) {
   
   simulation = d3.forceSimulation(data.nodes)
-                        .force("link", d3.forceLink(data.links).id(d => d.id))
+                        .force("link", d3.forceLink(data.links).id(d => d.id).distance(d => distance_link(d)))
                         .force("charge", d3.forceManyBody().strength(-10).distanceMax(1000))
                         .force("center", d3.forceCenter(graph_width / 2, graph_height / 2))
                         .alphaMin(0.1);
@@ -87,17 +108,17 @@ function display_graph(data) {
                           .attr("stroke-width", 2)
                           .attr("marker-end", d => `url(${new URL(`#arrow-line-end-arrow`, location)})`);
 
-    const nodes = graph_svg.append("g")
-                          .attr("stroke", "#fff")
-                          .attr("stroke-width", 1.5)
-                        .selectAll("circle")
-                        .data(data.nodes)
-                        .join("circle")
-                          .attr("class", "graph-circle")
-                          .attr("r", 5)
-                          .attr("fill", n => node_color(n))
-                          .call(drag(simulation));
-
+  const nodes = graph_svg.append("g")
+                        .attr("stroke", "#fff")
+                        .attr("stroke-width", 1.5)
+                      .selectAll("circle")
+                      .data(data.nodes)
+                      .join("circle")
+                        .attr("class", "graph-circle")
+                        .attr("r", 5)
+                        .attr("fill", n => node_color(n))
+                        .call(drag(simulation));
+  
   simulation.on("tick", () => {
     links
       .attr("x1", d => d.source.x)
