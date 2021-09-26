@@ -3,6 +3,7 @@ import json
 import loader
 from wallet_clustering import * 
 app = Flask(__name__, static_folder='static/', template_folder='templates/')
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 @app.route("/")
 def index():
