@@ -173,7 +173,7 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
                               .attr("stroke-linejoin", "round")
                               .append("polyline").attr("points", "20 6 9 17 4 12")
                         
-                        $(document).trigger("block_changed")
+                        $(document).trigger("block_changed",[clicked_bar.data()[0].hash])
                      }
                   })
 
