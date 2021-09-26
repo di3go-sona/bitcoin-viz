@@ -5,8 +5,32 @@ var wallets = {
     margin_bottom : 30,
     margin_left : 45,
 
-    clusters : null
+    update_clustering : function(){
+        d3.json("/wallets/clusters").then( function(data_wrapper) {
+            console.log("updating clustering")
+            console.log(data_wrapper)
 
+            data = d3.csvParse(data_wrapper.csv, d3.autoType)
+            console.log(data)
+
+            wallets.svg.selectAll("circle")
+                .data(data)
+                .style("fill",function (d) { return wallets.color(d.cluster || null); }) 
+
+            if ( ! data_wrapper.last ) setTimeout(wallets.update_clustering, 800)
+            
+        })
+
+    },
+
+    start_clustering: function(){
+        console.log("Start clustering")
+        xhttp = new XMLHttpRequest()
+        xhttp.open("GET", "/wallets/clusters/start", true);
+        xhttp.send();
+        
+        wallets.update_clustering()
+    }
 }
 
 
@@ -15,41 +39,11 @@ $(document).ready(function(){
     wallets.width  = $('#clusters-container').width() - wallets.margin_left - wallets.margin_right;
     wallets.height = $('#clusters-container').height() - wallets.margin_top - wallets.margin_bottom;
     
-    wallets.color = d3.scaleOrdinal().domain([null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    wallets.color = d3.scaleOrdinal()
+        .domain([null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
         .range(d3.schemeSet3);
 
-
-
-
-
-    function update_clustering(){
-            d3.csv("/wallets/clusters/csv").then( function(data) {
-                if (arraysEqual(last_clusters, data) ) return
-                console.log(data)
-                last_clusters = data
-                svg.selectAll("circle")
-                    .data(data)
-                    .style("fill",function (d) { return get_color(d.cluster ) } ) 
-
-                setTimeout(update_clustering, 800)
-        })
-
-    }
-
-    function start_clustering(){
-        console.log("Start clustering")
-        xhttp = new XMLHttpRequest()
-        xhttp.open("GET", "/wallets/clusters/start", true);
-        xhttp.send();
-        last_clusters = null
-        update_clustering()
-        
-        
-    }
-
-
-
-    $('#start-clustering-button').click(start_clustering)
+    
 
     // append the svg object to the body of the page
     wallets.svg = d3.select("#clusters-card")
@@ -105,4 +99,6 @@ $(document).ready(function(){
 
 
 
+
+    $('#start-clustering-button').click(wallets.start_clustering)
 })

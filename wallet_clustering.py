@@ -21,6 +21,8 @@ def start_clustering():
     X = sklearn.preprocessing.normalize(data)
 
     for n in range(100):
+        print(n)
+
         centroids, labels, inertia, best_n = sklearn.cluster.k_means(X, 3, init=last_centroids if last_centroids is not None else 'random', 
                                                                             max_iter=1,
                                                                             n_init=1,  
@@ -39,10 +41,9 @@ def start_clustering():
         if n < 2  or np.linalg.norm(centroids-last_centroids) > 1e-6 :
             last_centroids = centroids
             clusters_queue.put((clusters_data_df, False))
-            print(n)
-            continue
         else:
             clusters_queue.put((clusters_data_df, True))
+            break
 
 
 

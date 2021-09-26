@@ -31,8 +31,10 @@ def wallets_csv_base():
 @app.route("/wallets/clusters/start")
 def wallets_clusters_new():
     block = request.args.get("block")
+    print("Clustering Started")
     start_clustering()
-    return "Clustering Started"
+    print("Clustering Ended")
+    return "Clustering Ended"
 
 @app.route("/wallets/clusters")
 def wallets_clusters_csv_base():
