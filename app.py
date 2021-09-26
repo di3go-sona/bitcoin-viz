@@ -22,21 +22,21 @@ def timeline_csv_base():
 
 @app.route("/wallets")
 def wallets_csv_base():
-    block_hash = request.args.get("block_hash", loader.get_last_block())
-    return loader.get_wallets(block_hash)
+    block = request.args.get("block", loader.get_last_block())
+    return loader.get_wallets(block)
 
 
 
 
 @app.route("/wallets/clusters/start")
 def wallets_clusters_new():
-    blocks_list = request.args.get("blocks_list")
+    block = request.args.get("block")
     start_clustering()
-    return redirect('/wallets/clusters/csv')
+    return "Clustering Started"
 
-@app.route("/wallets/clusters/csv")
+@app.route("/wallets/clusters")
 def wallets_clusters_csv_base():
-    blocks_list = request.args.get("blocks_list")
+    block = request.args.get("block")
     return get_clustering()
 
 @app.route("/graph")
