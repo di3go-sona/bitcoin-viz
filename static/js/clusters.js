@@ -30,7 +30,12 @@ var wallets = {
         xhttp.send();
         
         wallets.update_clustering()
+    },
+
+    handleZoom: function handleZoom(e) {
+        wallets.dots_g.attr('transform', e.transform);
     }
+
 }
 
 
@@ -50,18 +55,12 @@ $(document).ready(function(){
         .append("svg")
         .attr("width", wallets.width + wallets.margin_left + wallets.margin_right)
         .attr("height", wallets.height + wallets.margin_top + wallets.margin_bottom)
+        .call(d3.zoom().on('zoom', wallets.handleZoom))
         .append("g")
         .attr("transform", `translate(${wallets.margin_left}, ${wallets.margin_top})`);
 
-    // function handleZoom(e) {
-    //     g.attr('transform', e.transform);
-    // }
 
-    // let zoom = d3.zoom()
-    //   .on('zoom', handleZoom);
 
-    // d3.select('svg')
-    //   .call(zoom);
 
     //Read the data
     d3.json("/wallets").then( function(data_wrapper) {
@@ -86,7 +85,7 @@ $(document).ready(function(){
             .call(d3.axisLeft(wallets.y));
 
         // Add dots
-        wallets.svg.append('g')
+        wallets.dots_g = wallets.svg.append('g')
             .selectAll("dot")
             .data(data)
             .join("circle")
