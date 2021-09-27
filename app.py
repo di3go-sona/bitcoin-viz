@@ -33,7 +33,7 @@ def wallets_csv_base():
 def wallets_clusters_new():
     block = request.args.get("block")
     print("Clustering Started")
-    start_clustering()
+    start_clustering(block)
     print("Clustering Ended")
     return "Clustering Ended"
 

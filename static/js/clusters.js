@@ -67,12 +67,12 @@ var wallets = {
 
             // Add X axis
             wallets.x = d3.scaleLinear()
-                .domain([data_wrapper.min_pca_1,data_wrapper.max_pca_1])
+                .domain([data_wrapper.min_x,data_wrapper.max_x])
                 .range([ 0, wallets.width ]);
             
             // Add Y axis
             wallets.y = d3.scaleLinear()
-                .domain([data_wrapper.min_pca_2,data_wrapper.max_pca_2])
+                .domain([data_wrapper.min_y,data_wrapper.max_y])
                 .range([ wallets.height, 0]);
 
             if (!wallets.init ){
@@ -93,8 +93,8 @@ var wallets = {
                 .selectAll("dot")
                 .data(data)
                 .join("circle")
-                    .attr("cx", function (d) { return wallets.x(d.pca_1); } )
-                    .attr("cy", function (d) { return wallets.y(d.pca_2); } )
+                    .attr("cx", function (d) { return wallets.x(d.x); } )
+                    .attr("cy", function (d) { return wallets.y(d.y); } )
                     .attr("r", 1.5)
                     .style("fill",function (d) { return wallets.color(d.cluster || null); })
 

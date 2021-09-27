@@ -132,7 +132,7 @@ def get_blocks(plot, min, max, types):
 def get_wallets(block_hash):
 
     query = f"""
-    SELECT addr,pca_1,pca_2
+    SELECT block_hash,addr,pca_1 as x ,pca_2 as y
     FROM 
         (SELECT DISTINCT transactions.block_hash, inputs.address
         FROM inputs, transactions
@@ -152,10 +152,10 @@ def get_wallets(block_hash):
 
     data = pd.read_sql_query(query, engine)
     res = {
-        "min_pca_1" : data['pca_1'].min(),
-        "max_pca_1" : data['pca_1'].max(),
-        "min_pca_2" : data['pca_2'].min(),
-        "max_pca_2" : data['pca_2'].max(),
+        "min_x" : data['x'].min(),
+        "max_x" : data['x'].max(),
+        "min_y" : data['y'].min(),
+        "max_y" : data['y'].max(),
         "csv" : data.to_csv()
     }
 
