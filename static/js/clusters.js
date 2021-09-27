@@ -54,6 +54,11 @@ var wallets = {
 
     handleZoom: function(e) {
         wallets.dots_g.attr('transform', e.transform);
+
+        // update axes with these new boundaries
+        wallets.x_axis.call(d3.axisBottom(e.transform.rescaleX(wallets.x)))
+        wallets.y_axis.call(d3.axisLeft(e.transform.rescaleY(wallets.y)))
+    
     },
     //Read the data
     load_wallets: function(block){
@@ -81,11 +86,11 @@ var wallets = {
                 .range([ wallets.height, 0]);
 
             if (!wallets.init ){
-                wallets.svg.append("g")
+                wallets.x_axis = wallets.svg.append("g")
                     .attr("transform", `translate(0, ${wallets.height})`)
                     .call(d3.axisBottom(wallets.x));
 
-                wallets.svg.append("g")
+                wallets.y_axis = wallets.svg.append("g")
                     .call(d3.axisLeft(wallets.y));
                 
                 wallets.init = true
