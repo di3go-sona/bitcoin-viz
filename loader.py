@@ -4,7 +4,6 @@ from database import Block, engine, Session
 from sqlalchemy import text, func
 import pandas as pd 
 
-
 ### Graph endpoints
 
 def get_inputs_links(transactions_ids):
@@ -29,7 +28,7 @@ def get_outputs_links(transactions_ids):
 
 def get_transactions_ids(block, min, max, types_clause):
     query = f"""
-                SELECT DISTINCT(transactions_ext.id) as id 
+                SELECT DISTINCT(transactions_ext.id) as id, (n_inputs+n_outputs) as n_links
                 FROM transactions_ext
                 WHERE transactions_ext.block_hash = '{block}' AND transactions_ext.tot_value >= {min} AND transactions_ext.tot_value <= {max} {types_clause}
                 LIMIT 500
@@ -50,7 +49,8 @@ def get_weigthed_graph(block, min, max, types):
 
     local_block = block if block is not None else '00000000000000000006467d4ceb7b301b679b4146d7269a270091e5c82938aa'
 
-    transactions_ids = [tx_id[0] for tx_id in get_transactions_ids(local_block, local_min, local_max, types_clause)]
+    transactions_ids_tuples = get_transactions_ids(local_block, local_min, local_max, types_clause)
+    transactions_ids = [tx[0] for tx in transactions_ids_tuples]
 
     inputs_links = get_inputs_links(transactions_ids)
     inputs_address = set([link[0] for link in inputs_links])
@@ -58,10 +58,10 @@ def get_weigthed_graph(block, min, max, types):
     outputs_links = get_outputs_links(transactions_ids)
     outputs_address = set([link[0] for link in outputs_links]).difference(inputs_address)
 
-    tx_json = [{"id": tx_id, "type": "tx"}     for tx_id in transactions_ids]
+    tx_json = [{"id": tx[0], "type": "tx", "n_links": tx[1]} for tx in transactions_ids_tuples]
 
     inputs_links_json  = [{"source": link[0], "target": link[1]}  for link in inputs_links]
-    outputs_links_json = [{"source": link[1], "target": link[0]} for link in outputs_links]
+    outputs_links_json = [{"source": link[1], "target": link[0]}  for link in outputs_links]
 
     in_json    = [{"id": in_addr, "type": "wa"}    for in_addr in inputs_address]
     out_json   = [{"id": out_addr, "type": "wa"}   for out_addr in outputs_address]
