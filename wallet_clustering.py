@@ -34,15 +34,15 @@ wallets_df = pd.read_sql_query(query, engine)
 wallets_data = wallets_df.drop(['addr', 'block_hash'], axis=1).to_numpy()
 X = sklearn.preprocessing.normalize(wallets_data)
 
-def start_clustering():
+def start_clustering(n_clusters):
     global last_centroids, available
     last_centroids, available = (None, False)
     for n in range(100):
         print(n)
 
-        centroids, labels, inertia = sklearn.cluster.k_means(X, 3, init=last_centroids if last_centroids is not None else 'random', 
+        centroids, labels, inertia = sklearn.cluster.k_means(X, n_clusters, init=last_centroids if last_centroids is not None else 'random', 
                                                                             max_iter=1,
-                                                                            n_init=3)
+                                                                            n_init=1)
                                                                             
         
 
@@ -70,14 +70,11 @@ def get_clustering(block):
     block_wallets_df = wallets_df[ block_selector ]
 
     X = sklearn.preprocessing.normalize(wallets_data)
-    _, labels, _ = sklearn.cluster.k_means(X[block_selector], 3, init=centroids, max_iter=1)
+    _, labels, _ = sklearn.cluster.k_means(X[block_selector], len(centroids), init=centroids, max_iter=1, n_init=1)
 
-    block_wallets_df.loc[:, 'cluster'] = labels.astype(int)   
+    block_wallets_df = block_wallets_df.assign(cluster=labels.astype(int)   )
     return block_wallets_df[['addr', 'cluster']], last
-    return {
-        "last": last,
-        "csv" : block_wallets_df[['addr', 'cluster']].to_csv()
-        }
+
 
         
 

@@ -6,10 +6,9 @@ var wallets = {
     margin_left : 45,
     init : false,
 
-    current_block: null,
-
+    interval_function: null,
     update_clustering : function(){
-        d3.json("/wallets/clusters").then( function(data_wrapper) {
+        d3.json(`/wallets/clusters?block=${timeline.current_block}`).then( function(data_wrapper) {
             console.log("Updating clustering")
 
             data = d3.csvParse(data_wrapper.csv, d3.autoType)
@@ -18,13 +17,14 @@ var wallets = {
                 .data(data)
                 .style("fill",function (d) { return wallets.color(d.cluster || null); }) 
 
-            if ( ! data_wrapper.last ) {
-                setTimeout(wallets.update_clustering, 200)
-            }  else {
+            if ( data_wrapper.last ) {
                 console.log("Ended clustering")
                 wallets.clustering_button.prop("disabled",false)
                 wallets.clustering_button.find(".spinner").hide()
                 wallets.clustering_button.find(".text").show()
+
+                clearInterval(wallets.interval_function)
+                wallets.interval_function = null;
             }
             
         })
@@ -38,8 +38,9 @@ var wallets = {
         wallets.clustering_button.find(".text").hide()
 
 
+        n_clusters = $("#n_clusters").val()
         xhttp = new XMLHttpRequest()
-        xhttp.open("GET", "/wallets/clusters/start", true);
+        xhttp.open("GET", `/wallets/clusters/start?n_clusters=${n_clusters}`, true);
         xhttp.send();
 
         wallets.svg.selectAll("circle")
@@ -47,7 +48,7 @@ var wallets = {
                 .style("fill",function (d) { return wallets.color(null); }) 
         
         
-        setTimeout(wallets.update_clustering, 500)
+        wallets.interval_function = setInterval(wallets.update_clustering, 300)
         
     },
 
@@ -56,6 +57,8 @@ var wallets = {
     },
     //Read the data
     load_wallets: function(block){
+
+
 
         if (!block){
             var endpoint = d3.json("/wallets")
@@ -99,6 +102,11 @@ var wallets = {
                     .attr("r", 1.5)
                     .style("fill",function (d) { return wallets.color(d.cluster || null); })
 
+            if (wallets.interval_function){
+                wallets.interval_function = setInterval(wallets.update_clustering, 300)
+            }
+            
+
         })
 
     }
@@ -137,9 +145,13 @@ $(document).ready(function(){
     wallets.load_wallets(null)
     $(document).on("block_changed", function(event) {
 
-        block = timeline.current_block;
+        if (wallets.interval_function){
+            clearInterval(wallets.interval_function)
+        }
+        
         wallets.dots_g.selectAll("circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
 
-        wallets.load_wallets(block)
+        wallets.load_wallets(timeline.current_block)
+
      });
 })

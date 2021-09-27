@@ -30,10 +30,10 @@ def wallets_get():
 
 
 @app.route("/wallets/clusters/start")
-def wallets_start_clustering():
-    print("Clustering Started")
-    start_clustering()
-    print("Clustering Ended")
+def wallets_clusters_start():
+    n_clusters = int(request.args.get("n_clusters"))
+    start_clustering(n_clusters)
+
     return "Clustering Ended"
 
 @app.route("/wallets/clusters")

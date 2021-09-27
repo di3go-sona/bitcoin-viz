@@ -153,9 +153,9 @@ def get_wallets(block_hash):
     wallets_df = pd.read_sql_query(query, engine)
     if wallet_clustering.available:
         block_wallets_df, _ = wallet_clustering.get_clustering(block_hash)
-        print(block_wallets_df)
+        # print(block_wallets_df)
         wallets_df.loc[:, 'cluster'] = block_wallets_df['cluster'].to_numpy()
-    print(wallets_df)
+    # print(wallets_df)
     res = {
         "min_x" : wallets_df['x'].min(),
         "max_x" : wallets_df['x'].max(),
