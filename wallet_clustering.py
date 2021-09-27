@@ -36,7 +36,7 @@ X = sklearn.preprocessing.normalize(wallets_data)
 
 def start_clustering():
     global last_centroids, available
-    last_centroids = None
+    last_centroids, available = (None, False)
     for n in range(100):
         print(n)
 

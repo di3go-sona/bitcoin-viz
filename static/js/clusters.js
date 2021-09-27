@@ -135,8 +135,9 @@ $(document).ready(function(){
 
     wallets.clustering_button.click(wallets.start_clustering)
     wallets.load_wallets(null)
-    $(document).on("block_changed", function(event, block) {
-        console.log(event)
+    $(document).on("block_changed", function(event) {
+
+        block = timeline.current_block;
         wallets.dots_g.selectAll("circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
 
         wallets.load_wallets(block)

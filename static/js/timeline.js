@@ -10,6 +10,9 @@ function format_date(date, isFull) {
    else        return `${hours}:${minutes}:${seconds}`
 }
 
+const timeline = {
+   current_block: null
+}
 // Set the dimensions and margins of the timeline
 const tm_margin_y = {top: 40, right: 0, bottom: 60, left: 20},
       tm_width_y  = (70 - tm_margin_y.left - tm_margin_y.right),
@@ -173,7 +176,8 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
                               .attr("stroke-linejoin", "round")
                               .append("polyline").attr("points", "20 6 9 17 4 12")
                         
-                        $(document).trigger("block_changed",[clicked_bar.data()[0].hash])
+                        timeline.current_block = clicked_bar.data()[0].hash
+                        $(document).trigger("block_changed")
                      }
                   })
 
