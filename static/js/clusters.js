@@ -6,6 +6,8 @@ var wallets = {
     margin_left : 45,
     init : false,
 
+    current_block: null,
+
     update_clustering : function(){
         d3.json("/wallets/clusters").then( function(data_wrapper) {
             console.log("Updating clustering")
@@ -45,7 +47,7 @@ var wallets = {
                 .style("fill",function (d) { return wallets.color(null); }) 
         
         
-        wallets.update_clustering()
+        setTimeout(wallets.update_clustering, 500)
         
     },
 
@@ -86,7 +88,6 @@ var wallets = {
                 wallets.init = true
             } 
 
-            wallets.dots_g.selectAll("circle").remove()
 
             
             wallets.dots_g
@@ -136,6 +137,8 @@ $(document).ready(function(){
     wallets.load_wallets(null)
     $(document).on("block_changed", function(event, block) {
         console.log(event)
+        wallets.dots_g.selectAll("circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
+
         wallets.load_wallets(block)
      });
 })

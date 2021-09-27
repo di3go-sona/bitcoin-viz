@@ -22,7 +22,7 @@ def timeline_csv_base():
     return loader.get_blocks(plot, min, max, types)
 
 @app.route("/wallets")
-def wallets_csv_base():
+def wallets_get():
     block = request.args.get("block", loader.get_last_block())
     return loader.get_wallets(block)
 
@@ -30,17 +30,16 @@ def wallets_csv_base():
 
 
 @app.route("/wallets/clusters/start")
-def wallets_clusters_new():
-    block = request.args.get("block")
+def wallets_start_clustering():
     print("Clustering Started")
-    start_clustering(block)
+    start_clustering()
     print("Clustering Ended")
     return "Clustering Ended"
 
 @app.route("/wallets/clusters")
-def wallets_clusters_csv_base():
+def wallets_clusters_get():
     block = request.args.get("block")
-    return get_clustering()
+    return loader.get_wallets_clusters(block)
 
 @app.route("/graph")
 def graph():

@@ -138,8 +138,8 @@ d3.json(`/graph?types=${checkboxes.toArray().join(',')}`).then(function(data) {
 // Manage filters change custom event
 function reload() {
   simulation.stop()
-  d3.selectAll("circle.graph-circle").transition().duration(500).attr("r", 0).remove()
-  d3.selectAll("line.graph-line").transition().duration(500).attr("opacitiy", 0).remove()
+  d3.selectAll("circle.graph-circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
+  d3.selectAll("line.graph-line").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("opacitiy", 0).remove()
 
   d3.json(`/graph?&block=${d3.select(".bar.selected").data()[0].hash}&min=${min}&max=${max}&types=${checkboxes.toArray().join(',')}`).then(function(data) {
     display_graph(data)

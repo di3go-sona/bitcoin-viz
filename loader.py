@@ -1,7 +1,6 @@
 import json
-from re import match
 from database import Block, engine, Session
-from sqlalchemy import text, func
+import wallet_clustering 
 import pandas as pd 
 
 ### Graph endpoints
@@ -132,7 +131,7 @@ def get_blocks(plot, min, max, types):
 def get_wallets(block_hash):
 
     query = f"""
-    SELECT block_hash,addr,pca_1 as x ,pca_2 as y
+    SELECT block_hash, addr, pca_1 as x ,pca_2 as y
     FROM 
         (SELECT DISTINCT transactions.block_hash, inputs.address
         FROM inputs, transactions
@@ -145,24 +144,38 @@ def get_wallets(block_hash):
         outputs.transaction_id == transactions.id
         ) AS io, wallets_pca
     WHERE 
-    io.block_hash == '{block_hash}'
-        AND 
-    io.address == wallets_pca.addr
+        io.block_hash == '{block_hash}'
+            AND 
+        io.address == wallets_pca.addr
+    ORDER BY block_hash, wallets_pca.addr
     """
 
-    data = pd.read_sql_query(query, engine)
+    wallets_df = pd.read_sql_query(query, engine)
+    if wallet_clustering.available:
+        block_wallets_df, _ = wallet_clustering.get_clustering(block_hash)
+        print(block_wallets_df)
+        wallets_df.loc[:, 'cluster'] = block_wallets_df['cluster'].to_numpy()
+    print(wallets_df)
     res = {
-        "min_x" : data['x'].min(),
-        "max_x" : data['x'].max(),
-        "min_y" : data['y'].min(),
-        "max_y" : data['y'].max(),
-        "csv" : data.to_csv()
+        "min_x" : wallets_df['x'].min(),
+        "max_x" : wallets_df['x'].max(),
+        "min_y" : wallets_df['y'].min(),
+        "max_y" : wallets_df['y'].max(),
+        "csv" : wallets_df.to_csv()
     }
 
 
     return json.dumps(res)
 
 
+def get_wallets_clusters(block=None):
+    if block is None:
+        block = get_last_block()
+    block_wallets_df, last = wallet_clustering.get_clustering(block)
+    return {
+        "last": last,
+        "csv" : block_wallets_df.to_csv()
+        }
 
 def get_last_block():
 
