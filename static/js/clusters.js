@@ -5,17 +5,33 @@ var wallets = {
     margin_bottom : 30,
     margin_left : 45,
     init : false,
+    clusters_map: null,
+    transform : null, 
 
     interval_function: null,
     update_clustering : function(){
         d3.json(`/wallets/clusters?block=${timeline.current_block}`).then( function(data_wrapper) {
             console.log("Updating clustering")
-
+            
             data = d3.csvParse(data_wrapper.csv, d3.autoType)
+            
+            wallets.clusters_map = new Map(data.map( d => {return [d.addr, d.cluster]}));
 
             wallets.svg.selectAll("circle")
                 .data(data)
-                .style("fill",function (d) { return wallets.color(d.cluster || null); }) 
+                .style("fill",function (d) { return wallets.color( d.cluster  || 0 ); }) 
+
+            
+            // TODO: update graph circles
+            d3.selectAll('.graph-circle')
+                .filter(d => {return d.type == "wa"})
+                    .attr("fill", 
+                            d => {return wallets.color(wallets.clusters_map.get(d.id))})
+            d3.selectAll('.graph-circle')
+                .filter(d => {return d.type == "tx"})
+                    .attr("fill", 
+                            "white")
+                
 
             if ( data_wrapper.last ) {
                 console.log("Ended clustering")
@@ -53,8 +69,9 @@ var wallets = {
     },
 
     handleZoom: function(e) {
-        wallets.dots_g.attr('transform', e.transform);
-
+        wallets.dots_g.attr('transform', e.transform).selectAll('circle')
+                    .attr("r", 3 / e.transform.k);
+        wallets.transform_k = e.transform.k
         // update axes with these new boundaries
         wallets.x_axis.call(d3.axisBottom(e.transform.rescaleX(wallets.x)))
         wallets.y_axis.call(d3.axisLeft(e.transform.rescaleY(wallets.y)))
@@ -104,7 +121,7 @@ var wallets = {
                 .join("circle")
                     .attr("cx", function (d) { return wallets.x(d.x); } )
                     .attr("cy", function (d) { return wallets.y(d.y); } )
-                    .attr("r", 1.5)
+                    .attr("r", 3 / ( wallets.transform_k || 1) )
                     .style("fill",function (d) { return wallets.color(d.cluster || null); })
 
             if (wallets.interval_function){
@@ -126,7 +143,7 @@ $(document).ready(function(){
     wallets.clustering_button = $('#start-clustering-button')
     wallets.color = d3.scaleOrdinal()
         .domain([null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        .range(d3.schemeSet3);
+        .range(d3.schemeSet2);
 
     
 

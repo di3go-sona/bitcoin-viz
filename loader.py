@@ -27,7 +27,7 @@ def get_outputs_links(transactions_ids):
 
 def get_transactions_ids(block, min, max, types_clause):
     query = f"""
-                SELECT DISTINCT(transactions_ext.id) as id, (n_inputs+n_outputs) as n_links
+                SELECT transactions_ext.id as id, (n_inputs+n_outputs) as n_links
                 FROM transactions_ext
                 WHERE transactions_ext.block_hash = '{block}' AND transactions_ext.tot_value >= {min} AND transactions_ext.tot_value <= {max} {types_clause}
                 LIMIT 500
@@ -46,8 +46,7 @@ def get_weigthed_graph(block, min, max, types):
     local_types = "('%s')" % "', '".join(types.split(","))
     types_clause = f"AND transactions_ext.type in {local_types}"
 
-    local_block = block if block is not None else '00000000000000000006467d4ceb7b301b679b4146d7269a270091e5c82938aa'
-
+    local_block = block or get_last_block()
     transactions_ids_tuples = get_transactions_ids(local_block, local_min, local_max, types_clause)
     transactions_ids = [tx[0] for tx in transactions_ids_tuples]
 
@@ -64,7 +63,7 @@ def get_weigthed_graph(block, min, max, types):
 
     in_json    = [{"id": in_addr, "type": "wa"}    for in_addr in inputs_address]
     out_json   = [{"id": out_addr, "type": "wa"}   for out_addr in outputs_address]
-
+    print(f'marco {(len(inputs_address) + len(outputs_address))}')
     return {'nodes':  tx_json + in_json + out_json, 'links':  inputs_links_json + outputs_links_json}
 
 ### Filters endpoints
@@ -136,25 +135,27 @@ def get_wallets(block_hash):
         (SELECT DISTINCT transactions.block_hash, inputs.address
         FROM inputs, transactions
         WHERE 
-        inputs.transaction_id == transactions.id
+        inputs.transaction_id = transactions.id
         UNION 
         SELECT DISTINCT transactions.block_hash, outputs.address
         FROM outputs, transactions
         WHERE 
-        outputs.transaction_id == transactions.id
+        outputs.transaction_id = transactions.id
         ) AS io, wallets_pca
     WHERE 
-        io.block_hash == '{block_hash}'
+        io.block_hash = '{block_hash}'
             AND 
-        io.address == wallets_pca.addr
+        io.address = wallets_pca.addr
     ORDER BY block_hash, wallets_pca.addr
     """
 
     wallets_df = pd.read_sql_query(query, engine)
     if wallet_clustering.available:
         block_wallets_df, _ = wallet_clustering.get_clustering(block_hash)
+       
         # print(block_wallets_df)
         wallets_df.loc[:, 'cluster'] = block_wallets_df['cluster'].to_numpy()
+    print(f'diego {len(wallets_df)}')
     # print(wallets_df)
     res = {
         "min_x" : wallets_df['x'].min(),
@@ -169,7 +170,7 @@ def get_wallets(block_hash):
 
 
 def get_wallets_clusters(block=None):
-    if block is None:
+    if block is None or block == 'null':
         block = get_last_block()
     block_wallets_df, last = wallet_clustering.get_clustering(block)
     return {

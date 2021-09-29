@@ -16,15 +16,18 @@ def process_blocks():
     pca = PCA(2, )
     pca_coords = pca.fit_transform(X)
 
-    tsne = TSNE(2, verbose=True, )
-    tsne_coords = tsne.fit_transform(X)
+    # tsne = TSNE(2, verbose=True, )
+    # tsne_coords = tsne.fit_transform(X)
 
 
     addrs = np.expand_dims(_addrs,1)
 
 
-    pca_data = np.concatenate([addrs, pca_coords, tsne_coords ], axis=1)
-    pca_data_df = pd.DataFrame(pca_data, columns=['addr', 'pca_1', 'pca_2', 'tsne_1', 'tsne_2'])
+    # pca_data = np.concatenate([addrs, pca_coords, tsne_coords ], axis=1)
+    # pca_data_df = pd.DataFrame(pca_data, columns=['addr', 'pca_1', 'pca_2', 'tsne_1', 'tsne_2'])
+
+    pca_data = np.concatenate([addrs, pca_coords ], axis=1)
+    pca_data_df = pd.DataFrame(pca_data, columns=['addr', 'pca_1', 'pca_2'])
 
     pca_data_df.to_sql('wallets_pca', engine,  if_exists='replace', index=False )
 
