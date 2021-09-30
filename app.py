@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request, redirect
 import json 
 import loader
-from wallet_clustering import * 
+
+
 app = Flask(__name__, static_folder='static/', template_folder='templates/')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 @app.route("/")
 def index():
-    return render_template('index.html.j2')
+    n_clusters = 2 if loader.wallet_clustering.last_centroids is None else loader.wallet_clustering.last_centroids.shape[0]
+    return render_template('index.html.j2', n_clusters=n_clusters)
 
 @app.route("/range_bitcoin")
 def range_bitcoin():
@@ -32,7 +34,7 @@ def wallets_get():
 @app.route("/wallets/clusters/start")
 def wallets_clusters_start():
     n_clusters = int(request.args.get("n_clusters"))
-    start_clustering(n_clusters)
+    loader.wallet_clustering.start_clustering(n_clusters)
 
     return "Clustering Ended"
 

@@ -53,6 +53,8 @@ var wallets = {
         wallets.clustering_button.find(".spinner").show()
         wallets.clustering_button.find(".text").hide()
 
+        
+
 
         n_clusters = $("#n_clusters").val()
         xhttp = new XMLHttpRequest()
