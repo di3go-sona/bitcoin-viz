@@ -56,6 +56,11 @@ const tm_y_axis = tm_svg_y.append("g")
 
 var radio_button = $("input[type='radio']:checked")
 
+// tm_tooltip
+var tm_tooltip = d3.select('body').append('div')
+                               .attr('class', 'tooltip')
+                               .style("opacity", 0)
+
 // Parse the Data
 d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray().join(',')}`).then( function(data) {
 
@@ -115,35 +120,29 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
 
    tm_y_axis.call(d3.axisLeft(tm_yScale))
 
-   // tooltip
-   var tooltip = d3.select('body').append('div')
-                                  .attr('class', 'tooltip')
-                                  .style("opacity", 0)
-
    // Bars
    bar_wrappers = tm_svg_x.selectAll(".wrapper-bar")
                   .data(data)
                   .join("g")
                   .attr("class", "wrapper-bar")
                   .attr("style", "cursor: pointer;")
-                  .on("mouseover", function(event, d) {
-                     tooltip.style('opacity', '.8')
-                  })
+                  // .on("mouseover", function(event, d) {
+                  // })
                   .on("mousemove", function(event, d) {
-                     tooltip_width = tooltip.node().getBoundingClientRect().width
-                     tooltip_height = tooltip.node().getBoundingClientRect().height
+                     tooltip_width = tm_tooltip.node().getBoundingClientRect().width
+                     tooltip_height = tm_tooltip.node().getBoundingClientRect().height
 
-                     tooltip.transition()
+                     tm_tooltip.transition()
                      .duration(200)
-                     .style("opacity", 1)
+                     .style("opacity", 0.9)
                      .style("color", "white")
-                     tooltip
+                     tm_tooltip
                      .html(`Block num: ${d.height}<hr class="my-1 bg-white"/>${$("input[type='radio']:checked").next().text()}: ${d.bar_value}`)
                      .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
                      .style('top', (event.pageY - tooltip_height - 2) + 'px')
                   })
                   .on("mouseout", function(event, d) {
-                     tooltip.transition()
+                     tm_tooltip.transition()
                         .duration(500)
                         .style("opacity", 0)
                   })

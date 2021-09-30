@@ -63,7 +63,7 @@ def get_weigthed_graph(block, min, max, types):
 
     in_json    = [{"id": in_addr, "type": "wa"}    for in_addr in inputs_address]
     out_json   = [{"id": out_addr, "type": "wa"}   for out_addr in outputs_address]
-    print(f'marco {(len(inputs_address) + len(outputs_address))}')
+    # print(f'marco {(len(inputs_address) + len(outputs_address))}')
     return {'nodes':  tx_json + in_json + out_json, 'links':  inputs_links_json + outputs_links_json}
 
 ### Filters endpoints
@@ -125,7 +125,19 @@ def get_blocks(plot, min, max, types):
         res = ["hash,height,time,bar_value"] + ["{},{},{},{}".format(*b) for b in blocks]
         return "\n".join(res)
 
+
 ### Wallets endpoints
+
+def get_wallet(wallet_id):
+    query = f"""
+                SELECT * FROM wallets WHERE wallets.addr = '{wallet_id}'
+             """
+
+    with Session(engine) as db:
+        cur = db.execute(query)
+        res = cur.fetchone()
+        return dict(res)
+
 
 def get_wallets(block_hash):
 
@@ -155,7 +167,7 @@ def get_wallets(block_hash):
        
         # print(block_wallets_df)
         wallets_df.loc[:, 'cluster'] = block_wallets_df['cluster'].to_numpy()
-    print(f'diego {len(wallets_df)}')
+    # print(f'diego {len(wallets_df)}')
     # print(wallets_df)
     res = {
         "min_x" : wallets_df['x'].min(),
@@ -164,7 +176,6 @@ def get_wallets(block_hash):
         "max_y" : wallets_df['y'].max(),
         "csv" : wallets_df.to_csv()
     }
-
 
     return json.dumps(res)
 
@@ -179,7 +190,6 @@ def get_wallets_clusters(block=None):
         }
 
 def get_last_block():
-
     query = """
             SELECT  hash
             FROM blocks
@@ -193,4 +203,4 @@ def get_last_block():
         return last_block
 
 
-get_wallets("000000000000000000014752692f020bbbb1dabb18dd753bca1a60c9c8b92941")
+# get_wallet("000000000000000000014752692f020bbbb1dabb18dd753bca1a60c9c8b92941")
