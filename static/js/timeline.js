@@ -150,7 +150,7 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
                      clicked_bar = d3.select("#rect_"+d.hash)
                      prev_clicked = d3.select(".bar.selected")
 
-                     if (clicked_bar.node() != prev_clicked.node()) {
+                     if (clicked_bar.node() != prev_clicked.node() && !loading_graph) {
                         prev_clicked.transition().duration(200).attr("opacity", 0.15)
                         prev_clicked.node().classList.remove("selected")
                         tm_svg_x.select("#selection_rect_"+prev_clicked.data()[0].hash).remove()
@@ -265,5 +265,4 @@ $("input[type='radio']").click(function(){
 // Manage filters change custom event
 $(document).on("filters_changed", function(event) {
    load_data(min, max, checkboxes)
-   setTimeout(function(){ $(document).trigger("load_new_graph") }, 1000);
 });
