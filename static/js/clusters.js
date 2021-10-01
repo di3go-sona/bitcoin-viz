@@ -1,9 +1,9 @@
 // create a global wallets variable where to store things
 var wallets = {
     margin_top : 5,
-    margin_right :15, 
-    margin_bottom : 30,
-    margin_left : 45,
+    margin_right :5, 
+    margin_bottom : 5,
+    margin_left : 5,
     init : false,
     clusters_map: null,
     transform : null, 
@@ -75,8 +75,8 @@ var wallets = {
                     .attr("r", 3 / e.transform.k);
         wallets.transform_k = e.transform.k
         // update axes with these new boundaries
-        wallets.x_axis.call(d3.axisBottom(e.transform.rescaleX(wallets.x)))
-        wallets.y_axis.call(d3.axisLeft(e.transform.rescaleY(wallets.y)))
+        wallets.x_axis.call(d3.axisTop(e.transform.rescaleX(wallets.x)))
+        wallets.y_axis.call(d3.axisRight(e.transform.rescaleY(wallets.y)))
     
     },
     //Read the data
@@ -97,20 +97,24 @@ var wallets = {
             // Add X axis
             wallets.x = d3.scaleLinear()
                 .domain([data_wrapper.min_x,data_wrapper.max_x])
+                
                 .range([ 0, wallets.width ]);
             
             // Add Y axis
             wallets.y = d3.scaleLinear()
                 .domain([data_wrapper.min_y,data_wrapper.max_y])
+                
                 .range([ wallets.height, 0]);
 
             if (!wallets.init ){
                 wallets.x_axis = wallets.svg.append("g")
                     .attr("transform", `translate(0, ${wallets.height})`)
-                    .call(d3.axisBottom(wallets.x));
+                    .call(d3.axisTop(wallets.x))
+                    .call(g => g.select(".domain").attr("display", "none"))
 
                 wallets.y_axis = wallets.svg.append("g")
-                    .call(d3.axisLeft(wallets.y));
+                    .call(d3.axisRight(wallets.y))
+                    .call(g => g.select(".domain").attr("display", "none"))
                 
                 wallets.init = true
             } 
