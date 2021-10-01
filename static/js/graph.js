@@ -103,7 +103,7 @@ drag = simulation => {
 }
 
 var simulation
-
+var loading_graph = true
 // g_tooltip
 var g_tooltip = d3.select('body').append('div')
                                .attr('class', 'tooltip graph-tooltip')
@@ -205,6 +205,8 @@ function display_graph(data) {
       .attr("cx", d => d.x)
       .attr("cy", d => d.y);
   });
+
+  loading_graph = false
 } 
 
 d3.json(`/graph?types=${checkboxes.toArray().join(',')}`).then(function(data) {
@@ -212,17 +214,22 @@ d3.json(`/graph?types=${checkboxes.toArray().join(',')}`).then(function(data) {
 });
 
 // Manage filters change custom event
-function reload() {
+function remove_graph() {
   simulation.stop()
   d3.selectAll("circle.graph-circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
   d3.selectAll("line.graph-line").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("opacitiy", 0).remove()
+}
 
+function reload() {
+  loading_graph = true
   d3.json(`/graph?&block=${d3.select(".bar.selected").data()[0].hash}&min=${min}&max=${max}&types=${checkboxes.toArray().join(',')}`).then(function(data) {
-    display_graph(data)
+    remove_graph()
+    // display_graph(data)
+    setTimeout(function(){ display_graph(data) }, 1000);
   });
 }
 
-$(document).on("load_new_graph", function(event) {
+$(document).on("filters_changed", function(event) {
   reload()
 });
 
