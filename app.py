@@ -13,8 +13,11 @@ def before_request_func():
 
 @app.route("/")
 def index():
-    
     return render_template('index.html.j2', n_clusters=g.n_clusters)
+
+@app.route("/graph_header")
+def graph_header():
+    return render_template('graph_header.html.j2', n_clusters=g.n_clusters)
 
 @app.route("/range_bitcoin")
 def range_bitcoin():

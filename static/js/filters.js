@@ -60,7 +60,7 @@ d3.json("/range_bitcoin").then( function(data) {
     mergeTooltips(slider_container, 15, ' - ');
 });
 
-$("#apply-button").click(function() {
+$("#filters-apply-button").click(function() {
     var range = slider_container.noUiSlider.get()
     var min_selected = parseFloat(range[0])
     var max_selected = parseFloat(range[1])
@@ -74,7 +74,7 @@ $("#apply-button").click(function() {
     }
 })
 
-$("#reset-button").click(function() {
+$("#filters-reset-button").click(function() {
     min = slider_container.noUiSlider.options['range']['min'][0]
     max = slider_container.noUiSlider.options['range']['max'][0]
     slider_container.noUiSlider.set([min, max])

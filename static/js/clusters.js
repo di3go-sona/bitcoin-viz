@@ -146,15 +146,14 @@ $(document).ready(function(){
 
     wallets.width  = $('#clusters-container').width() - wallets.margin_left - wallets.margin_right;
     wallets.height = $('#clusters-container').height() - wallets.margin_top - wallets.margin_bottom;
-    wallets.clustering_button = $('#start-clustering-button')
+    wallets.clustering_button = $('#clusters-start-button')
     wallets.color = d3.scaleOrdinal()
         .domain([null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
         .range(d3.schemeSet2);
 
-    $(".clustered .legend-dot.wallets").each(function(){
-        n = parseInt($(this).attr("cluster"))
-        $(this).css("background-color",wallets.color(n));
-    })
+    update_graph_header_colors()
+
+
 
     
 

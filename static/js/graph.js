@@ -43,7 +43,11 @@ function update_colors(){
 
 
 
-$(document).on("clusters_changed",update_colors )
+$(document).on("clusters_changed",function(){
+  update_colors()
+  $(".graph-header").load('/graph_header')
+  update_graph_header_colors()
+} )
 
 const graph_svg = d3.select("#graph-container")
                     .append("svg")
