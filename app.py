@@ -23,13 +23,15 @@ def timeline_csv_base():
     types = request.args.get("types")
     return loader.get_blocks(plot, min, max, types)
 
+@app.route("/wallet")
+def wallet_get():
+    wallet_id = request.args.get("wallet_id")
+    return json.dumps(loader.get_wallet(wallet_id))
+
 @app.route("/wallets")
 def wallets_get():
     block = request.args.get("block", loader.get_last_block())
     return loader.get_wallets(block)
-
-
-
 
 @app.route("/wallets/clusters/start")
 def wallets_clusters_start():

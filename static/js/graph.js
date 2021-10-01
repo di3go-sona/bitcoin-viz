@@ -69,6 +69,11 @@ drag = simulation => {
 
 var simulation
 
+// g_tooltip
+var g_tooltip = d3.select('body').append('div')
+                               .attr('class', 'tooltip graph-tooltip')
+                               .style("opacity", 0)
+
 function distance_link(d) {
 
   var n_links = 0
@@ -116,8 +121,41 @@ function display_graph(data) {
                       .join("circle")
                         .attr("class", "graph-circle")
                         .attr("r", 5)
+                        .attr("cursor", "pointer")
                         .attr("fill", n => node_color(n))
-                        .call(drag(simulation));
+                        .call(drag(simulation))
+                        .on("mouseover", function(event, d) {
+                          g_tooltip.html(`${d['type'] === 'wa'? 'Address' : 'Tx id'}: ${d['id']}`)
+                          if (d['type'] === 'wa') {
+                            d3.json(`/wallet?wallet_id=${d['id']}`).then(function(data) {
+                              g_tooltip.html(g_tooltip.html() + 
+                              `
+                                <hr class='my-1 bg-white'/>
+                                <li class='mb-1'>Avg vin/vout : ${data['avg_vin'].toFixed(6)}/${data['avg_vout'].toFixed(6)}</li>
+                                <li class='mb-1'>Var vin/vout : ${data['var_vin'].toFixed(6)}/${data['var_vout'].toFixed(6)}</li>
+                                <li class='mb-1'>Deg in/out   : ${data['deg_in']}/${data['deg_out']}</li>
+                                <li class='mb-1'>Unique deg in/out : ${data['unique_deg_in']}/${data['unique_deg_out']}</li>
+                                <li class='mb-1'>Total txs : ${data['total_txs']}</li>
+                                <li class='mb-1'>Received value : ${data['received_value']}</li>
+                                <li class='mb-1'>Balance : ${data['balance']}</li>`)
+                            })
+                          }
+                       })
+                       .on("mousemove", function(event, d) {
+                          tooltip_width = g_tooltip.node().getBoundingClientRect().width
+                          tooltip_height = g_tooltip.node().getBoundingClientRect().height
+                          g_tooltip.transition()
+                          .duration(200)
+                          .style('opacity', 0.9)
+                          .style("color", "white")
+                          .style('left', (event.pageX < ($("#graph-container").offset()['left'] + $("#graph-container").width()/2)) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
+                          .style('top', (event.pageY < ($("#graph-container").offset()['top'] + $("#graph-container").height()/2)) ? (event.pageY + 15)+'px' : (event.pageY - tooltip_height - 2)+'px')
+                       })
+                       .on("mouseout", function(event, d) {
+                          g_tooltip.transition()
+                             .duration(500)
+                             .style("opacity", 0)
+                       });
   
   simulation.on("tick", () => {
     links
