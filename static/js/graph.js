@@ -163,16 +163,19 @@ function display_graph(data) {
                           g_tooltip.html(`${d['type'] === 'wa'? 'Address' : 'Tx id'}: ${d['id']}`)
                           if (d['type'] === 'wa') {
                             d3.json(`/wallet?wallet_id=${d['id']}`).then(function(data) {
-                              g_tooltip.html(g_tooltip.html() + 
-                              `
-                                <hr class='my-1 bg-white'/>
-                                <li class='mb-1'>Avg vin/vout : ${data['avg_vin'].toFixed(6)}/${data['avg_vout'].toFixed(6)}</li>
-                                <li class='mb-1'>Var vin/vout : ${data['var_vin'].toFixed(6)}/${data['var_vout'].toFixed(6)}</li>
-                                <li class='mb-1'>Deg in/out   : ${data['deg_in']}/${data['deg_out']}</li>
-                                <li class='mb-1'>Unique deg in/out : ${data['unique_deg_in']}/${data['unique_deg_out']}</li>
-                                <li class='mb-1'>Total txs : ${data['total_txs']}</li>
-                                <li class='mb-1'>Received value : ${data['received_value']}</li>
-                                <li class='mb-1'>Balance : ${data['balance']}</li>`)
+                              if (!g_tooltip.html().includes("<hr")) {
+                                g_tooltip.html(g_tooltip.html() + 
+                                ` <hr class='my-1 bg-white'/>
+                                  <ul style="padding-left: 2px; margin: 0; list-style-type: none;">
+                                  <li class='mb-1'>Avg vin/vout : ${data['avg_vin'].toFixed(6)}/${data['avg_vout'].toFixed(6)}</li>
+                                  <li class='mb-1'>Var vin/vout : ${data['var_vin'].toFixed(6)}/${data['var_vout'].toFixed(6)}</li>
+                                  <li class='mb-1'>Deg in/out   : ${data['deg_in']}/${data['deg_out']}</li>
+                                  <li class='mb-1'>Unique deg in/out : ${data['unique_deg_in']}/${data['unique_deg_out']}</li>
+                                  <li class='mb-1'>Total txs : ${data['total_txs']}</li>
+                                  <li class='mb-1'>Received value : ${data['received_value']}</li>
+                                  <li class='mb-1'>Balance : ${data['balance']}</li>
+                                  </ul>`)
+                              }
                             })
                           }
                        })
