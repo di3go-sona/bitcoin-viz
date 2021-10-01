@@ -50,10 +50,11 @@ const graph_svg = d3.select("#graph-container")
                       .attr("height", graph_height)
                     .append("g")
 
-// Add zoom stuff
+  // Add zoom stuff
 function handleZoom(e) {
   graph_svg.attr('transform', e.transform);
 }
+
 let zoom = d3.zoom().on('zoom', handleZoom);
 d3.select("#graph-container > svg").call(zoom);
 
@@ -189,6 +190,8 @@ function display_graph(data) {
                              .duration(500)
                              .style("opacity", 0)
                        });
+  
+  graph_svg.call(zoom.transform, d3.zoomIdentity.translate((graph_width-0.7*graph_width)/2, (graph_height-0.7*graph_height)/2).scale(0.7))
   
   simulation.on("tick", () => {
     links
