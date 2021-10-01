@@ -38,11 +38,6 @@ function update_colors(){
   console.log(wallets.color)
 }
 
-
-
-
-
-
 $(document).on("clusters_changed",function(){
   update_colors()
   $(".graph-header").load('/graph_header')
@@ -209,7 +204,7 @@ function display_graph(data) {
   loading_graph = false
 } 
 
-d3.json(`/graph?types=${checkboxes.toArray().join(',')}`).then(function(data) {
+d3.json(`/graph?types=${checkboxes.join(',')}`).then(function(data) {
   display_graph(data)
 });
 
@@ -222,7 +217,7 @@ function remove_graph() {
 
 function reload() {
   loading_graph = true
-  d3.json(`/graph?&block=${d3.select(".bar.selected").data()[0].hash}&min=${min}&max=${max}&types=${checkboxes.toArray().join(',')}`).then(function(data) {
+  d3.json(`/graph?&block=${d3.select(".bar.selected").data()[0].hash}&min=${min}&max=${max}&types=${checkboxes.join(',')}`).then(function(data) {
     remove_graph()
     // display_graph(data)
     setTimeout(function(){ display_graph(data) }, 1000);

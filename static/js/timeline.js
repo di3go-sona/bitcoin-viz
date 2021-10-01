@@ -62,7 +62,7 @@ var tm_tooltip = d3.select('body').append('div')
                                .style("opacity", 0)
 
 // Parse the Data
-d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray().join(',')}`).then( function(data) {
+d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.join(',')}`).then( function(data) {
 
    //Setting labels color
    last_hour = null
@@ -236,7 +236,7 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
 
 function load_data(min, max, checkboxes) {
 
-   d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&min=${min}&max=${max}&types=${checkboxes.toArray().join(',')}`).then( function(data) {
+   d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&min=${min}&max=${max}&types=${checkboxes.join(',')}`).then( function(data) {
       tm_svg_y.select("text.label-y").transition().duration(500).text($(radio_button).next().text())
       tm_yScale.domain([0, d3.max(data.map(b => parseInt(b.bar_value)))])
       bar_wrappers.data(data)
