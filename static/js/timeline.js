@@ -14,11 +14,11 @@ const timeline = {
    current_block: null
 }
 // Set the dimensions and margins of the timeline
-const tm_margin_y = {top: 40, right: 0, bottom: 60, left: 20},
+const tm_margin_y = {top: 30, right: 0, bottom: 40, left: 20},
       tm_width_y  = (70 - tm_margin_y.left - tm_margin_y.right),
       tm_height_y = (window.innerHeight/4.5 - tm_margin_y.top - tm_margin_y.bottom)
 
-const tm_margin_x = {top: 40, right: 20, bottom: 60, left: 0},
+const tm_margin_x = {top: 30, right: 20, bottom: 40, left: 0},
       tm_width_x  = ($("#col-x-axis").width() - tm_width_y - tm_margin_y.left - tm_margin_x.right),
       tm_height_x = (window.innerHeight/4.5 - tm_margin_x.top - tm_margin_x.bottom)
 
