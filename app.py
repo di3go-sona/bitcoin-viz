@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, g
 import json 
 import loader
 
@@ -6,10 +6,15 @@ import loader
 app = Flask(__name__, static_folder='static/', template_folder='templates/')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
+@app.before_request
+def before_request_func():
+    g.n_clusters = None if loader.wallet_clustering.last_centroids is None else loader.wallet_clustering.last_centroids.shape[0]
+
+
 @app.route("/")
 def index():
-    n_clusters = 2 if loader.wallet_clustering.last_centroids is None else loader.wallet_clustering.last_centroids.shape[0]
-    return render_template('index.html.j2', n_clusters=n_clusters)
+    
+    return render_template('index.html.j2', n_clusters=g.n_clusters)
 
 @app.route("/range_bitcoin")
 def range_bitcoin():

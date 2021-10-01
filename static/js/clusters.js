@@ -22,15 +22,7 @@ var wallets = {
                 .style("fill",function (d) { return wallets.color( d.cluster  || 0 ); }) 
 
             
-            // TODO: update graph circles
-            d3.selectAll('.graph-circle')
-                .filter(d => {return d.type == "wa"})
-                    .attr("fill", 
-                            d => {return wallets.color(wallets.clusters_map.get(d.id))})
-            d3.selectAll('.graph-circle')
-                .filter(d => {return d.type == "tx"})
-                    .attr("fill", 
-                            "white")
+
                 
 
             if ( data_wrapper.last ) {
@@ -42,6 +34,7 @@ var wallets = {
                 clearInterval(wallets.interval_function)
                 wallets.interval_function = null;
             }
+            $(document).trigger("clusters_changed")
             
         })
 
@@ -92,7 +85,14 @@ var wallets = {
 
         endpoint.then( function(data_wrapper) {
 
+
             data = d3.csvParse(data_wrapper.csv)
+            if (data_wrapper.n_clusters){
+                console.log(data_wrapper.n_clusters)
+                wallets.clusters_map = new Map(data.map( d => {return [d.addr, d.cluster]}));
+            }
+            
+
 
             // Add X axis
             wallets.x = d3.scaleLinear()
@@ -106,7 +106,7 @@ var wallets = {
                 
                 .range([ wallets.height, 0]);
 
-            if (!wallets.init ){
+            if (! (wallets.x_axis &&  wallets.y_axis) ){
                 wallets.x_axis = wallets.svg.append("g")
                     .attr("transform", `translate(0, ${wallets.height})`)
                     .call(d3.axisTop(wallets.x))
@@ -150,6 +150,11 @@ $(document).ready(function(){
     wallets.color = d3.scaleOrdinal()
         .domain([null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
         .range(d3.schemeSet2);
+
+    $(".clustered .legend-dot.wallets").each(function(){
+        n = parseInt($(this).attr("cluster"))
+        $(this).css("background-color",wallets.color(n));
+    })
 
     
 

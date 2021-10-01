@@ -2,7 +2,7 @@ import json
 from database import Block, engine, Session
 import wallet_clustering 
 import pandas as pd 
-
+from flask import g
 ### Graph endpoints
 
 def get_inputs_links(transactions_ids):
@@ -140,7 +140,6 @@ def get_wallet(wallet_id):
 
 
 def get_wallets(block_hash):
-
     query = f"""
     SELECT block_hash, addr, pca_1 as x ,pca_2 as y
     FROM 
@@ -174,6 +173,7 @@ def get_wallets(block_hash):
         "max_x" : wallets_df['x'].max(),
         "min_y" : wallets_df['y'].min(),
         "max_y" : wallets_df['y'].max(),
+        "n_clusters" : g.n_clusters,
         "csv" : wallets_df.to_csv()
     }
 

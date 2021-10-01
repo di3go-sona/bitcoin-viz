@@ -133,12 +133,19 @@ input[type="radio"] {
     display: inline-block;
   }
 
+  .legend-dot {
+    border:1px solid white ;
+  }
+
   .legend-dot.wallets {
     background-color: #69b3a2;
   }
 
   .legend-dot.transactions {
     background-color: #de6262;
+  }
+  .clustered .legend-dot.transactions {
+    background-color: black;
   }
 
   .tick-text {

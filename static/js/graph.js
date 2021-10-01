@@ -7,12 +7,43 @@ const graph_margin = {top: 0, right: 0, bottom: 0, left: 0},
       graph_height = $("#graph-container").height() - graph_margin.top - graph_margin.bottom
 
 function node_color(node){
+  // console.log(node)
+  // console.log(wallets.clusters_map)
+  if (wallets.clusters_map){
+    return  clusters_color(node)
+  } else {
+    return default_color(node)
+  }  
+}
+
+function clusters_color(node) {
+  if (node.type == "wa"){
+    return wallets.color(wallets.clusters_map.get(node.id))
+  } else {
+    return "white"
+  }  
+}
+
+function default_color(node) {
   if (node.type == "wa"){
     return  "#69b3a2"
   } else {
     return "#de6262"
   }  
 }
+
+function update_colors(){
+  d3.selectAll('.graph-circle').attr("fill", d => {return node_color(d)})
+  console.log(wallets.clusters_map)
+  console.log(wallets.color)
+}
+
+
+
+
+
+
+$(document).on("clusters_changed",update_colors )
 
 const graph_svg = d3.select("#graph-container")
                     .append("svg")

@@ -37,7 +37,7 @@
 
             <div class="row mx-0" style="margin-top: 2.5rem; margin-bottom: 2rem">
               <div class="col-3" style="font-size: 15px">
-                Range bitcoins
+                Tx mBTC
               </div>
               <div class="col-8 mr-auto ml-auto">
                 <div id="no-ui-slider" class="slider-styled"></div>
@@ -46,7 +46,7 @@
 
             <div class="row mx-0" style="margin-top: 1rem;">
               <div class="col-3" style="font-size: 15px">
-                Type of transactions
+                Tx type
               </div>
               <div class="col-9 text-center">
                   <div class="form-group form-check-inline m-0">
@@ -77,13 +77,10 @@
             <div class="container-fluid row d-flex m-0 pt-2" style="align-items: center;">
               Clusters of wallets
                 <select class="ml-auto" id="n_clusters">
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
+                  <option {{ "selected" if g.n_clusters is none}} disabled >-</option>
+                {% for i in [ 2, 3, 4, 5, 6, 7, 8, 9, 10] %}
+                  <option {{ "selected" if g.n_clusters == i }} value="{{i}}">{{i}}</option>
+                {% endfor %}
                 </select> 
               <button type="button" class="btn-sm btn-info ml-auto" id="start-clustering-button">
                 
@@ -112,22 +109,9 @@
         {# Graph #}
         <div id="graph-card" class="card card-styled m-2" style="border-radius: .25rem .25rem .25rem .25rem;">
           <div class="card-body p-0" style="display: table;">
-            <div class="container-fluid row d-flex m-0 pt-2 px-3" style="align-items: center;">
-              Directed graph visualization
-              <div class="ml-auto" style="display: table;" role="group">
-                <div class="form-check form-check-inline mx-0" style="display: display:table-cell; vertical-align:middle;">
-                  <span class="legend-dot wallets mx-2"></span>
-                  <label class="form-check-label" style="margin-top: .2rem">Wallets</label>
-                </div>
-                <div class="form-check form-check-inline mr-0 ml-2" style="display: display:table-cell; vertical-align:middle;">
-                  <span class="legend-dot transactions mx-2"></span>
-                  <label class="form-check-label" style="margin-top: .2rem">Transactions</label>
-                </div>
-              </div>
-            </div>
+            {% include 'graph_header.html.j2' %}
             <hr class="mb-0 mx-2"/>
-            <div id="graph-container" class="h-100" style="display: table-row;">
-            </div>
+            <div id="graph-container" class="h-100" style="display: table-row;"></div>
           </div>
         </div>
 
@@ -144,11 +128,11 @@
           <div class="row mx-1 d-flex justify-content-center">
             <div class="form-check form-check-inline">
               <input class="form-check-input radio_transactions" type="radio" name="inlineRadioOptions" id="radio_transactions" value="transactions" checked>
-              <label class="form-check-label" for="radio_transactions">Transactions</label>
+              <label class="form-check-label" for="radio_transactions">#Tx</label>
             </div>
             <div class="form-check form-check-inline">
               <input class="form-check-input radio_bitcoins" type="radio" name="inlineRadioOptions" id="radio_bitcoins" value="bitcoins">
-              <label class="form-check-label" for="radio_bitcoins">Tot. Bitcoins</label>
+              <label class="form-check-label" for="radio_bitcoins">BTC</label>
             </div>
             <div class="form-check form-check-inline">
               <input class="form-check-input radio_size" type="radio" name="inlineRadioOptions" id="radio_size" value="size">
