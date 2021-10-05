@@ -4,7 +4,7 @@ var wallets = {
     margin_right : 5, 
     margin_bottom : 5,
     margin_left : 5,
-    init : false,
+
     clusters_map: null,
     transform : null, 
 
@@ -17,7 +17,7 @@ var wallets = {
             
             wallets.clusters_map = new Map(data.map( d => {return [d.addr, d.cluster]}));
 
-            wallets.svg.selectAll("circle")
+            wallets.dots_g.selectAll("circle")
                 .data(data)
                 .style("fill",function (d) { return wallets.color( d.cluster  || 0 ); }) 
 
@@ -60,9 +60,12 @@ var wallets = {
         wallets.x_axis.call(d3.axisTop(new_XScale))
         wallets.y_axis.call(d3.axisRight(new_yScale))
 
-        var circles = wallets.dots_g.selectAll('circle')
-        circles.attr("cx", function (d) { return new_XScale(d.x) })
-        circles.attr("cy", function (d) { return new_yScale(d.y) })
+        wallets.dots_g.attr("transform", e.transform)
+
+        wallets.dots_g.selectAll('circle')
+            .attr("r", 3 / ( e.transform.k || 1) )
+        // circles.attr("cx", function (d) { return new_XScale(d.x) })
+        // circles.attr("cy", function (d) { return new_yScale(d.y) })
     },
 
     //Read the data
@@ -100,8 +103,7 @@ var wallets = {
                 wallets.y_axis = wallets.svg.append("g")
                     .call(d3.axisRight(wallets.y))
                     .call(g => g.select(".domain").attr("display", "none"))
-                
-                wallets.init = true
+
             } 
 
             wallets.dots_g
@@ -135,6 +137,17 @@ $(document).ready(function(){
         .append("svg")
             .attr("width", wallets.width + wallets.margin_left + wallets.margin_right)
             .attr("height", wallets.height + wallets.margin_top + wallets.margin_bottom)
+    
+    wallets.svg.append("clipPath")
+        .attr("id", "clip-clusters")
+        .append("rect")
+            .attr("x", wallets.margin_left + 25)
+            .attr("y", wallets.margin_top)
+            .attr("width", wallets.width - wallets.margin_left - wallets.margin_right - 15)
+            .attr("height", wallets.height - wallets.margin_top - wallets.margin_bottom - 15)
+
+    wallets.dots_g = wallets.svg.append("g")
+
 
     const zoom = d3.zoom()
         .scaleExtent([1, 10])
@@ -142,15 +155,17 @@ $(document).ready(function(){
         .translateExtent([[wallets.margin_left, -Infinity], [wallets.width - wallets.margin_right, Infinity]])
         .on("zoom", wallets.handleZoom);
 
-    wallets.svg.append("clipPath")
-        .attr("id", "clip-clusters")
-        .append("rect")
-            .attr("x", wallets.margin_left + 25)
-            .attr("y", wallets.margin_top)
-            .attr("width", wallets.width - wallets.margin_left - wallets.margin_right - 15)
-            .attr("height", wallets.height - wallets.margin_top - wallets.margin_bottom - 15); // -25 because i dont't know why there is a margin top
+    // wallets.svg.select("clipPath")
+    //     .attr("id", "clip-clusters")
+    //     .append("rect")
+    //         .attr("x", wallets.margin_left + 25)
+    //         .attr("y", wallets.margin_top)
+    //         .attr("width", wallets.width - wallets.margin_left - wallets.margin_right - 15)
+    //         .attr("height", wallets.height - wallets.margin_top - wallets.margin_bottom - 15); // -25 because i dont't know why there is a margin top
 
-    wallets.dots_g = wallets.svg.append('g').attr("clip-path", "url(#clip-clusters)")
+    wallets.dots_g = wallets.svg.append('g')
+        .attr("clip-path", "url(#clip-clusters)")
+        .append("g")
 
     wallets.clustering_button.click(wallets.start_clustering)
     wallets.load_wallets(null)
