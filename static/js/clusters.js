@@ -8,8 +8,20 @@ var wallets = {
     clusters_map: new Map(),
     transform : null, 
 
-    interval_function: null,
+    update_clustering_timer: null,
+
+    stop_clustering : function(){
+        console.log("Ended clustering")
+                wallets.clustering_start_button.prop("disabled",false)
+                wallets.clustering_start_button.find(".spinner").hide()
+                wallets.clustering_start_button.find(".text").show()
+
+                clearInterval(wallets.update_clustering_timer)
+                wallets.update_clustering_timer = null;
+    },
+
     update_clustering : function(){
+        if (!wallets.update_clustering_timer) {return}
         d3.json(`/wallets/clusters?block=${timeline.current_block}`).then( function(data_wrapper) {
             console.log("Updating clustering")
             
@@ -21,13 +33,7 @@ var wallets = {
                 .style("fill",function (d) { return wallets.color( d.cluster ); }) 
 
             if ( data_wrapper.last ) {
-                console.log("Ended clustering")
-                wallets.clustering_button.prop("disabled",false)
-                wallets.clustering_button.find(".spinner").hide()
-                wallets.clustering_button.find(".text").show()
-
-                clearInterval(wallets.interval_function)
-                wallets.interval_function = null;
+                wallets.stop_clustering();
             }
             $(document).trigger("clustering_changed")
         })
@@ -35,24 +41,47 @@ var wallets = {
 
     start_clustering: function(){
         console.log("Start clustering")
-        wallets.clustering_button.prop("disabled",true)
-        wallets.clustering_button.find(".spinner").show()
-        wallets.clustering_button.find(".text").hide()
+        wallets.clustering_start_button.prop("disabled",true)
+        wallets.clustering_start_button.find(".spinner").show()
+        wallets.clustering_start_button.find(".text").hide()
 
         n_clusters = $("#n_clusters").val()
         xhttp = new XMLHttpRequest()
         xhttp.open("GET", `/wallets/clusters/start?n_clusters=${n_clusters}`, true);
         xhttp.send();
 
+        // Update colors
         wallets.svg.selectAll("circle")
                 .data(data)
                 .style("fill",function (d) { return wallets.color(null); }) 
         
-        wallets.interval_function = setInterval(wallets.update_clustering, 300)
+        // Start polling for updates
+        wallets.update_clustering_timer = setInterval(wallets.update_clustering, 300)
         setTimeout(d => {$(document).trigger("clustering_started")}, 300)
 
         
         
+    },
+
+    reset_clustering: function(){
+        console.log("Reset clustering")
+
+        xhttp = new XMLHttpRequest()
+        xhttp.open("GET", `/wallets/clusters/reset`, false);
+        xhttp.send();
+
+        // Stop polling for updates
+        wallets.stop_clustering()
+
+        // Update colors
+        wallets.svg.selectAll("circle")
+            .data(data)
+            .style("fill",function (d) { return wallets.color(null); }) 
+        
+        // Remove saved colors
+        wallets.clusters_map = new Map()
+
+        $(document).trigger("clustering_reset")
     },
 
     handleZoom: function(e) {
@@ -118,8 +147,8 @@ var wallets = {
                     .attr("cluster", function (d) { d.cluster || null })
                     .style("fill",function (d) { return wallets.color(d.cluster || null ) })
 
-            if (wallets.interval_function){
-                wallets.interval_function = setInterval(wallets.update_clustering, 300)
+            if (wallets.update_clustering_timer){
+                wallets.update_clustering_timer = setInterval(wallets.update_clustering, 300)
             }
         })
 
@@ -158,10 +187,14 @@ var wallets = {
 $(document).ready(function(){
     wallets.width  = $('#clusters-container').width() - wallets.margin_left - wallets.margin_right;
     wallets.height = $('#clusters-container').height() - wallets.margin_top - wallets.margin_bottom;
-    wallets.clustering_button = $('#clusters-start-button')
 
+    wallets.clustering_start_button = $('#clusters-start-button')
+    wallets.clustering_reset_button = $('#clusters-reset-button')
 
-    update_graph_header_colors()
+    wallets.clustering_start_button.click(wallets.start_clustering)
+    wallets.clustering_reset_button.click(wallets.reset_clustering)
+
+    update_graph_header()
 
     // append the svg object to the body of the page
     wallets.svg = d3.select("#clusters-container")
@@ -186,26 +219,19 @@ $(document).ready(function(){
         .translateExtent([[wallets.margin_left, -Infinity], [wallets.width - wallets.margin_right, Infinity]])
         .on("zoom", wallets.handleZoom);
 
-    // wallets.svg.select("clipPath")
-    //     .attr("id", "clip-clusters")
-    //     .append("rect")
-    //         .attr("x", wallets.margin_left + 25)
-    //         .attr("y", wallets.margin_top)
-    //         .attr("width", wallets.width - wallets.margin_left - wallets.margin_right - 15)
-    //         .attr("height", wallets.height - wallets.margin_top - wallets.margin_bottom - 15); // -25 because i dont't know why there is a margin top
-
     wallets.dots_g = wallets.svg.append('g')
         .attr("clip-path", "url(#clip-clusters)")
         .append("g")
 
-    wallets.clustering_button.click(wallets.start_clustering)
+
+
     wallets.load_wallets(null)
 
     wallets.svg.call(d3.zoom().on('zoom', wallets.handleZoom))
 
     $(document).on("block_changed", function(event) {
-        if (wallets.interval_function){
-            clearInterval(wallets.interval_function)
+        if (wallets.update_clustering_timer){
+            clearInterval(wallets.update_clustering_timer)
         }
         wallets.dots_g.selectAll("circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
         wallets.load_wallets(timeline.current_block)

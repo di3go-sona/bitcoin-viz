@@ -45,8 +45,13 @@ def wallets_get():
 def wallets_clusters_start():
     n_clusters = int(request.args.get("n_clusters"))
     loader.wallet_clustering.start_clustering(n_clusters)
-
     return "Clustering Ended"
+
+@app.route("/wallets/clusters/reset")
+def wallets_clusters_reset():
+
+    loader.wallet_clustering.reset_clustering()
+    return "Clustering Reset"
 
 @app.route("/wallets/clusters")
 def wallets_clusters_get():

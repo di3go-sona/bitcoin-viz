@@ -4,7 +4,7 @@ function toggle_cluster_wrapper(e) {
     $(e.target).css("background-color", wallets.color(n))
 }
 
-function update_graph_header_colors(){
+function update_graph_header(){
     $(".clustered .legend-dot.wallets").each(function(){
         n = $(this).attr("cluster")
         $(this).css("background-color", wallets.color(n));
@@ -15,9 +15,9 @@ function update_graph_header_colors(){
 function update_n_clusters_selector(event) {
     v = $(event.target).val()
     if (parseInt(v)){
-        wallets.clustering_button.prop("disabled",false)
+        wallets.clustering_start_button.prop("disabled",false)
     } else {
-        wallets.clustering_button.prop("disabled",true)
+        wallets.clustering_start_button.prop("disabled",true)
     }
 }
 

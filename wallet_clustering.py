@@ -34,9 +34,17 @@ wallets_df = pd.read_sql_query(query, engine)
 wallets_data = wallets_df.drop(['addr', 'block_hash'], axis=1).to_numpy()
 X = sklearn.preprocessing.normalize(wallets_data)
 
+
+def reset_clustering():
+    global last_centroids, available, centroids_queue
+    last_centroids, available, centroids_queue = (None, False,  Queue(100))
+
+
+
 def start_clustering(n_clusters):
     global last_centroids, available
-    last_centroids, available = (None, False)
+    reset_clustering()
+    
     for n in range(100):
         print(n)
 
@@ -61,8 +69,12 @@ def start_clustering(n_clusters):
 
 def get_clustering(block):
     global last_centroids, available
-    if centroids_queue.empty() and  available:
-        centroids, last = (last_centroids, True)
+
+    if centroids_queue.empty():
+        if available:
+            centroids, last = (last_centroids, True)
+        else:
+            raise Exception("No available nor running clustering ")
     else:
         centroids, last = centroids_queue.get(True, 2)
     block_selector = wallets_df.block_hash == block

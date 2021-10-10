@@ -16,6 +16,7 @@ function node_color(node){
 
 function clusters_color(node) {
   if (node.type == "wa"){
+
     return wallets.color(node.cluster)
   } else {
     return "black"
@@ -32,18 +33,21 @@ function default_color(node) {
 
 function update_colors(){
   d3.selectAll('.graph-circle').attr("fill", d => {return node_color(d)})
-
 }
 
 $(document).on("clustering_changed",function(){
-  new_data = graph_svg.selectAll('circle').data().map(d=> ({ ...d, cluster: wallets.clusters_map.get(d.id) }))
-  graph_svg.selectAll('circle').data(new_data)
+  graph_svg.selectAll('circle').data().forEach(d=> {  d.cluster = wallets.clusters_map.get(d.id) });
   update_colors() 
 } )
 
+$(document).on("clustering_reset",function(){
+  $(".graph-header").parent().load('/graph_header', null, update_graph_header)
+  update_colors() 
+} )
+
+
 $(document).on("clustering_started",function(){
-  $(".graph-header").parent().load('/graph_header', null, update_graph_header_colors)
-  
+  $(".graph-header").parent().load('/graph_header', null, update_graph_header)
 } )
 
 const graph_svg = d3.select("#graph-container")
