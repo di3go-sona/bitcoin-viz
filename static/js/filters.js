@@ -1,6 +1,7 @@
 var min = 0, max = 0
 var slider_container = document.getElementById('no-ui-slider')
-var checkboxes = $("input[type='checkbox']:checked").map(function(i) { return $(this).attr("id") })
+var checkboxes = $("input[type='checkbox'].filters-checkbox:checked").map(function(i) { return $(this).attr("id") }).toArray()
+var timeout_filters = null
 
 d3.json("/range_bitcoin").then( function(data) {
     min = data["min"]
@@ -58,13 +59,33 @@ d3.json("/range_bitcoin").then( function(data) {
     });
 
     mergeTooltips(slider_container, 15, ' - ');
+    // For resetting filters
+    slider_container.noUiSlider.on('set.one', set_timer_reset_filters);
 });
 
+function set_timer_reset_filters() {
+    if (timeout_filters != null) window.clearTimeout(timeout_filters)
+    timeout_filters = window.setTimeout(reset_filters, 10000)
+}
+
+function reset_filters() {
+    // Slider
+    slider_container.noUiSlider.set([min, max])
+    // Checkboxes
+    prev_checked = checkboxes.length > 0 ? '#' + checkboxes.join(',#') : ""
+    $(prev_checked).prop("checked", true)
+    $("input[type='checkbox'].filters-checkbox").not(prev_checked).prop("checked", false)
+}
+
+// For resetting filters
+$("input[type='checkbox'].filters-checkbox").click(set_timer_reset_filters);
+
 $("#filters-apply-button").click(function() {
+    if (timeout_filters != null) window.clearTimeout(timeout_filters)
     var range = slider_container.noUiSlider.get()
     var min_selected = parseFloat(range[0])
     var max_selected = parseFloat(range[1])
-    var checkboxes_selected = $("input[type='checkbox']:checked").map(function(i) { return $(this).attr("id") })
+    var checkboxes_selected = $("input[type='checkbox']:checked").map(function(i) { return $(this).attr("id") }).toArray()
 
     if (min_selected != min || max_selected != max || !($(checkboxes_selected).not(checkboxes).length === 0 && $(checkboxes).not(checkboxes_selected).length === 0)) {
         min = min_selected
@@ -79,8 +100,9 @@ $("#filters-reset-button").click(function() {
     max = slider_container.noUiSlider.options['range']['max'][0]
     slider_container.noUiSlider.set([min, max])
     
-    $("input[type='checkbox']").prop('checked', true)
-    checkboxes = $("input[type='checkbox']:checked").map(function(i) { return $(this).attr("id") })
+    c = $("input[type='checkbox'].filters-checkbox")
+    c.prop('checked', true)
+    checkboxes = c.map(function(i) { return $(this).attr("id") }).toArray()
 
     $(document).trigger("filters_changed")
 })

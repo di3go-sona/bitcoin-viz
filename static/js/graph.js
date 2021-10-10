@@ -38,11 +38,6 @@ function update_colors(){
   console.log(wallets.color)
 }
 
-
-
-
-
-
 $(document).on("clusters_changed",function(){
   update_colors()
  
@@ -59,10 +54,11 @@ const graph_svg = d3.select("#graph-container")
                       .attr("height", graph_height)
                     .append("g")
 
-// Add zoom stuff
+  // Add zoom stuff
 function handleZoom(e) {
   graph_svg.attr('transform', e.transform);
 }
+
 let zoom = d3.zoom().on('zoom', handleZoom);
 d3.select("#graph-container > svg").call(zoom);
 
@@ -199,6 +195,8 @@ function display_graph(data) {
                              .style("opacity", 0)
                        });
   
+  graph_svg.call(zoom.transform, d3.zoomIdentity.translate((graph_width-0.7*graph_width)/2, (graph_height-0.7*graph_height)/2).scale(0.7))
+  
   simulation.on("tick", () => {
     links
       .attr("x1", d => d.source.x)
@@ -213,7 +211,7 @@ function display_graph(data) {
   loading_graph = false
 } 
 
-d3.json(`/graph?types=${checkboxes.toArray().join(',')}`).then(function(data) {
+d3.json(`/graph?types=${checkboxes.join(',')}`).then(function(data) {
   display_graph(data)
 });
 
@@ -226,7 +224,7 @@ function remove_graph() {
 
 function reload() {
   loading_graph = true
-  d3.json(`/graph?&block=${d3.select(".bar.selected").data()[0].hash}&min=${min}&max=${max}&types=${checkboxes.toArray().join(',')}`).then(function(data) {
+  d3.json(`/graph?&block=${d3.select(".bar.selected").data()[0].hash}&min=${min}&max=${max}&types=${checkboxes.join(',')}`).then(function(data) {
     remove_graph()
     // display_graph(data)
     setTimeout(function(){ display_graph(data) }, 1000);

@@ -14,11 +14,11 @@ const timeline = {
    current_block: null
 }
 // Set the dimensions and margins of the timeline
-const tm_margin_y = {top: 30, right: 0, bottom: 40, left: 20},
+const tm_margin_y = {top: 35, right: 0, bottom: 40, left: 20},
       tm_width_y  = (70 - tm_margin_y.left - tm_margin_y.right),
       tm_height_y = (window.innerHeight/4.5 - tm_margin_y.top - tm_margin_y.bottom)
 
-const tm_margin_x = {top: 30, right: 20, bottom: 40, left: 0},
+const tm_margin_x = {top: 35, right: 20, bottom: 40, left: 0},
       tm_width_x  = ($("#col-x-axis").width() - tm_width_y - tm_margin_y.left - tm_margin_x.right),
       tm_height_x = (window.innerHeight/4.5 - tm_margin_x.top - tm_margin_x.bottom)
 
@@ -62,7 +62,7 @@ var tm_tooltip = d3.select('body').append('div')
                                .style("opacity", 0)
 
 // Parse the Data
-d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray().join(',')}`).then( function(data) {
+d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.join(',')}`).then( function(data) {
 
    //Setting labels color
    last_hour = null
@@ -236,7 +236,7 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.toArray()
 
 function load_data(min, max, checkboxes) {
 
-   d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&min=${min}&max=${max}&types=${checkboxes.toArray().join(',')}`).then( function(data) {
+   d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&min=${min}&max=${max}&types=${checkboxes.join(',')}`).then( function(data) {
       tm_svg_y.select("text.label-y").transition().duration(500).text($(radio_button).next().text())
       tm_yScale.domain([0, d3.max(data.map(b => parseInt(b.bar_value)))])
       bar_wrappers.data(data)
