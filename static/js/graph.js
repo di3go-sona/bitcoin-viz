@@ -20,7 +20,7 @@ function clusters_color(node) {
   if (node.type == "wa"){
     return wallets.color(wallets.clusters_map.get(node.id))
   } else {
-    return "white"
+    return "black"
   }  
 }
 
@@ -45,8 +45,12 @@ function update_colors(){
 
 $(document).on("clusters_changed",function(){
   update_colors()
-  $(".graph-header").load('/graph_header')
-  update_graph_header_colors()
+ 
+} )
+
+$(document).on("clustering_started",function(){
+  $(".graph-header").load('/graph_header', null, update_graph_header_colors)
+  
 } )
 
 const graph_svg = d3.select("#graph-container")

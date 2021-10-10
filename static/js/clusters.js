@@ -19,7 +19,7 @@ var wallets = {
 
             wallets.svg.selectAll("circle")
                 .data(data)
-                .style("fill",function (d) { return wallets.color( d.cluster  || 0 ); }) 
+                .style("fill",function (d) { return wallets.color( d.cluster ); }) 
 
             
 
@@ -47,7 +47,7 @@ var wallets = {
         wallets.clustering_button.find(".text").hide()
 
         
-
+        
 
         n_clusters = $("#n_clusters").val()
         xhttp = new XMLHttpRequest()
@@ -60,6 +60,9 @@ var wallets = {
         
         
         wallets.interval_function = setInterval(wallets.update_clustering, 300)
+        wallets.interval_function = setTimeout(d => {$(document).trigger("clustering_started")}, 300)
+
+        
         
     },
 
@@ -128,7 +131,8 @@ var wallets = {
                     .attr("cx", function (d) { return wallets.x(d.x); } )
                     .attr("cy", function (d) { return wallets.y(d.y); } )
                     .attr("r", 3 / ( wallets.transform_k || 1) )
-                    .style("fill",function (d) { return wallets.color(d.cluster || null); })
+                    .attr("cluster", function (d) { d.cluster || null })
+                    .style("fill",function (d) { return wallets.color(d.cluster || null ) })
 
             if (wallets.interval_function){
                 wallets.interval_function = setInterval(wallets.update_clustering, 300)
@@ -137,6 +141,29 @@ var wallets = {
 
         })
 
+    },
+    deselected_clusters : [],
+
+    select_cluster : function(cluster_id) {
+        d3.selectAll('circle')
+            .filter( d => {return d.cluster == cluster_id })
+            .style('fill', d => { return d3.color(this.color(d.cluster)).darker(-3) } )
+        this.deselected_clusters.push(cluster_id)
+    },
+
+    deselect_cluster : function(cluster_id) {
+        d3.selectAll('circle')
+            .filter( d => {return d.cluster == cluster_id })
+            .style('fill', d => { return d3.color(this.color(d.cluster)).darker(3) } )
+        this.deselected_clusters = this.deselected_clusters.filter(d => {return d != cluster_id})
+    },
+
+    toggle_cluster : function(cluster_id){
+        if (this.deselected_clusters.includes(cluster_id)) {
+            this.select_cluster(cluster_id)
+        } else {
+            this.deselect_cluster(cluster_id)
+        }
     }
 
 }

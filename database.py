@@ -1,5 +1,4 @@
 from sqlalchemy import create_engine
-from sqlalchemy import MetaData
 from sqlalchemy import Table, Column, Integer, String, Float, TIMESTAMP
 from sqlalchemy.orm import declarative_base, Session, relationship
 from sqlalchemy.sql.schema import ForeignKey
