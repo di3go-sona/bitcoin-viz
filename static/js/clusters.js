@@ -5,7 +5,7 @@ var wallets = {
     margin_bottom : 5,
     margin_left : 5,
 
-    clusters_map: null,
+    clusters_map: new Map(),
     transform : null, 
 
     interval_function: null,
@@ -14,8 +14,7 @@ var wallets = {
             console.log("Updating clustering")
             
             data = d3.csvParse(data_wrapper.csv, d3.autoType)
-            
-            wallets.clusters_map = new Map(data.map( d => {return [d.addr, d.cluster]}));
+            wallets.clusters_map = new Map(data.map( d => {return [d.addr, parseInt(d.cluster)]}));
 
             wallets.dots_g.selectAll("circle")
                 .data(data)
@@ -128,36 +127,40 @@ var wallets = {
     },
     deselected_clusters : [],
 
-    select_cluster : function(cluster_id) {
-        d3.selectAll('circle')
-            .filter( d => {return d.cluster == cluster_id })
-            .style('fill', d => { return d3.color(this.color(d.cluster)).darker(-3) } )
-        this.deselected_clusters.push(cluster_id)
-    },
-
-    deselect_cluster : function(cluster_id) {
-        d3.selectAll('circle')
-            .filter( d => {return d.cluster == cluster_id })
-            .style('fill', d => { return d3.color(this.color(d.cluster)).darker(3) } )
-        this.deselected_clusters = this.deselected_clusters.filter(d => {return d != cluster_id})
-    },
-
     toggle_cluster : function(cluster_id){
         if (this.deselected_clusters.includes(cluster_id)) {
-            this.select_cluster(cluster_id)
+            this.deselected_clusters = this.deselected_clusters.filter(d => {return d != cluster_id})
         } else {
-            this.deselect_cluster(cluster_id)
+            this.deselected_clusters = this.deselected_clusters.concat(cluster_id)
+        }
+
+        d3.selectAll('circle')
+            .filter( d => {return d.cluster == cluster_id })
+            .style('fill', d => { return this.color(d.cluster) } )
+    },
+
+    _color :  d3.scaleOrdinal()
+        .domain([null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        .range(d3.schemeSet2),
+
+    color: function(cluster_id){
+        c =  this._color(cluster_id)
+
+        if (this.deselected_clusters.includes(cluster_id) ){
+           return d3.color(c).darker(3) 
+        } else {
+            return c 
         }
     }
 }
+
+
 
 $(document).ready(function(){
     wallets.width  = $('#clusters-container').width() - wallets.margin_left - wallets.margin_right;
     wallets.height = $('#clusters-container').height() - wallets.margin_top - wallets.margin_bottom;
     wallets.clustering_button = $('#clusters-start-button')
-    wallets.color = d3.scaleOrdinal()
-        .domain([null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        .range(d3.schemeSet2);
+
 
     update_graph_header_colors()
 

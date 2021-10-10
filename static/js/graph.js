@@ -18,7 +18,7 @@ function node_color(node){
 
 function clusters_color(node) {
   if (node.type == "wa"){
-    return wallets.color(wallets.clusters_map.get(node.id))
+    return wallets.color(node.cluster)
   } else {
     return "black"
   }  
@@ -44,7 +44,7 @@ $(document).on("clusters_changed",function(){
 } )
 
 $(document).on("clustering_started",function(){
-  $(".graph-header").load('/graph_header', null, update_graph_header_colors)
+  $(".graph-header").parent().load('/graph_header', null, update_graph_header_colors)
   
 } )
 
@@ -131,6 +131,7 @@ function distance_link(d) {
 }
 
 function display_graph(data) {
+  data.nodes = data.nodes.map(d=> ({ ...d, cluster: wallets.clusters_map.get(d.id) }))
   
   simulation = d3.forceSimulation(data.nodes)
                         .force("link", d3.forceLink(data.links).id(d => d.id).distance(d => distance_link(d)))
@@ -225,9 +226,12 @@ function remove_graph() {
 function reload() {
   loading_graph = true
   d3.json(`/graph?&block=${d3.select(".bar.selected").data()[0].hash}&min=${min}&max=${max}&types=${checkboxes.join(',')}`).then(function(data) {
+
+   
+
     remove_graph()
     // display_graph(data)
-    setTimeout(function(){ display_graph(data) }, 1000);
+    setTimeout(function(){ display_graph(data) }, globals.BLOCK_CHANGED_DELAY);
   });
 }
 
