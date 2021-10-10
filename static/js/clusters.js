@@ -29,7 +29,7 @@ var wallets = {
                 clearInterval(wallets.interval_function)
                 wallets.interval_function = null;
             }
-            $(document).trigger("clusters_changed")
+            $(document).trigger("clustering_changed")
         })
     },
 
@@ -49,7 +49,7 @@ var wallets = {
                 .style("fill",function (d) { return wallets.color(null); }) 
         
         wallets.interval_function = setInterval(wallets.update_clustering, 300)
-        wallets.interval_function = setTimeout(d => {$(document).trigger("clustering_started")}, 300)
+        setTimeout(d => {$(document).trigger("clustering_started")}, 300)
 
         
         
@@ -83,7 +83,6 @@ var wallets = {
         endpoint.then( function(data_wrapper) {
             data = d3.csvParse(data_wrapper.csv)
             if (data_wrapper.n_clusters){
-                console.log(data_wrapper.n_clusters)
                 wallets.clusters_map = new Map(data.map( d => {return [d.addr, d.cluster]}));
             }
 
@@ -211,4 +210,6 @@ $(document).ready(function(){
         wallets.dots_g.selectAll("circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
         wallets.load_wallets(timeline.current_block)
      });
+
+    $(document).trigger("wallets-loaded")
 })

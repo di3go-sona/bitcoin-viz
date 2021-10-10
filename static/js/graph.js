@@ -7,9 +7,7 @@ const graph_margin = {top: 0, right: 0, bottom: 0, left: 0},
       graph_height = $("#graph-container").height() - graph_margin.top - graph_margin.bottom
 
 function node_color(node){
-  // console.log(node)
-  // console.log(wallets.clusters_map)
-  if (wallets.clusters_map){
+  if (wallets.clusters_map.size > 0){
     return  clusters_color(node)
   } else {
     return default_color(node)
@@ -34,13 +32,13 @@ function default_color(node) {
 
 function update_colors(){
   d3.selectAll('.graph-circle').attr("fill", d => {return node_color(d)})
-  console.log(wallets.clusters_map)
-  console.log(wallets.color)
+
 }
 
-$(document).on("clusters_changed",function(){
-  update_colors()
- 
+$(document).on("clustering_changed",function(){
+  new_data = graph_svg.selectAll('circle').data().map(d=> ({ ...d, cluster: wallets.clusters_map.get(d.id) }))
+  graph_svg.selectAll('circle').data(new_data)
+  update_colors() 
 } )
 
 $(document).on("clustering_started",function(){
