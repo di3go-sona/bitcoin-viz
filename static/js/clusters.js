@@ -23,10 +23,11 @@ var wallets = {
     update_clustering : function(){
         if (!wallets.update_clustering_timer) {return}
         d3.json(`/wallets/clusters?block=${timeline.current_block}`).then( function(data_wrapper) {
+
             console.log("Updating clustering")
             
             data = d3.csvParse(data_wrapper.csv, d3.autoType)
-            wallets.clusters_map = new Map(data.map( d => {return [d.addr, parseInt(d.cluster)]}));
+            wallets.clusters_map = new Map(data.map( d => {return [d.addr, d.cluster]}));
 
             wallets.dots_g.selectAll("circle")
                 .data(data)
@@ -81,6 +82,9 @@ var wallets = {
         // Remove saved colors
         wallets.clusters_map = new Map()
 
+        // Remove selected clusters
+        wallets.deselected_clusters = []
+
         $(document).trigger("clustering_reset")
     },
 
@@ -96,8 +100,6 @@ var wallets = {
 
         wallets.dots_g.selectAll('circle')
             .attr("r", 3 / ( e.transform.k || 1) )
-        // circles.attr("cx", function (d) { return new_XScale(d.x) })
-        // circles.attr("cy", function (d) { return new_yScale(d.y) })
     },
 
     //Read the data
@@ -156,15 +158,18 @@ var wallets = {
     deselected_clusters : [],
 
     toggle_cluster : function(cluster_id){
+        console.log( `Toggle cluster ${cluster_id}`)
         if (this.deselected_clusters.includes(cluster_id)) {
             this.deselected_clusters = this.deselected_clusters.filter(d => {return d != cluster_id})
         } else {
-            this.deselected_clusters = this.deselected_clusters.concat(cluster_id)
+            this.deselected_clusters.push(cluster_id.toString(), parseInt(cluster_id))
         }
 
-        d3.selectAll('circle')
+        wallets.dots_g.selectAll('circle')
             .filter( d => {return d.cluster == cluster_id })
-            .style('fill', d => { return this.color(d.cluster) } )
+            .style('fill', d => { return wallets.color(d.cluster) } )
+
+        $(document).trigger("clustering_changed")
     },
 
     _color :  d3.scaleOrdinal()
@@ -172,9 +177,9 @@ var wallets = {
         .range(d3.schemeSet2),
 
     color: function(cluster_id){
-        c =  this._color(cluster_id)
+        c =  wallets._color(cluster_id)
 
-        if (this.deselected_clusters.includes(cluster_id) ){
+        if (wallets.deselected_clusters.includes(cluster_id) ){
            return d3.color(c).darker(3) 
         } else {
             return c 
@@ -212,30 +217,36 @@ $(document).ready(function(){
 
     wallets.dots_g = wallets.svg.append("g")
 
-
-    const zoom = d3.zoom()
-        .scaleExtent([1, 10])
-        .extent([[wallets.margin_left, 0], [wallets.width - wallets.margin_right, wallets.height]])
-        .translateExtent([[wallets.margin_left, -Infinity], [wallets.width - wallets.margin_right, Infinity]])
-        .on("zoom", wallets.handleZoom);
-
     wallets.dots_g = wallets.svg.append('g')
         .attr("clip-path", "url(#clip-clusters)")
         .append("g")
 
+
+    d3.zoom()
+        .scaleExtent([1, 10])
+        .extent([[wallets.margin_left, 0], [wallets.width - wallets.margin_right, wallets.height]])
+        .translateExtent([[wallets.margin_left, -Infinity], [wallets.width - wallets.margin_right, Infinity]])
+        .on("zoom", wallets.handleZoom);
 
 
     wallets.load_wallets(null)
 
     wallets.svg.call(d3.zoom().on('zoom', wallets.handleZoom))
 
-    $(document).on("block_changed", function(event) {
-        if (wallets.update_clustering_timer){
+    $(document).on("block_changed", function() {
+        
+        if (wallets.update_clustering_timer) {
             clearInterval(wallets.update_clustering_timer)
         }
-        wallets.dots_g.selectAll("circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
+
+        wallets.dots_g.selectAll("circle")
+            .transition()
+                .duration(globals.BLOCK_CHANGED_DELAY)
+                .attr("r", 0)
+                .remove()
+
         wallets.load_wallets(timeline.current_block)
      });
 
-    $(document).trigger("wallets-loaded")
+    $(document).trigger("wallets_loaded")
 })
