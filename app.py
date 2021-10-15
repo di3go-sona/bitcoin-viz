@@ -10,7 +10,6 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 def before_request_func():
     g.n_clusters = None if loader.wallet_clustering.last_centroids is None else loader.wallet_clustering.last_centroids.shape[0]
 
-
 @app.route("/")
 def index():
     return render_template('index.html.j2', n_clusters=g.n_clusters)
@@ -61,7 +60,8 @@ def wallets_clusters_get():
 @app.route("/graph")
 def graph():
     block = request.args.get("block")
-    min = request.args.get("min")
-    max = request.args.get("max")
-    types = request.args.get("types")
-    return json.dumps(loader.get_weigthed_graph(block, min, max, types))
+    # min = request.args.get("min")
+    # max = request.args.get("max")
+    # types = request.args.get("types")
+    # return json.dumps(loader.get_weigthed_graph(block, min, max, types))
+    return json.dumps(loader.get_weigthed_graph(block))

@@ -13,6 +13,7 @@ function format_date(date, isFull) {
 const timeline = {
    current_block: null
 }
+
 // Set the dimensions and margins of the timeline
 const tm_margin_y = {top: 35, right: 0, bottom: 40, left: 20},
       tm_width_y  = (70 - tm_margin_y.left - tm_margin_y.right),

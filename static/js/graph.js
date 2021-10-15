@@ -45,7 +45,6 @@ $(document).on("clustering_reset",function(){
   update_colors() 
 })
 
-
 $(document).on("clustering_started",function(){
   $(".graph-header").parent().load('/graph_header', null, update_graph_header)
 })
@@ -72,8 +71,8 @@ graph_svg.append("defs").selectAll("marker")
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", 28)
         .attr("refY", 0)
-        .attr("markerWidth", 3)
-        .attr("markerHeight", 3)
+        .attr("markerWidth", 5)
+        .attr("markerHeight", 5)
         .attr("orient", "auto") 
         .append("path")
         .attr("fill", "#999")
@@ -130,7 +129,7 @@ function distance_link(d) {
   }                    
 }
 
-function saveGraphPosition(nodes) {
+function saveGraphPosition(block_id, nodes) {
   // For all browser
   var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
   var open = indexedDB.open("NodesPositionsByBlock", 4);
@@ -140,7 +139,6 @@ function saveGraphPosition(nodes) {
   };
 
   open.onsuccess = function() {
-    console.log("Success opening NodesPositionsByBlock db");
     var db = open.result;
     var tx = db.transaction("Nodes", "readwrite");
     var store = tx.objectStore("Nodes");
@@ -149,7 +147,7 @@ function saveGraphPosition(nodes) {
     var nodes_dict = nodes.nodes().reduce((nodes_dict, e) => (nodes_dict[e.getAttribute('node_id')] = [parseFloat(e.getAttribute('cx')), parseFloat(e.getAttribute('cy'))], nodes_dict), {});
 
     // Add some data
-    store.put({block_id: timeline.current_block, nodes: nodes_dict});
+    store.put({block_id: block_id, nodes: nodes_dict});
 
     // Close the db when the transaction is done
     tx.oncomplete = function() {
@@ -158,7 +156,7 @@ function saveGraphPosition(nodes) {
    };
 }
 
-function retrieveGraphPosition() {
+function retrieveGraphPosition(block_id) {
   return new Promise (function(resolve) {
     // For all browser
     var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
@@ -176,12 +174,11 @@ function retrieveGraphPosition() {
     };
 
     open.onsuccess = function() {
-      console.log("Success opening NodesPositionsByBlock db");
       var db = open.result;
       var tx = db.transaction("Nodes", "readwrite");
       var store = tx.objectStore("Nodes");
-
-      var value = store.get(timeline.current_block);
+      
+      var value = store.get(block_id);
 
       value.onsuccess = function() {
         if (value.result)
@@ -199,32 +196,73 @@ function retrieveGraphPosition() {
   });
 }
 
+// Apply filters to graph
+function apply_fitlers_graph() {
+
+  var local_nodes = d3.selectAll(nodes).nodes();
+  var local_links = d3.selectAll(links).nodes();
+
+  var txs = local_nodes.filter(n => $(n).attr("node_type") == "tx");
+  var wallets = local_nodes.filter(n => $(n).attr("node_type") == "wa");
+
+  var txs_show = txs.filter(t => $(t).attr("tx_tot_value") >= min && $(t).attr("tx_tot_value") <= max && checkboxes.includes($(t).attr("tx_type")));
+  var txs_show_ids = txs_show.map(t => $(t).attr("node_id"));
+  var txs_hide = txs.filter(t => !txs_show.includes(t));
+
+  var links_show = local_links.filter(l => txs_show_ids.includes($(l).attr("source")) || txs_show_ids.includes($(l).attr("target")));
+  var links_hide = local_links.filter(l => !links_show.includes(l));
+  var links_show_ids_source = links_show.map(l => $(l).attr("source"));
+  var links_show_ids_target = links_show.map(l => $(l).attr("target"));
+
+  var wallets_show = wallets.filter(w => links_show_ids_source.includes($(w).attr("node_id")) || links_show_ids_target.includes($(w).attr("node_id")))
+  var wallets_hide = wallets.filter(w => !links_show_ids_source.includes($(w).attr("node_id")) && !links_show_ids_target.includes($(w).attr("node_id")))
+
+  $(txs_show).attr("opacity", 1);
+  $(txs_hide).attr("opacity", 0);
+
+  $(links_show).attr("opacity", 1);
+  $(links_hide).attr("opacity", 0);
+  
+  $(wallets_show).attr("opacity", 1);
+  $(wallets_hide).attr("opacity", 0);
+}
+
+// Only on block changed
 function display_graph(data) {
+
+  // Preventing bad behaviors
+  $("#filters-apply-button, #filters-reset-button").attr('disabled',true);
+
   data.nodes = data.nodes.map(d => ({ ...d, cluster: wallets.clusters_map.get(d.id) }))
 
   links = graph_svg.append("g")
-                          .attr("stroke", "#999")
-                          .attr("stroke-opacity", 0.6)
-                        .selectAll("line")
-                        .data(data.links)
-                        .join("line")
-                          .attr("class", "graph-line")
-                          .attr("stroke-width", 1)
-                          .attr("marker-end", d => `url(${new URL(`#arrow-line-end-arrow`, location)})`);
+                      .attr("stroke", "#999")
+                      .attr("stroke-opacity", 0.6)
+                      .selectAll("line")
+                      .data(data.links)
+                      .join("line")
+                      .attr("source", l => l.source)
+                      .attr("target", l => l.target)
+                      .attr("class", "graph-line")
+                      .attr("stroke-width", 1)
+                      .attr("marker-end", d => `url(${new URL(`#arrow-line-end-arrow`, location)})`);
 
   nodes = graph_svg.append("g")
-                        .attr("stroke", "#fff")
-                        .attr("stroke-width", 0.5)
+                      .attr("stroke", "#fff")
+                      .attr("stroke-width", 0.7)
                       .selectAll("circle")
                       .data(data.nodes)
                       .join("circle")
-                        .attr("node_id", n => n.id)
-                        .attr("class", "graph-circle")
-                        .attr("r", 8)
-                        .attr("cursor", "pointer")
-                        .attr("fill", n => node_color(n))
-                        // .call(drag(simulation))
-                        .on("mouseover", function(event, d) {
+                      .attr("node_id", n => n.id)
+                      .attr("node_type", n => n.type)
+                      .attr("tx_type", n => n.type == "tx" ? n.tx_type : "")
+                      .attr("tx_tot_value", n => n.type == "tx" ? n.tot_value: 0)
+                      .attr("class", "graph-circle")
+                      .attr("r", 8)
+                      .attr("cursor", "pointer")
+                      .attr("fill", n => node_color(n))
+                      // .call(drag(simulation))
+                      .on("mouseover", function(event, d) {
                           g_tooltip.html(`${d['type'] === 'wa'? 'Address' : 'Tx id'}: ${d['id']}`)
                           if (d['type'] === 'wa') {
                             d3.json(`/wallet?wallet_id=${d['id']}`).then(function(data) {
@@ -243,27 +281,41 @@ function display_graph(data) {
                               }
                             })
                           }
-                       })
-                       .on("mousemove", function(event, d) {
-                          tooltip_width = g_tooltip.node().getBoundingClientRect().width
-                          tooltip_height = g_tooltip.node().getBoundingClientRect().height
-                          g_tooltip.transition()
-                          .duration(200)
-                          .style('opacity', 0.9)
-                          .style("color", "white")
-                          .style('left', (event.pageX < ($("#graph-container").offset()['left'] + $("#graph-container").width()/2)) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
-                          .style('top', (event.pageY < ($("#graph-container").offset()['top'] + $("#graph-container").height()/2)) ? (event.pageY + 15)+'px' : (event.pageY - tooltip_height - 2)+'px')
-                       })
-                       .on("mouseout", function(event, d) {
-                          g_tooltip.transition()
-                             .duration(500)
-                             .style("opacity", 0)
-                       });
+                          else {
+                            if (!g_tooltip.html().includes("<hr")) {
+                              g_tooltip.html(g_tooltip.html() + 
+                              ` <hr class='my-1 bg-white'/>
+                                <ul style="padding-left: 2px; margin: 0; list-style-type: none;">
+                                <li class='mb-1'>N. links   : ${d['n_links']}</li>
+                                <li class='mb-1'>Tot. value : ${d['tot_value']}</li>
+                                <li class='mb-1'>Tx type : ${d['tx_type']}</li>
+                                </ul>`)
+                            }
+                          }
+                      })
+                      .on("mousemove", function(event, d) {
+                        tooltip_width = g_tooltip.node().getBoundingClientRect().width
+                        tooltip_height = g_tooltip.node().getBoundingClientRect().height
+                        g_tooltip.transition()
+                                  .duration(200)
+                                  .style('opacity', 0.9)
+                                  .style("color", "white")
+                                  .style('left', (event.pageX < ($("#graph-container").offset()['left'] + $("#graph-container").width()/2)) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
+                                  .style('top', (event.pageY < ($("#graph-container").offset()['top'] + $("#graph-container").height()/2)) ? (event.pageY + 15)+'px' : (event.pageY - tooltip_height - 2)+'px')
+                      })
+                      .on("mouseout", function(event, d) {
+                        g_tooltip.transition()
+                                  .duration(500)
+                                  .style("opacity", 0)
+                      });
   
-  // Initial zooming out
-  d3.select("#graph-container > svg").call(zoom.transform, d3.zoomIdentity.translate((graph_width-0.1*graph_width)/2, (graph_height-0.1*graph_height)/2).scale(0.1))
+  // On block changed we must respect the filters applied
+  apply_fitlers_graph()
 
-  retrieveGraphPosition().then(function(nodes_dict) {
+  // Initial zooming out
+  d3.select("#graph-container > svg").call(zoom.transform, d3.zoomIdentity.translate((graph_width-0.1*graph_width)/2, (graph_height-0.1*graph_height)/2).scale(0.1));
+
+  retrieveGraphPosition(data.block_id).then(function(nodes_dict) {
 
     if (nodes_dict == null) {
       simulation = d3.forceSimulation(data.nodes)
@@ -271,7 +323,7 @@ function display_graph(data) {
                       .force("charge", d3.forceManyBody().strength(-50))
                       .force("center", d3.forceCenter(graph_width / 2, graph_height / 2))
                       .alphaMin(0.2)
-                      .on('end', function() { saveGraphPosition(nodes) });
+                      .on('end', function() { saveGraphPosition(data.block_id, nodes); $("#filters-apply-button, #filters-reset-button").attr('disabled', false); });
 
       simulation.on("tick", () => {
         links
@@ -299,37 +351,39 @@ function display_graph(data) {
           .attr("x1", d => nodes_dict[d['source']][0])
           .attr("y1", d => nodes_dict[d['source']][1])
           .attr("x2", d => nodes_dict[d['target']][0])
-          .attr("y2", d => nodes_dict[d['target']][1])
+          .attr("y2", d => nodes_dict[d['target']][1]);
+      $("#filters-apply-button, #filters-reset-button").attr('disabled', false);
     }
   });
 
-  loading_graph = false
+  loading_graph = false;
 } 
 
-d3.json(`/graph?types=${checkboxes.join(',')}`).then(function(data) {
-  display_graph(data)
+d3.json(`/graph`).then(function(data) {
+  display_graph(data);
 });
 
 // Manage filters change custom event
 function remove_graph() {
-  simulation?.stop()
-  d3.selectAll("circle.graph-circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
-  d3.selectAll("line.graph-line").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("opacitiy", 0).remove()
+  simulation?.stop();
+  // d3.selectAll("circle.graph-circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove();
+  // d3.selectAll("line.graph-line").transition().duration(globals.BLOCK_CHANGED_DELAY/2).attr("opacitiy", 0).remove();
+  graph_svg.selectAll("g").remove();
 }
 
 function reload() {
-  loading_graph = true
-  d3.json(`/graph?&block=${timeline.current_block}&min=${min}&max=${max}&types=${checkboxes.join(',')}`).then(function(data) {
-    remove_graph()
+  loading_graph = true;
+  d3.json(`/graph?&block=${timeline.current_block}`).then(function(data) {
+    remove_graph();
     setTimeout(function(){ display_graph(data) }, globals.BLOCK_CHANGED_DELAY);
   });
 }
 
-$(document).on("filters_changed", function(event) {
-  reload()
+$(document).on("filters_changed", function() {
+  apply_fitlers_graph();
 });
 
-$(document).on("block_changed", function(event) {
-  reload()
+$(document).on("block_changed", function() {
+  reload();
 });
 

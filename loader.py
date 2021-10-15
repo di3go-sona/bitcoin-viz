@@ -25,29 +25,21 @@ def get_outputs_links(transactions_ids):
         cur = db.execute(query)
         return cur.fetchall()
 
-def get_transactions_ids(block, min, max, types_clause):
+def get_transactions_ids(block):
     query = f"""
-                SELECT transactions_ext.id as id, (n_inputs+n_outputs) as n_links
+                SELECT transactions_ext.id as id, (n_inputs+n_outputs) as n_links, tot_value, type
                 FROM transactions_ext
-                WHERE transactions_ext.block_hash = '{block}' AND transactions_ext.tot_value >= {min} AND transactions_ext.tot_value <= {max} {types_clause}
-                LIMIT 500
+                WHERE transactions_ext.block_hash = '{block}'
             """
     with Session(engine) as db:
         cur = db.execute(query)
         return cur.fetchall()
 
 
-def get_weigthed_graph(block, min, max, types):
-
-    range = json.loads(get_range_bitcoin())
-    local_min = min if min is not None else range['min']
-    local_max = max if max is not None else range['max']
-
-    local_types = "('%s')" % "', '".join(types.split(","))
-    types_clause = f"AND transactions_ext.type in {local_types}"
+def get_weigthed_graph(block):
 
     local_block = block or get_last_block()
-    transactions_ids_tuples = get_transactions_ids(local_block, local_min, local_max, types_clause)
+    transactions_ids_tuples = get_transactions_ids(local_block)
     transactions_ids = [tx[0] for tx in transactions_ids_tuples]
 
     inputs_links = get_inputs_links(transactions_ids)
@@ -56,15 +48,15 @@ def get_weigthed_graph(block, min, max, types):
     outputs_links = get_outputs_links(transactions_ids)
     outputs_address = set([link[0] for link in outputs_links]).difference(inputs_address)
 
-    tx_json = [{"id": tx[0], "type": "tx", "n_links": tx[1]} for tx in transactions_ids_tuples]
+    tx_json = [{"id": tx[0], "type": "tx", "n_links": tx[1], "tot_value": tx[2], "tx_type": tx[3]} for tx in transactions_ids_tuples]
 
     inputs_links_json  = [{"source": link[0], "target": link[1]}  for link in inputs_links]
     outputs_links_json = [{"source": link[1], "target": link[0]}  for link in outputs_links]
 
     in_json    = [{"id": in_addr, "type": "wa"}    for in_addr in inputs_address]
     out_json   = [{"id": out_addr, "type": "wa"}   for out_addr in outputs_address]
-    # print(f'marco {(len(inputs_address) + len(outputs_address))}')
-    return {'nodes':  tx_json + in_json + out_json, 'links':  inputs_links_json + outputs_links_json}
+
+    return {'block_id': local_block, 'nodes':  tx_json + in_json + out_json, 'links':  inputs_links_json + outputs_links_json}
 
 ### Filters endpoints
 
@@ -164,10 +156,8 @@ def get_wallets(block_hash):
     if wallet_clustering.available:
         block_wallets_df, _ = wallet_clustering.get_clustering(block_hash)
        
-        # print(block_wallets_df)
         wallets_df.loc[:, 'cluster'] = block_wallets_df['cluster'].to_numpy()
-    # print(f'diego {len(wallets_df)}')
-    # print(wallets_df)
+
     res = {
         "min_x" : wallets_df['x'].min(),
         "max_x" : wallets_df['x'].max(),
@@ -201,6 +191,3 @@ def get_last_block():
         cur = db.execute(query)
         last_block, = cur.fetchone()
         return last_block
-
-
-# get_wallet("000000000000000000014752692f020bbbb1dabb18dd753bca1a60c9c8b92941")
