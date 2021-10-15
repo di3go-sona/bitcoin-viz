@@ -64,6 +64,9 @@ var tm_tooltip = d3.select('body').append('div')
 // Parse the Data
 d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.join(',')}`).then( function(data) {
 
+   //Setting first selected block
+   timeline.current_block = data[data.length - 1].hash
+
    //Setting labels color
    last_hour = null
    labels_color = []

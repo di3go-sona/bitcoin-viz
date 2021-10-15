@@ -1,4 +1,4 @@
 const globals = 
 {
-    BLOCK_CHANGED_DELAY: 500
+    BLOCK_CHANGED_DELAY: 1000
 }

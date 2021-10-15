@@ -38,17 +38,17 @@ function update_colors(){
 $(document).on("clustering_changed",function(){
   graph_svg.selectAll('circle').data().forEach(d=> {  d.cluster = wallets.clusters_map.get(d.id) });
   update_colors() 
-} )
+})
 
 $(document).on("clustering_reset",function(){
   $(".graph-header").parent().load('/graph_header', null, update_graph_header)
   update_colors() 
-} )
+})
 
 
 $(document).on("clustering_started",function(){
   $(".graph-header").parent().load('/graph_header', null, update_graph_header)
-} )
+})
 
 const graph_svg = d3.select("#graph-container")
                     .append("svg")
@@ -56,7 +56,7 @@ const graph_svg = d3.select("#graph-container")
                       .attr("height", graph_height)
                     .append("g")
 
-  // Add zoom stuff
+// Add zoom stuff
 function handleZoom(e) {
   graph_svg.attr('transform', e.transform);
 }
@@ -79,32 +79,31 @@ graph_svg.append("defs").selectAll("marker")
         .attr("fill", "#999")
         .attr("d", 'M0,-5L10,0L0,5');
 
-drag = simulation => {
+// drag = simulation => {
+//   function dragstarted(event) {
+//     if (!event.active) simulation.alphaTarget(0.3).restart();
+//     event.subject.fx = event.subject.x;
+//     event.subject.fy = event.subject.y;
+//   }
   
-  function dragstarted(event) {
-    if (!event.active) simulation.alphaTarget(0.3).restart();
-    event.subject.fx = event.subject.x;
-    event.subject.fy = event.subject.y;
-  }
+//   function dragged(event) {
+//     event.subject.fx = event.x;
+//     event.subject.fy = event.y;
+//   }
   
-  function dragged(event) {
-    event.subject.fx = event.x;
-    event.subject.fy = event.y;
-  }
+//   function dragended(event) {
+//     if (!event.active) simulation.alphaTarget(0);
+//     event.subject.fx = null;
+//     event.subject.fy = null;
+//   }
   
-  function dragended(event) {
-    if (!event.active) simulation.alphaTarget(0);
-    event.subject.fx = null;
-    event.subject.fy = null;
-  }
-  
-  return d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended);
-}
+//   return d3.drag()
+//       .on("start", dragstarted)
+//       .on("drag", dragged)
+//       .on("end", dragended);
+// }
 
-var simulation
+var simulation, links, nodes
 var loading_graph = true
 // g_tooltip
 var g_tooltip = d3.select('body').append('div')
@@ -112,7 +111,6 @@ var g_tooltip = d3.select('body').append('div')
                                .style("opacity", 0)
 
 function distance_link(d) {
-
   var n_links = 0
   if (d["source"]["type"] == "tx") {
     n_links = d["source"]["n_links"]
@@ -132,16 +130,79 @@ function distance_link(d) {
   }                    
 }
 
-function display_graph(data) {
-  data.nodes = data.nodes.map(d=> ({ ...d, cluster: wallets.clusters_map.get(d.id) }))
-  
-  simulation = d3.forceSimulation(data.nodes)
-                        .force("link", d3.forceLink(data.links).id(d => d.id).distance(d => distance_link(d)))
-                        .force("charge", d3.forceManyBody().strength(-10).distanceMax(1000))
-                        .force("center", d3.forceCenter(graph_width / 2, graph_height / 2))
-                        .alphaMin(0.1);
+function saveGraphPosition(nodes) {
+  // For all browser
+  var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
+  var open = indexedDB.open("NodesPositionsByBlock", 4);
 
-  const links = graph_svg.append("g")
+  open.onerror = function() {
+    console.log("Error opening NodesPositionsByBlock db");
+  };
+
+  open.onsuccess = function() {
+    console.log("Success opening NodesPositionsByBlock db");
+    var db = open.result;
+    var tx = db.transaction("Nodes", "readwrite");
+    var store = tx.objectStore("Nodes");
+
+    // Formatting nodes dictionary for current selected block
+    var nodes_dict = nodes.nodes().reduce((nodes_dict, e) => (nodes_dict[e.getAttribute('node_id')] = [parseFloat(e.getAttribute('cx')), parseFloat(e.getAttribute('cy'))], nodes_dict), {});
+
+    // Add some data
+    store.put({block_id: timeline.current_block, nodes: nodes_dict});
+
+    // Close the db when the transaction is done
+    tx.oncomplete = function() {
+      db.close();
+    };  
+   };
+}
+
+function retrieveGraphPosition() {
+  return new Promise (function(resolve) {
+    // For all browser
+    var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
+    var open = indexedDB.open("NodesPositionsByBlock", 4);
+
+    //Handlers
+    open.onupgradeneeded = function() {
+      var db = open.result;
+      db.createObjectStore("Nodes", {keyPath: "block_id"});
+    };
+
+    open.onerror = function() {
+      console.log("Error opening NodesPositionsByBlock db");
+      return resolve(null);
+    };
+
+    open.onsuccess = function() {
+      console.log("Success opening NodesPositionsByBlock db");
+      var db = open.result;
+      var tx = db.transaction("Nodes", "readwrite");
+      var store = tx.objectStore("Nodes");
+
+      var value = store.get(timeline.current_block);
+
+      value.onsuccess = function() {
+        if (value.result)
+          return resolve(value.result.nodes);
+        else 
+          console.log("No matching block found, returning null");
+          return resolve(null);
+      };
+
+      // Close the db when the transaction is done
+      tx.oncomplete = function() {
+        db.close();
+      };  
+    };
+  });
+}
+
+function display_graph(data) {
+  data.nodes = data.nodes.map(d => ({ ...d, cluster: wallets.clusters_map.get(d.id) }))
+
+  links = graph_svg.append("g")
                           .attr("stroke", "#999")
                           .attr("stroke-opacity", 0.6)
                         .selectAll("line")
@@ -151,17 +212,18 @@ function display_graph(data) {
                           .attr("stroke-width", 1)
                           .attr("marker-end", d => `url(${new URL(`#arrow-line-end-arrow`, location)})`);
 
-  const nodes = graph_svg.append("g")
+  nodes = graph_svg.append("g")
                         .attr("stroke", "#fff")
                         .attr("stroke-width", 0.5)
                       .selectAll("circle")
                       .data(data.nodes)
                       .join("circle")
+                        .attr("node_id", n => n.id)
                         .attr("class", "graph-circle")
-                        .attr("r", 5)
+                        .attr("r", 8)
                         .attr("cursor", "pointer")
                         .attr("fill", n => node_color(n))
-                        .call(drag(simulation))
+                        // .call(drag(simulation))
                         .on("mouseover", function(event, d) {
                           g_tooltip.html(`${d['type'] === 'wa'? 'Address' : 'Tx id'}: ${d['id']}`)
                           if (d['type'] === 'wa') {
@@ -198,17 +260,47 @@ function display_graph(data) {
                              .style("opacity", 0)
                        });
   
-  graph_svg.call(zoom.transform, d3.zoomIdentity.translate((graph_width-0.7*graph_width)/2, (graph_height-0.7*graph_height)/2).scale(0.7))
-  
-  simulation.on("tick", () => {
-    links
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
-    nodes
-      .attr("cx", d => d.x)
-      .attr("cy", d => d.y);
+  // Initial zooming out
+  d3.select("#graph-container > svg").call(zoom.transform, d3.zoomIdentity.translate((graph_width-0.1*graph_width)/2, (graph_height-0.1*graph_height)/2).scale(0.1))
+
+  retrieveGraphPosition().then(function(nodes_dict) {
+
+    if (nodes_dict == null) {
+      simulation = d3.forceSimulation(data.nodes)
+                      .force("link", d3.forceLink(data.links).id(d => d.id).distance(d => distance_link(d)))
+                      .force("charge", d3.forceManyBody().strength(-50))
+                      .force("center", d3.forceCenter(graph_width / 2, graph_height / 2))
+                      .alphaMin(0.2)
+                      .on('end', function() { saveGraphPosition(nodes) });
+
+      simulation.on("tick", () => {
+        links
+          .attr("x1", d => d.source.x)
+          .attr("y1", d => d.source.y)
+          .attr("x2", d => d.target.x)
+          .attr("y2", d => d.target.y);
+        nodes
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+      });
+
+    }
+
+    else {
+      nodes.attr("cx", graph_width / 2).attr("cy", graph_height / 2)
+          .transition().duration(2000)
+          .attr("cx", function(d) { return nodes_dict[d['id']][0] }).attr("cy", function(d) { return nodes_dict[d['id']][1] });
+      links
+          .attr("x1", graph_width / 2)
+          .attr("y1", graph_height / 2)
+          .attr("x2", graph_width / 2)
+          .attr("y2", graph_height / 2)
+          .transition().duration(2000)
+          .attr("x1", d => nodes_dict[d['source']][0])
+          .attr("y1", d => nodes_dict[d['source']][1])
+          .attr("x2", d => nodes_dict[d['target']][0])
+          .attr("y2", d => nodes_dict[d['target']][1])
+    }
   });
 
   loading_graph = false
@@ -220,19 +312,15 @@ d3.json(`/graph?types=${checkboxes.join(',')}`).then(function(data) {
 
 // Manage filters change custom event
 function remove_graph() {
-  simulation.stop()
+  simulation?.stop()
   d3.selectAll("circle.graph-circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove()
   d3.selectAll("line.graph-line").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("opacitiy", 0).remove()
 }
 
 function reload() {
   loading_graph = true
-  d3.json(`/graph?&block=${d3.select(".bar.selected").data()[0].hash}&min=${min}&max=${max}&types=${checkboxes.join(',')}`).then(function(data) {
-
-   
-
+  d3.json(`/graph?&block=${timeline.current_block}&min=${min}&max=${max}&types=${checkboxes.join(',')}`).then(function(data) {
     remove_graph()
-    // display_graph(data)
     setTimeout(function(){ display_graph(data) }, globals.BLOCK_CHANGED_DELAY);
   });
 }
