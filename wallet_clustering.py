@@ -44,7 +44,7 @@ def reset_clustering():
 def start_clustering(n_clusters):
     global last_centroids, available
     reset_clustering()
-    
+
     for n in range(100):
         print(n)
 
@@ -88,7 +88,27 @@ def get_clustering(block):
     return block_wallets_df[['addr', 'cluster']], last
 
 
-        
+
+
+
+def get_clustering_means():
+    global last_centroids, available, wallets_df
+
+    if centroids_queue.empty():
+        if available:
+            centroids, last = (last_centroids, True)
+        else:
+            raise Exception("No available nor running clustering ")
+    else:
+        centroids, last = centroids_queue.get(True, 2)
+
+    X = sklearn.preprocessing.normalize(wallets_data)
+    _, labels, _ = sklearn.cluster.k_means(X, len(centroids), init=centroids, max_iter=1, n_init=1)
+
+    wallets_df = wallets_df.assign(cluster=labels.astype(int)   )
+    wallets_df.groupby('cluster').mean()
+    return  wallets_df.groupby('cluster').mean(), last
+
 
 # start_clustering()
 # print(get_clustering())
