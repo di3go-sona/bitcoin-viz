@@ -13,6 +13,7 @@ function format_date(date, isFull) {
 const timeline = {
    current_block: null
 }
+
 // Set the dimensions and margins of the timeline
 const tm_margin_y = {top: 35, right: 0, bottom: 40, left: 20},
       tm_width_y  = (70 - tm_margin_y.left - tm_margin_y.right),
@@ -63,6 +64,9 @@ var tm_tooltip = d3.select('body').append('div')
 
 // Parse the Data
 d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.join(',')}`).then( function(data) {
+
+   //Setting first selected block
+   timeline.current_block = data[data.length - 1].hash
 
    //Setting labels color
    last_hour = null
