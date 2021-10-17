@@ -1,6 +1,9 @@
 var ticks = 0
 var graph_data
 
+NODE_RADIUS = 8
+LINK_LEN = 30
+
 // set the dimensions and margins of the graph
 const graph_margin = {top: 0, right: 0, bottom: 0, left: 0},
       graph_width  = $("#graph-container").width() - graph_margin.left - graph_margin.right,
@@ -25,9 +28,9 @@ function clusters_color(node) {
 
 function default_color(node) {
   if (node.type == "wa"){
-    return  "#69b3a2"
+    return  "#ccc"
   } else {
-    return "#de6262"
+    return "black"
   }  
 }
 
@@ -64,20 +67,34 @@ let zoom = d3.zoom().on('zoom', handleZoom);
 d3.select("#graph-container > svg").call(zoom);
 
 // Per-type markers, as they don't inherit styles.
-graph_svg.append("defs").selectAll("marker")
-        .data(["line-end-arrow"])
-        .join("marker")
-        .attr("id", d => `arrow-${d}`)
+graph_svg.append("defs")
+        .append("marker")
+        .attr("id", "arrow-out")
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 28)
+        .attr("refX", 26)
         .attr("refY", 0)
         .attr("markerWidth", 5)
         .attr("markerHeight", 5)
         .attr("orient", "auto") 
         .append("path")
-        .attr("fill", "#999")
+        .attr("fill", "#dc3545")
         .attr("d", 'M0,-5L10,0L0,5');
 
+graph_svg.append("defs")
+        .append("marker")
+        .attr("id", "arrow-in")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 26)
+        .attr("refY", 0)
+        .attr("markerWidth", 5)
+        .attr("markerHeight", 5)
+        .attr("orient", "auto") 
+        .append("path")
+        .attr("fill", "#69b3a2")
+        .attr("d", 'M0,-5L10,0L0,5');
+   
+
+        
 // drag = simulation => {
 //   function dragstarted(event) {
 //     if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -110,6 +127,13 @@ var g_tooltip = d3.select('body').append('div')
                                .style("opacity", 0)
 
 function distance_link(d) {
+  // for (i=0; i<10; i++){
+  //   r = 40 + i * ( NODE_RADIUS + (i%2)*(NODE_RADIUS / 2 ) ) 
+  //   d = 2*r*3.14
+  //   n = 
+  // }
+
+
   var n_links = 0
   if (d["source"]["type"] == "tx") {
     n_links = d["source"]["n_links"]
@@ -236,16 +260,21 @@ function display_graph(data) {
   data.nodes = data.nodes.map(d => ({ ...d, cluster: wallets.clusters_map.get(d.id) }))
 
   links = graph_svg.append("g")
-                      .attr("stroke", "#999")
-                      .attr("stroke-opacity", 0.6)
+                      
                       .selectAll("line")
                       .data(data.links)
                       .join("line")
+                      .attr("stroke", l => { if (l.type=='out') {return '#69b3a2'}else {return '#dc3545'} })
+                      .attr("stroke-opacity", l => { if (l.type=='out') {return 0.9} else {return 0.6} })
                       .attr("source", l => l.source)
                       .attr("target", l => l.target)
                       .attr("class", "graph-line")
                       .attr("stroke-width", 1)
-                      .attr("marker-end", d => `url(${new URL(`#arrow-line-end-arrow`, location)})`);
+                      .attr("marker-end", l => { if (l.type=='out') 
+                                                  {return `url(${new URL(`#arrow-in`, location)})`}
+                                                 else 
+                                                  {return `url(${new URL(`#arrow-out`, location)})`} })
+
 
   nodes = graph_svg.append("g")
                       .attr("stroke", "#fff")
@@ -258,7 +287,7 @@ function display_graph(data) {
                       .attr("tx_type", n => n.type == "tx" ? n.tx_type : "")
                       .attr("tx_tot_value", n => n.type == "tx" ? n.tot_value: 0)
                       .attr("class", "graph-circle")
-                      .attr("r", 8)
+                      .attr("r", NODE_RADIUS)
                       .attr("cursor", "pointer")
                       .attr("fill", n => node_color(n))
                       // .call(drag(simulation))

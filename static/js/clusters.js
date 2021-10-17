@@ -173,8 +173,9 @@ var wallets = {
     },
 
     _color :  d3.scaleOrdinal()
-        .domain([null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        .range(d3.schemeSet2),
+        .domain([0, 1, 2, 3, 4, 5, 6, 7,  null])
+        // .range(["#ff1f1f", "#78ff1f", "#1f5aff", "#ff961f", "#1fffb4", "#d21fff", "#f0ff1f", "#1fd2ff", "#ff1fb4"]),
+        .range([ "#dc3545",  "#4576ff", "#ffa845", "#45ffc1", "#7645ff", "#f3ff45", "#45daff", "#ff45c1", "#ccc"]),
 
     color: function(cluster_id){
         c =  wallets._color(cluster_id)

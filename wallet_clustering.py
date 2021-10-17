@@ -31,7 +31,7 @@ query = f"""
 """
 
 wallets_df = pd.read_sql_query(query, engine)
-wallets_data = wallets_df.drop(['addr', 'block_hash'], axis=1).to_numpy()
+wallets_data = wallets_df.drop(['addr', 'block_hash', 'balance'], axis=1).to_numpy()
 X = sklearn.preprocessing.normalize(wallets_data)
 
 

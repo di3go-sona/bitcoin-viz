@@ -78,7 +78,7 @@
               Clusters of wallets
                 <select class="ml-auto" id="n_clusters">
                   <option {{ "selected" if g.n_clusters is none}} disabled >-</option>
-                {% for i in [ 2, 3, 4, 5, 6, 7, 8, 9, 10] %}
+                {% for i in [ 2, 3, 4, 5, 6, 7] %}
                   <option {{ "selected" if g.n_clusters == i }} value="{{i}}">{{i}}</option>
                 {% endfor %}
                 </select> 

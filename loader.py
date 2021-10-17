@@ -50,8 +50,8 @@ def get_weigthed_graph(block):
 
     tx_json = [{"id": tx[0], "type": "tx", "n_links": tx[1], "tot_value": tx[2], "tx_type": tx[3]} for tx in transactions_ids_tuples]
 
-    inputs_links_json  = [{"source": link[0], "target": link[1]}  for link in inputs_links]
-    outputs_links_json = [{"source": link[1], "target": link[0]}  for link in outputs_links]
+    inputs_links_json  = [{"source": link[0], "target": link[1], "type":"in"}  for link in inputs_links]
+    outputs_links_json = [{"source": link[1], "target": link[0], "type":"out"}  for link in outputs_links]
 
     in_json    = [{"id": in_addr, "type": "wa"}    for in_addr in inputs_address]
     out_json   = [{"id": out_addr, "type": "wa"}   for out_addr in outputs_address]
