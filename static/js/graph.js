@@ -10,28 +10,18 @@ const graph_margin = {top: 0, right: 0, bottom: 0, left: 0},
       graph_height = $("#graph-container").height() - graph_margin.top - graph_margin.bottom
 
 function node_color(node){
-  if (wallets.clusters_map.size > 0){
-    return  clusters_color(node)
-  } else {
-    return default_color(node)
-  }  
+  if (wallets.clusters_map.size > 0) return  clusters_color(node)
+  else                               return default_color(node)
 }
 
 function clusters_color(node) {
-  if (node.type == "wa"){
-
-    return wallets.color(node.cluster)
-  } else {
-    return "black"
-  }  
+  if (node.type == "wa") return wallets.color(node.cluster)
+  else                   return "url(#bitcoin_image)"
 }
 
 function default_color(node) {
-  if (node.type == "wa"){
-    return  "#ccc"
-  } else {
-    return "black"
-  }  
+  if (node.type == "wa") return  "#ccc"
+  else                   return "url(#bitcoin_image)"
 }
 
 function update_colors(){
@@ -92,6 +82,18 @@ graph_svg.append("defs")
         .append("path")
         .attr("fill", "#69b3a2")
         .attr("d", 'M0,-5L10,0L0,5');
+  
+graph_svg.append("defs")
+          .append("svg:pattern")
+          .attr("id", "bitcoin_image")
+          .attr("width", NODE_RADIUS*2)
+          .attr("height", NODE_RADIUS*2)
+          .append("svg:image")
+          .attr("xlink:href", globals.BITCOIN_IMAGE_URL)
+          .attr("width", NODE_RADIUS*2)
+          .attr("height", NODE_RADIUS*2)
+          .attr("x", 0)
+          .attr("y", 0);
         
 // drag = simulation => {
 //   function dragstarted(event) {
