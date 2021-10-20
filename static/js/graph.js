@@ -372,7 +372,9 @@ function display_graph(data) {
                       .force("charge", d3.forceManyBody().strength( d => d.type == "wa"? -100 : -400 ))
                       // .force("center", d3.forceCenter(graph_width / 2, graph_height / 2))
                       .alphaMin(0.2)
-                      .on('end', function() { saveGraphPosition(data.block_id, nodes); $("#filters-apply-button, #filters-reset-button").attr('disabled', false); });
+                      .on('end', function() { saveGraphPosition(data.block_id, nodes); 
+                                              $("#filters-apply-button, #filters-reset-button").attr('disabled', false);
+                                              loading_graph = false; });
 
       simulation.on("tick", () => {
         links
@@ -402,10 +404,9 @@ function display_graph(data) {
           .attr("x2", d => nodes_dict[d['target']][0])
           .attr("y2", d => nodes_dict[d['target']][1]);
       $("#filters-apply-button, #filters-reset-button").attr('disabled', false);
+      loading_graph = false;
     }
   });
-
-  loading_graph = false;
 } 
 
 // d3.json(`/graph`).then(function(data) {

@@ -187,9 +187,10 @@ var wallets = {
     update_visible: function(){
         t = graph_svg.attr('transform')
         re = /translate\(([0-9.-]*),([0-9.-]*)\) scale\(([0-9.-]*)\)/
+
         match = re.exec(t)
-
-
+        if (!match) return 
+        
         translate_x = parseFloat(match[1])
         translate_y = parseFloat(match[2])
         scale = parseFloat(match[3])
@@ -198,7 +199,7 @@ var wallets = {
         xmax = (graph_width - translate_x ) / scale
         ymin = (0 - translate_y ) / scale
         ymax = (graph_height - translate_y ) / scale
-        console.log(xmin, xmax, ymin, ymax)
+        // console.log(xmin, xmax, ymin, ymax)
         _iscontained = d3.selectAll('.graph-circle').nodes().map(n => { return [n.__data__.id,   n.cx.baseVal.value >= xmin   &&  n.cx.baseVal.value <= xmax && n.cy.baseVal.value >= ymin   &&  n.cy.baseVal.value <= ymax ]})
 
         iscontained = new Map(_iscontained)
