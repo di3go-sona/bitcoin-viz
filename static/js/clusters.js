@@ -182,10 +182,34 @@ var wallets = {
         } else {
             return c 
         }
+    },
+
+    update_visible: function(){
+        t = graph_svg.attr('transform')
+        re = /translate\(([0-9.-]*),([0-9.-]*)\) scale\(([0-9.-]*)\)/
+        match = re.exec(t)
+
+
+        translate_x = parseFloat(match[1])
+        translate_y = parseFloat(match[2])
+        scale = parseFloat(match[3])
+
+        xmin = (0 - translate_x ) / scale
+        xmax = (graph_width - translate_x ) / scale
+        ymin = (0 - translate_y ) / scale
+        ymax = (graph_height - translate_y ) / scale
+        console.log(xmin, xmax, ymin, ymax)
+        _iscontained = d3.selectAll('.graph-circle').nodes().map(n => { return [n.__data__.id,   n.cx.baseVal.value >= xmin   &&  n.cx.baseVal.value <= xmax && n.cy.baseVal.value >= ymin   &&  n.cy.baseVal.value <= ymax ]})
+
+        iscontained = new Map(_iscontained)
+
+        wallets.dots_g.selectAll('circle').style('opacity', d => {return iscontained.get(d.addr) == true ? 1: 0})
     }
 }
 
 
+
+setInterval(wallets.update_visible, 300)
 
 $(document).ready(function(){
     wallets.width  = $('#clusters-container').width() - wallets.margin_left - wallets.margin_right;
