@@ -222,7 +222,9 @@ function apply_fitlers_graph() {
 }
 
 function mouse_over_node(event, d) {
+
   g_tooltip.html(`${d['type'] === 'wa'? 'Address' : 'Tx id'}: ${d['id']}`)
+  
   if (d['type'] === 'wa') {
     d3.json(`/wallet?wallet_id=${d['id']}`).then(function(data) {
       if (!g_tooltip.html().includes("<hr")) {
@@ -254,6 +256,9 @@ function mouse_over_node(event, d) {
 }
 
 function mouse_move_node(event, d) {
+
+  if($(`circle.graph-circle[node_id='${d['id']}']`).css("opacity") == "0") return;
+
   tooltip_width = g_tooltip.node().getBoundingClientRect().width
   tooltip_height = g_tooltip.node().getBoundingClientRect().height
   g_tooltip.transition()
