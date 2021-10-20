@@ -1,8 +1,8 @@
 var ticks = 0
 var graph_data
 
-NODE_RADIUS = 8
-LINK_LEN = 30
+NODE_RADIUS = 18
+LINK_LEN = 80
 
 // set the dimensions and margins of the graph
 const graph_margin = {top: 0, right: 0, bottom: 0, left: 0},
@@ -71,7 +71,7 @@ graph_svg.append("defs")
         .append("marker")
         .attr("id", "arrow-out")
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 26)
+        .attr("refX", 23)
         .attr("refY", 0)
         .attr("markerWidth", 5)
         .attr("markerHeight", 5)
@@ -84,7 +84,7 @@ graph_svg.append("defs")
         .append("marker")
         .attr("id", "arrow-in")
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 26)
+        .attr("refX", 23)
         .attr("refY", 0)
         .attr("markerWidth", 5)
         .attr("markerHeight", 5)
@@ -92,8 +92,6 @@ graph_svg.append("defs")
         .append("path")
         .attr("fill", "#69b3a2")
         .attr("d", 'M0,-5L10,0L0,5');
-   
-
         
 // drag = simulation => {
 //   function dragstarted(event) {
@@ -127,33 +125,6 @@ var loading_graph = false
 var g_tooltip = d3.select('body').append('div')
                                .attr('class', 'tooltip graph-tooltip')
                                .style("opacity", 0)
-
-function distance_link(d) {
-  // for (i=0; i<10; i++){
-  //   r = 40 + i * ( NODE_RADIUS + (i%2)*(NODE_RADIUS / 2 ) ) 
-  //   d = 2*r*3.14
-  //   n = 
-  // }
-
-
-  var n_links = 0
-  if (d["source"]["type"] == "tx") {
-    n_links = d["source"]["n_links"]
-  }
-  else {
-    n_links = d["target"]["n_links"]
-  }
-
-  if (n_links > 10){
-    n = parseInt(n_links / 10)
-    steps = [...Array(n).keys()]
-    taken = steps[Math.floor(Math.random() * steps.length)]
-    return 40 + (taken * 5)
-  } 
-  else{
-    return 40
-  }                    
-}
 
 function saveGraphPosition(block_id, nodes) {
   var open = indexedDB.open("NodesPositionsByBlock", 4);
@@ -297,6 +268,46 @@ function mouse_out_node(event, d) {
             .style("opacity", 0)
 }
 
+var counter_per_tx = null
+
+function distance_link(d) {
+  var n_links = 0;
+  var id = null;
+
+  if (d["source"]["type"] == "tx") {
+    id = d["source"]["id"];
+    n_links = d["source"]["n_links"];
+  }
+  else {
+    id = d["target"]["id"];
+    n_links = d["target"]["n_links"];
+  }
+  
+  // Local copy of struct per tx
+  counter = counter_per_tx[id];
+  n = counter['nodes'] + 1;
+  corona = counter['corona'][0];
+  corona_cnt = counter['corona'][1];
+
+  // Updating
+  counter['nodes'] += 1;
+
+  r_base = LINK_LEN;
+  r_step = 60;
+  r_tot = r_base + corona*r_step;
+  nodes_per_corona = Math.floor(2*Math.PI*r_tot / (2*NODE_RADIUS));
+
+  if (corona_cnt < nodes_per_corona - 5) {
+    counter_per_tx[id]['corona'][1] += 1;
+    return r_tot;
+  }
+  else {
+    counter_per_tx[id]['corona'][0] += 1;
+    counter_per_tx[id]['corona'][1] = 1;
+    return r_tot + r_step;
+  }
+}
+
 // Only on block changed
 function display_graph(data) {
 
@@ -315,7 +326,7 @@ function display_graph(data) {
                       .attr("source", l => l.source)
                       .attr("target", l => l.target)
                       .attr("class", "graph-line")
-                      .attr("stroke-width", 1)
+                      .attr("stroke-width", 2)
                       .attr("marker-end", l => { if (l.type=='out') 
                                                   {return `url(${new URL(`#arrow-in`, location)})`}
                                                  else 
@@ -350,10 +361,14 @@ function display_graph(data) {
   retrieveGraphPosition(data.block_id).then(function(nodes_dict) {
 
     if (nodes_dict == null) {
+      txs = d3.selectAll(nodes).filter(n => n.type == "tx");
+      counter_per_tx = {};
+      d3.selectAll(txs).each(t => counter_per_tx[t.id] = {'nodes': 0, 'corona': [0, 0]}) // [id, counter]
+
       simulation = d3.forceSimulation(data.nodes)
                       .force("link", d3.forceLink(data.links).id(d => d.id).distance(d => distance_link(d)))
-                      .force("charge", d3.forceManyBody().strength(-50))
-                      .force("center", d3.forceCenter(graph_width / 2, graph_height / 2))
+                      .force("charge", d3.forceManyBody().strength( d => d.type == "wa"? -100 : -400 ))
+                      // .force("center", d3.forceCenter(graph_width / 2, graph_height / 2))
                       .alphaMin(0.2)
                       .on('end', function() { saveGraphPosition(data.block_id, nodes); $("#filters-apply-button, #filters-reset-button").attr('disabled', false); });
 
