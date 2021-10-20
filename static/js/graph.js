@@ -119,9 +119,11 @@ graph_svg.append("defs")
 //       .on("end", dragended);
 // }
 
+// For all browser
+var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
+
 var simulation, links, nodes
-var loading_graph = true
-// g_tooltip
+var loading_graph = false
 var g_tooltip = d3.select('body').append('div')
                                .attr('class', 'tooltip graph-tooltip')
                                .style("opacity", 0)
@@ -154,8 +156,6 @@ function distance_link(d) {
 }
 
 function saveGraphPosition(block_id, nodes) {
-  // For all browser
-  var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
   var open = indexedDB.open("NodesPositionsByBlock", 4);
 
   open.onerror = function() {
@@ -170,7 +170,6 @@ function saveGraphPosition(block_id, nodes) {
     // Formatting nodes dictionary for current selected block
     var nodes_dict = nodes.nodes().reduce((nodes_dict, e) => (nodes_dict[e.getAttribute('node_id')] = [parseFloat(e.getAttribute('cx')), parseFloat(e.getAttribute('cy'))], nodes_dict), {});
 
-    // Add some data
     store.put({block_id: block_id, nodes: nodes_dict});
 
     // Close the db when the transaction is done
@@ -182,8 +181,6 @@ function saveGraphPosition(block_id, nodes) {
 
 function retrieveGraphPosition(block_id) {
   return new Promise (function(resolve) {
-    // For all browser
-    var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
     var open = indexedDB.open("NodesPositionsByBlock", 4);
 
     //Handlers
@@ -251,6 +248,55 @@ function apply_fitlers_graph() {
   $(wallets_hide).attr("opacity", 0);
 }
 
+function mouse_over_node(event, d) {
+  g_tooltip.html(`${d['type'] === 'wa'? 'Address' : 'Tx id'}: ${d['id']}`)
+  if (d['type'] === 'wa') {
+    d3.json(`/wallet?wallet_id=${d['id']}`).then(function(data) {
+      if (!g_tooltip.html().includes("<hr")) {
+        g_tooltip.html(g_tooltip.html() + 
+        ` <hr class='my-1 bg-white'/>
+          <ul style="padding-left: 2px; margin: 0; list-style-type: none;">
+          <li class='mb-1'>Avg vin/vout : ${data['avg_vin'].toFixed(6)}/${data['avg_vout'].toFixed(6)}</li>
+          <li class='mb-1'>Var vin/vout : ${data['var_vin'].toFixed(6)}/${data['var_vout'].toFixed(6)}</li>
+          <li class='mb-1'>Deg in/out   : ${data['deg_in']}/${data['deg_out']}</li>
+          <li class='mb-1'>Unique deg in/out : ${data['unique_deg_in']}/${data['unique_deg_out']}</li>
+          <li class='mb-1'>Total txs : ${data['total_txs']}</li>
+          <li class='mb-1'>Received value : ${data['received_value']}</li>
+          <li class='mb-1'>Balance : ${data['balance']}</li>
+          </ul>`)
+      }
+    })
+  }
+  else {
+    if (!g_tooltip.html().includes("<hr")) {
+      g_tooltip.html(g_tooltip.html() + 
+      ` <hr class='my-1 bg-white'/>
+        <ul style="padding-left: 2px; margin: 0; list-style-type: none;">
+        <li class='mb-1'>N. links   : ${d['n_links']}</li>
+        <li class='mb-1'>Tot. value : ${d['tot_value']}</li>
+        <li class='mb-1'>Tx type : ${d['tx_type']}</li>
+        </ul>`)
+    }
+  }
+}
+
+function mouse_move_node(event, d) {
+  tooltip_width = g_tooltip.node().getBoundingClientRect().width
+  tooltip_height = g_tooltip.node().getBoundingClientRect().height
+  g_tooltip.transition()
+            .duration(200)
+            .style('opacity', 0.9)
+            .style("color", "white")
+            .style('left', (event.pageX < ($("#graph-container").offset()['left'] + $("#graph-container").width()/2)) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
+            .style('top', (event.pageY < ($("#graph-container").offset()['top'] + $("#graph-container").height()/2)) ? (event.pageY + 15)+'px' : (event.pageY - tooltip_height - 2)+'px')
+}
+
+function mouse_out_node(event, d) {
+  g_tooltip.transition()
+            .duration(500)
+            .style("opacity", 0)
+}
+
 // Only on block changed
 function display_graph(data) {
 
@@ -291,52 +337,9 @@ function display_graph(data) {
                       .attr("cursor", "pointer")
                       .attr("fill", n => node_color(n))
                       // .call(drag(simulation))
-                      .on("mouseover", function(event, d) {
-                          g_tooltip.html(`${d['type'] === 'wa'? 'Address' : 'Tx id'}: ${d['id']}`)
-                          if (d['type'] === 'wa') {
-                            d3.json(`/wallet?wallet_id=${d['id']}`).then(function(data) {
-                              if (!g_tooltip.html().includes("<hr")) {
-                                g_tooltip.html(g_tooltip.html() + 
-                                ` <hr class='my-1 bg-white'/>
-                                  <ul style="padding-left: 2px; margin: 0; list-style-type: none;">
-                                  <li class='mb-1'>Avg vin/vout : ${data['avg_vin'].toFixed(6)}/${data['avg_vout'].toFixed(6)}</li>
-                                  <li class='mb-1'>Var vin/vout : ${data['var_vin'].toFixed(6)}/${data['var_vout'].toFixed(6)}</li>
-                                  <li class='mb-1'>Deg in/out   : ${data['deg_in']}/${data['deg_out']}</li>
-                                  <li class='mb-1'>Unique deg in/out : ${data['unique_deg_in']}/${data['unique_deg_out']}</li>
-                                  <li class='mb-1'>Total txs : ${data['total_txs']}</li>
-                                  <li class='mb-1'>Received value : ${data['received_value']}</li>
-                                  <li class='mb-1'>Balance : ${data['balance']}</li>
-                                  </ul>`)
-                              }
-                            })
-                          }
-                          else {
-                            if (!g_tooltip.html().includes("<hr")) {
-                              g_tooltip.html(g_tooltip.html() + 
-                              ` <hr class='my-1 bg-white'/>
-                                <ul style="padding-left: 2px; margin: 0; list-style-type: none;">
-                                <li class='mb-1'>N. links   : ${d['n_links']}</li>
-                                <li class='mb-1'>Tot. value : ${d['tot_value']}</li>
-                                <li class='mb-1'>Tx type : ${d['tx_type']}</li>
-                                </ul>`)
-                            }
-                          }
-                      })
-                      .on("mousemove", function(event, d) {
-                        tooltip_width = g_tooltip.node().getBoundingClientRect().width
-                        tooltip_height = g_tooltip.node().getBoundingClientRect().height
-                        g_tooltip.transition()
-                                  .duration(200)
-                                  .style('opacity', 0.9)
-                                  .style("color", "white")
-                                  .style('left', (event.pageX < ($("#graph-container").offset()['left'] + $("#graph-container").width()/2)) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
-                                  .style('top', (event.pageY < ($("#graph-container").offset()['top'] + $("#graph-container").height()/2)) ? (event.pageY + 15)+'px' : (event.pageY - tooltip_height - 2)+'px')
-                      })
-                      .on("mouseout", function(event, d) {
-                        g_tooltip.transition()
-                                  .duration(500)
-                                  .style("opacity", 0)
-                      });
+                      .on("mouseover", mouse_over_node)
+                      .on("mousemove", mouse_move_node)
+                      .on("mouseout", mouse_out_node);
   
   // On block changed we must respect the filters applied
   apply_fitlers_graph()
@@ -388,15 +391,13 @@ function display_graph(data) {
   loading_graph = false;
 } 
 
-d3.json(`/graph`).then(function(data) {
-  display_graph(data);
-});
+// d3.json(`/graph`).then(function(data) {
+//   display_graph(data);
+// });
 
 // Manage filters change custom event
 function remove_graph() {
   simulation?.stop();
-  // d3.selectAll("circle.graph-circle").transition().duration(globals.BLOCK_CHANGED_DELAY).attr("r", 0).remove();
-  // d3.selectAll("line.graph-line").transition().duration(globals.BLOCK_CHANGED_DELAY/2).attr("opacitiy", 0).remove();
   graph_svg.selectAll("g").remove();
 }
 

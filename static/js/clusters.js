@@ -59,9 +59,6 @@ var wallets = {
         // Start polling for updates
         wallets.update_clustering_timer = setInterval(wallets.update_clustering, 300)
         setTimeout(d => {$(document).trigger("clustering_started")}, 300)
-
-        
-        
     },
 
     reset_clustering: function(){
@@ -230,7 +227,7 @@ $(document).ready(function(){
         .on("zoom", wallets.handleZoom);
 
 
-    wallets.load_wallets(null)
+    // wallets.load_wallets(null)
 
     wallets.svg.call(d3.zoom().on('zoom', wallets.handleZoom))
 

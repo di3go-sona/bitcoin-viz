@@ -62,6 +62,65 @@ var tm_tooltip = d3.select('body').append('div')
                                .attr('class', 'tooltip')
                                .style("opacity", 0)
 
+function mouse_move_bar(event, d) {
+   tooltip_width = tm_tooltip.node().getBoundingClientRect().width
+   tooltip_height = tm_tooltip.node().getBoundingClientRect().height
+
+   tm_tooltip.transition()
+   .duration(200)
+   .style("opacity", 0.9)
+   .style("color", "white")
+   tm_tooltip
+   .html(`Block num: ${d.height}<hr class="my-1 bg-white"/>${$("input[type='radio']:checked").next().text()}: ${d.bar_value}`)
+   .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
+   .style('top', (event.pageY - tooltip_height - 2) + 'px')
+}
+
+function mouse_out_bar(event, d) {
+   tm_tooltip.transition()
+      .duration(500)
+      .style("opacity", 0)
+}
+
+function click_bar(d) {
+   clicked_bar = d3.select("#rect_"+d.hash)
+   prev_clicked = d3.select(".bar.selected")
+
+   if (prev_clicked.node() != null) {
+      prev_clicked.transition().duration(200).attr("opacity", 0.15)
+      prev_clicked.node().classList.remove("selected")
+      tm_svg_x.select("#selection_rect_"+prev_clicked.data()[0].hash).remove()
+   }
+   if (clicked_bar.node() != prev_clicked.node() && !loading_graph) {
+      clicked_bar.transition().duration(200).attr("opacity", 0.8)
+      clicked_bar.node().classList.add("selected")
+      tm_svg_x
+         .append("svg")
+         .attr("id", "selection_rect_"+d.hash)
+         .attr("class", "tick-selected")
+         .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("x", parseFloat($(clicked_bar.node()).attr("x")) + parseFloat($(clicked_bar.node()).attr("width"))/2 - 15)
+            .attr("y", $(clicked_bar.node()).attr("y") - 40)
+            .attr("opacity", 1)
+            .attr("width", "30")
+            .attr("height", "30")
+            .attr("viewBox", "0 0 24 24")
+            .attr("stroke", $(clicked_bar.node()).attr("fill"))
+            .attr("fill", "none")
+            .attr("stroke-width", "2.5")
+            .attr("stroke-linecap", "round")
+            .attr("stroke-linejoin", "round")
+            .append("polyline").attr("points", "20 6 9 17 4 12")
+      
+      timeline.current_block = clicked_bar.data()[0].hash
+   }
+}
+
+$(document).on('pre_block_changed', function(event, d) {
+   click_bar(d)
+   $(document).trigger("block_changed")
+})
+
 // Parse the Data
 d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.join(',')}`).then( function(data) {
 
@@ -91,23 +150,23 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.join(',')
                             .range(labels_color)
 
    tm_x_axis.selectAll("text")
-   .attr("fill", l => tm_labels_ordinal(l))
-   .style("text-anchor", "center")
-   .style("font-size", "12px")
-   .call(function(t) { 
-      t.each(function(d) {
-         var self = d3.select(this)
-         var split = format_date(new Date(self.text()), tm_labels_ordinal(self.text())=="white").split(' ')  // get the text and split it
-         self.text(l => '')
-         if (split.length > 1) {
-            self.append("tspan").attr("x", 0).attr("dy","1em").text(split[0])
-            self.append("tspan").attr("x", 0).attr("dy","1em").text(split[1])
-         }
-         else {
-            self.append("tspan").attr("x", 0).attr("dy","2em").text(split[0])
-         }
-      })
-   })
+            .attr("fill", l => tm_labels_ordinal(l))
+            .style("text-anchor", "center")
+            .style("font-size", "12px")
+            .call(function(t) { 
+               t.each(function(d) {
+                  var self = d3.select(this)
+                  var split = format_date(new Date(self.text()), tm_labels_ordinal(self.text())=="white").split(' ')  // get the text and split it
+                  self.text(l => '')
+                  if (split.length > 1) {
+                     self.append("tspan").attr("x", 0).attr("dy","1em").text(split[0])
+                     self.append("tspan").attr("x", 0).attr("dy","1em").text(split[1])
+                  }
+                  else {
+                     self.append("tspan").attr("x", 0).attr("dy","2em").text(split[0])
+                  }
+               })
+            })
 
    // Y axis
    tm_yScale.domain([0, d3.max(data.map(b => parseInt(b.bar_value)))])
@@ -130,59 +189,9 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.join(',')
                   .join("g")
                   .attr("class", "wrapper-bar")
                   .attr("style", "cursor: pointer;")
-                  // .on("mouseover", function(event, d) {
-                  // })
-                  .on("mousemove", function(event, d) {
-                     tooltip_width = tm_tooltip.node().getBoundingClientRect().width
-                     tooltip_height = tm_tooltip.node().getBoundingClientRect().height
-
-                     tm_tooltip.transition()
-                     .duration(200)
-                     .style("opacity", 0.9)
-                     .style("color", "white")
-                     tm_tooltip
-                     .html(`Block num: ${d.height}<hr class="my-1 bg-white"/>${$("input[type='radio']:checked").next().text()}: ${d.bar_value}`)
-                     .style('left', (event.pageX < window.innerWidth/2) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
-                     .style('top', (event.pageY - tooltip_height - 2) + 'px')
-                  })
-                  .on("mouseout", function(event, d) {
-                     tm_tooltip.transition()
-                        .duration(500)
-                        .style("opacity", 0)
-                  })
-                  .on("click", function(event, d) {
-                     clicked_bar = d3.select("#rect_"+d.hash)
-                     prev_clicked = d3.select(".bar.selected")
-
-                     if (clicked_bar.node() != prev_clicked.node() && !loading_graph) {
-                        prev_clicked.transition().duration(200).attr("opacity", 0.15)
-                        prev_clicked.node().classList.remove("selected")
-                        tm_svg_x.select("#selection_rect_"+prev_clicked.data()[0].hash).remove()
-                        
-                        clicked_bar.transition().duration(200).attr("opacity", 0.8)
-                        clicked_bar.node().classList.add("selected")
-                        tm_svg_x
-                           .append("svg")
-                           .attr("id", "selection_rect_"+d.hash)
-                           .attr("class", "tick-selected")
-                           .attr("xmlns", "http://www.w3.org/2000/svg")
-                              .attr("x", parseFloat($(clicked_bar.node()).attr("x")) + parseFloat($(clicked_bar.node()).attr("width"))/2 - 15)
-                              .attr("y", $(clicked_bar.node()).attr("y") - 40)
-                              .attr("opacity", 1)
-                              .attr("width", "30")
-                              .attr("height", "30")
-                              .attr("viewBox", "0 0 24 24")
-                              .attr("stroke", $(clicked_bar.node()).attr("fill"))
-                              .attr("fill", "none")
-                              .attr("stroke-width", "2.5")
-                              .attr("stroke-linecap", "round")
-                              .attr("stroke-linejoin", "round")
-                              .append("polyline").attr("points", "20 6 9 17 4 12")
-                        
-                        timeline.current_block = clicked_bar.data()[0].hash
-                        $(document).trigger("block_changed")
-                     }
-                  })
+                  .on("mousemove", mouse_move_bar)
+                  .on("mouseout", mouse_out_bar)
+                  .on("click", b => $(document).trigger('pre_block_changed', [b.target.__data__]))
 
    // Background
    bar_wrappers.append("rect")
@@ -203,39 +212,22 @@ d3.csv(`/timeline/csv?plot=${$(radio_button).val()}&types=${checkboxes.join(',')
    // Foreground
    bar_wrappers.append('rect')
       .attr("id", b => "rect_" + b.hash)
-      .attr("class", b => bars_color_ordinal(b.hash)==0.8? "bar selected":"bar")
+      // .attr("class", b => bars_color_ordinal(b.hash)==0.8? "bar selected":"bar")
+      .attr("class", "bar")
       .attr("x", b => tm_xScale(new Date(b.time)))
       .attr("width", tm_xScale.bandwidth())
       .attr("height", tm_height_x)
       .attr("y", 0)
       .attr("fill", $(radio_button).css("background-color"))
-      .attr("opacity", b => bars_color_ordinal(b.hash))
+      // .attr("opacity", b => bars_color_ordinal(b.hash))
+      .attr("opacity", 0.15)
       .transition()
          .duration(1500)
          .attr("y", b => tm_yScale(parseInt(b.bar_value)))
          .attr("height", b => tm_height_y - tm_yScale(parseInt(b.bar_value)))
-   
-   // Add selected image to pre selected bars
-   bar_wrappers.selectAll(".bar.selected").each(function(d) {
-      tm_svg_x
-         .append("svg")
-         .attr("id", "selection_rect_"+d.hash)
-         .attr("class", "tick-selected")
-         // .attr("for", d.hash)
-         .attr("xmlns", "http://www.w3.org/2000/svg")
-            .attr("y", tm_yScale(parseInt(d.bar_value)) - 40)
-            .attr("x", parseFloat($(this).attr("x")) + parseFloat($(this).attr("width"))/2 - 15)
-            .attr("opacity", 1)
-            .attr("width", "30")
-            .attr("height", "30")
-            .attr("viewBox", "0 0 24 24")
-            .attr("stroke", $(this).attr("fill"))
-            .attr("fill", "none")
-            .attr("stroke-width", "2.5")
-            .attr("stroke-linecap", "round")
-            .attr("stroke-linejoin", "round")
-            .append("polyline").attr("points", "20 6 9 17 4 12")
-   })
+
+   // Simulate click on last bar
+   $(document).trigger('pre_block_changed', [data[data.length - 1]])
 })
 
 function load_data(min, max, checkboxes) {
