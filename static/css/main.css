@@ -127,8 +127,8 @@ input[type="radio"] {
   }
 
   .legend-dot {
-    height: 15px;
-    width: 15px;
+    height: 20px;
+    width: 20px;
     border-radius: 50%;
     display: inline-block;
   }
@@ -142,8 +142,21 @@ input[type="radio"] {
   }
 
   .legend-dot.transactions {
-    background-color: black;
+    background-size: contain;
+    background-image: url("../images/bitcoin_image.png");
+    transform: rotate(-15deg);
   }
+
+  .legend-dot.in-arrow {
+    background-color: #dc3545;
+    opacity: 0.6;
+  }
+
+  .legend-dot.out-arrow {
+    background-color: #69b3a2;
+    opacity: 0.9;
+  }
+
   .clustered .legend-dot.transactions {
     background-color: black;
   }
