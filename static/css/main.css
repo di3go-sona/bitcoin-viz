@@ -138,11 +138,11 @@ input[type="radio"] {
   }
 
   .legend-dot.wallets {
-    background-color: #69b3a2;
+    background-color: #ccc;
   }
 
   .legend-dot.transactions {
-    background-color: #de6262;
+    background-color: black;
   }
   .clustered .legend-dot.transactions {
     background-color: black;
