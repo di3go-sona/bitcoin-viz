@@ -14,9 +14,9 @@ def before_request_func():
 def index():
     return render_template('index.html.j2', n_clusters=g.n_clusters)
 
-@app.route("/graph_header")
-def graph_header():
-    return render_template('graph_header.html.j2', n_clusters=g.n_clusters)
+@app.route("/graph_card_header")
+def graph_card_header():
+    return render_template('graph_card_header_right.html.j2', n_clusters=g.n_clusters)
 
 @app.route("/range_bitcoin")
 def range_bitcoin():

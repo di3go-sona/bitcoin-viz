@@ -1,4 +1,4 @@
-function update_graph_header(){
+function update_graph_card_header(){
     $(".clustered .legend-dot.wallets").each(function(){
         n = $(this).attr("cluster")
         
@@ -12,18 +12,5 @@ function update_graph_header(){
     })
 }
 
-function update_n_clusters_selector(event) {
-    v = $(event.target).val()
-    if (parseInt(v)){
-        wallets.clustering_start_button.prop("disabled",false)
-    } else {
-        wallets.clustering_start_button.prop("disabled",true)
-    }
-}
-
-$(document).on("wallets_loaded", function(){
-    $('#n_clusters').change(update_n_clusters_selector)
-    $('#n_clusters').trigger("change")
-})
 
 

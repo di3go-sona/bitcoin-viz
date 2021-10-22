@@ -2,6 +2,9 @@ html, body {
   height: 100%;
   overflow: hidden;
 }
+.card.card-styled.fh {
+  height: 100%;
+}
 
 body {
   background-color: #1e1e1ef0;
@@ -87,7 +90,11 @@ input[type="radio"] {
     height: 8px;
   }
 
+
   .slider-styled .noUi-connect {
+    background: #17a2b8;
+  }
+  #n-clusters-slider.slider-styled .noUi-connects {
     background: #17a2b8;
   }
 

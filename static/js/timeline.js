@@ -6,8 +6,8 @@ function format_date(date, isFull) {
    minutes = date.getMinutes().toString().padStart(2, "0")
    seconds = date.getSeconds().toString().padStart(2, "0")
    
-   if (isFull) return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`
-   else        return `${hours}:${minutes}:${seconds}`
+   if (isFull) return `${day}/${month}/${year} ${hours}:${minutes}`
+   else        return `${hours}:${minutes}`
 }
 
 const timeline = {
@@ -20,18 +20,18 @@ const tm_margin_y = {top: 35, right: 0, bottom: 40, left: 20},
       tm_height_y = (window.innerHeight/4.5 - tm_margin_y.top - tm_margin_y.bottom)
 
 const tm_margin_x = {top: 35, right: 20, bottom: 40, left: 0},
-      tm_width_x  = ($("#col-x-axis").width() - tm_width_y - tm_margin_y.left - tm_margin_x.right),
+      tm_width_x  = ($("#timeline").width() - tm_width_y - tm_margin_y.left - tm_margin_x.right),
       tm_height_x = (window.innerHeight/4.5 - tm_margin_x.top - tm_margin_x.bottom)
 
 // Append the svg object to the body of the page
-const tm_svg_y = d3.select("#col-y-axis")
+const tm_svg_y = d3.select("#timeline")
                 .append("svg")
                 .attr("width", tm_width_y + tm_margin_y.left + tm_margin_y.right)
                 .attr("height", tm_height_y + tm_margin_y.top + tm_margin_y.bottom)
                 .append("g") 
                 .attr("transform", `translate(${tm_margin_y.left+tm_width_y-1},${tm_margin_y.top})`)
 
-const tm_svg_x = d3.select("#col-x-axis")
+const tm_svg_x = d3.select("#timeline")
                 .append("svg")
                 .attr("width", tm_width_x + tm_margin_x.left + tm_margin_x.right)
                 .attr("height", tm_height_x + tm_margin_x.top + tm_margin_x.bottom)
@@ -85,13 +85,13 @@ function mouse_out_bar(event, d) {
 function click_bar(d) {
    clicked_bar = d3.select("#rect_"+d.hash)
    prev_clicked = d3.select(".bar.selected")
-
-   if (prev_clicked.node() != null) {
+   if (graph.loading)return
+if (prev_clicked.node() != null && prev_clicked.node() != clicked_bar.node()  ) {
       prev_clicked.transition().duration(200).attr("opacity", 0.15)
       prev_clicked.node().classList.remove("selected")
       tm_svg_x.select("#selection_rect_"+prev_clicked.data()[0].hash).remove()
    }
-   if (clicked_bar.node() != prev_clicked.node() && !loading_graph) {
+   if (clicked_bar.node() != prev_clicked.node()) {
       clicked_bar.transition().duration(200).attr("opacity", 0.8)
       clicked_bar.node().classList.add("selected")
       tm_svg_x

@@ -15,163 +15,48 @@
   </head>
 
   <body>
-
-    <div class="row mx-0">
+    <div class="container-fluid">
+   
+    <div class="row">
 
       {# Column for Filters and Clusters #}
-      <div class="col-sm-4 p-0">
+      <div class="col-4 m-0 p-0">
 
         {# Filters #}
-        <div id="filters-card" class="card card-styled m-2">
-          <div class="card-body px-0 pt-0 pb-2">
-
-            <div class="container-fluid row d-flex m-0 pt-2" style="align-items: center;">
-              Filters
-              <div class="ml-auto" role="group">
-                <button id="filters-apply-button" type="button" class="btn-sm btn-info">Apply</button>
-                <button id="filters-reset-button" type="button" class="btn-sm btn-danger">Reset</button>
-              </div>
-            </div>
-
-            <hr/>
-
-            <div class="row mx-0 px-2" style="margin-top: 2.5rem; margin-bottom: 2rem">
-              <div class="col-3" style="font-size: 15px">
-                Tx mBTC
-              </div>
-              <div class="col-8 mr-auto ml-auto">
-                <div id="no-ui-slider" class="slider-styled"></div>
-              </div>
-            </div>
-
-            <div class="row mx-0 px-2" style="margin-top: 1rem;">
-              <div class="col-3 mt-1" style="font-size: 15px">
-                Tx type
-              </div>
-              <div class="col-9 text-center">
-                  <div class="form-group form-check-inline m-0">
-                    <input type="checkbox" class="form-check-input m-2 filters-checkbox" id="1-1-transactions" checked>
-                    <label class="form-check-label" for="1-1-transactions">1-1</label>
-                  </div>
-                  <div class="form-group form-check-inline m-0">
-                    <input type="checkbox" class="form-check-input m-2 filters-checkbox" id="1-N-transactions" checked>
-                    <label class="form-check-label" for="1-N-transactions">1-N</label>
-                  </div>
-                  <div class="form-group form-check-inline m-0">
-                    <input type="checkbox" class="form-check-input m-2 filters-checkbox" id="N-1-transactions" checked>
-                    <label class="form-check-label" for="N-1-transactions">N-1</label>
-                  </div>
-                  <div class="form-group form-check-inline m-0">
-                    <input type="checkbox" class="form-check-input m-2 filters-checkbox" id="N-N-transactions" checked>
-                    <label class="form-check-label" for="N-N-transactions">N-N</label>
-                  </div>
-              </div>
-            </div>
-            
-          </div>
-        </div>
+        {% include 'filters_card.html.j2' %}
         
         {# Clusters #}
-        <div id="clusters-card" class="card card-styled m-2">
-           <div class="card-body p-0" style="display: table;">
-              <div class="container-fluid row d-flex m-0 pt-2" style="align-items: center;">
-                Clusters of wallets
-                  <select class="ml-auto" id="n_clusters" style="cursor:pointer;">
-                    <option {{ "selected" if g.n_clusters is none}} disabled >-</option>
-                  {% for i in [ 2, 3, 4, 5, 6, 7] %}
-                    <option {{ "selected" if g.n_clusters == i }} value="{{i}}">{{i}}</option>
-                  {% endfor %}
-                  </select> 
-              <div class="ml-auto" role="group">
-              <button id="clusters-start-button" type="button" class="btn-sm btn-info" >
-              
-                
-                {# Play #}
-                <div class="text" role="status" >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
-                    <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
-                  </svg>
-                </div>
-                
-                {# Spinner #}
-                <div class="spinner spinner-border spinner-border-sm text-light" role="status" style="display: None"></div>
-              </button>
-              <button id="clusters-reset-button" type="button" class="btn-sm btn-danger">Reset</button>
-            </div>
-            
-            </div>
-            <hr class='mb-0'/>
-            <div id="clusters-container" class="h-100" style="display: table-row;"></div>
-          </div>
-        </div>
-
+         {% include 'clusters_card.html.j2' %}        
+        
+        {# Wallets #}
+         {% include 'wallets_card.html.j2' %}   
       </div>
 
-      {# Column for graph #}
-      <div class="col-sm-8 p-0">
-
-        {# Graph #}
-        <div id="graph-card" class="card card-styled m-2" style="border-radius: .25rem .25rem .25rem .25rem;">
-          <div class="card-body p-0" style="display: table;">
-            {% include 'graph_header.html.j2' %}
-            <hr class="mb-0 mx-0"/>
-            <div id="graph-container" class="h-100" style="display: table-row;"></div>
-          </div>
-        </div>
-
+      <div class="col-8 ml-0 p-0">
+      {# Graph #}
+       {% include 'graph_card.html.j2' %}  
+      {# Timeline #}
+       {% include 'timeline_card.html.j2' %}
       </div>
+  
 
-    </div>
+   </div>
 
-    <div class="row mx-0">
 
-      <div id="timeline-card" class="card card-styled mx-2 mb-2 w-100" style="border-radius: .25rem .25rem .25rem .25rem;">
-        <div class="card-body p-0">
-
-          <div class="container-fluid row d-flex m-0 pt-2" style="align-items: center;">
-            <p class="p-0 m-0" id="timeline-card-title">Blockchain timeline</p>
-            {# Radio buttons inline #}  
-            <div id="radio-buttons-group" role="group">
-              <div class="form-check form-check-inline">
-                <input class="form-check-input radio_transactions" type="radio" name="inlineRadioOptions" id="radio_transactions" value="transactions" checked>
-                <label class="form-check-label" for="radio_transactions">#Tx</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input radio_bitcoins" type="radio" name="inlineRadioOptions" id="radio_bitcoins" value="bitcoins">
-                <label class="form-check-label" for="radio_bitcoins">mBTC</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input radio_size" type="radio" name="inlineRadioOptions" id="radio_size" value="size">
-                <label class="form-check-label" for="radio_size">Size</label>
-              </div>
-            </div>
-          </div>
-
-          <hr class="mx-0 mt-1 mb-3"/>
-
-          {# Timeline #}
-          <div class="row mx-1 px-3">
-            <div class="col-sm-auto p-0" id="col-y-axis">
-            </div>
-            <div class="col p-0" style="overflow: auto;" id="col-x-axis">
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
     <script src="/static/js/utils.js"></script>
     <script src="/static/js/globals.js"></script>
     <script src="/static/js/filters.js"></script>
     <script src="/static/js/timeline.js"></script>
-    <script>
-      $("#graph-card").css("height", window.innerHeight - $("#timeline-card").height() - 2*$("#graph-card").offset()["top"])
-      $("#clusters-card").css("height", $("#graph-card").height() - $("#graph-card").offset()["top"] - $("#filters-card").height())
-      $("#radio-buttons-group").css("margin-left", $("#timeline-card").width()/2 + $("#timeline-card").offset()["left"] - $("#radio-buttons-group").width()/2 - $("#timeline-card-title").width())
-    </script>
     <script src="/static/js/clusters.js"></script>
+
     <script src="/static/js/graph.js"></script>
+    <script src="/static/js/wallets.js"></script>
+
+    <script>
+      $("div.wallets").css("height", window.innerHeight - $("div.filters").height() - $("div.clusters").height() - 50)
+      $("div.graph").css("height", window.innerHeight - $("div.timeline").height() - 38)
+    </script>
+
   </body>
 </html>
 

@@ -1,0 +1,12 @@
+{# Graph #}
+{% extends "card_layout.html.j2" %}
+{% block classes %}graph{% endblock %}
+{% block header_left %}
+    Wallets and transactions Graph
+{% endblock %}
+{% block header_right %}
+ {% include "graph_card_header_right.html.j2"%}
+{% endblock %}
+{% block body %}
+    <div id="graph-container" class='h-100'></div>
+{% endblock %}

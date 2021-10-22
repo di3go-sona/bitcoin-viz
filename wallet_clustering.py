@@ -13,7 +13,7 @@ last_centroids = None
 centroids_queue = Queue(100)
 
 query = f"""
-    SELECT block_hash, wallets.*
+    SELECT block_hash, wallets.*, io.address as 'address'
     FROM 
         (SELECT DISTINCT transactions.block_hash, inputs.address
         FROM inputs, transactions
@@ -31,7 +31,7 @@ query = f"""
 """
 
 wallets_df = pd.read_sql_query(query, engine)
-wallets_data = wallets_df.drop(['addr', 'block_hash', 'balance'], axis=1).to_numpy()
+wallets_data = wallets_df.drop(['addr','address', 'block_hash', 'balance'], axis=1).to_numpy()
 X = sklearn.preprocessing.normalize(wallets_data)
 
 
@@ -81,7 +81,6 @@ def get_clustering(block):
 
     block_wallets_df = wallets_df[ block_selector ]
 
-    X = sklearn.preprocessing.normalize(wallets_data)
     _, labels, _ = sklearn.cluster.k_means(X[block_selector], len(centroids), init=centroids, max_iter=1, n_init=1)
 
     block_wallets_df = block_wallets_df.assign(cluster=labels.astype(int)   )
@@ -102,7 +101,6 @@ def get_clustering_means():
     else:
         centroids, last = centroids_queue.get(True, 2)
 
-    X = sklearn.preprocessing.normalize(wallets_data)
     _, labels, _ = sklearn.cluster.k_means(X, len(centroids), init=centroids, max_iter=1, n_init=1)
 
     wallets_df = wallets_df.assign(cluster=labels.astype(int)   )

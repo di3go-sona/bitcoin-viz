@@ -29,7 +29,7 @@ def get_transactions_ids(block):
     query = f"""
                 SELECT transactions_ext.id as id, (n_inputs+n_outputs) as n_links, tot_value, type
                 FROM transactions_ext
-                WHERE transactions_ext.block_hash = '{block}'
+                WHERE transactions_ext.block_hash = '{block}' LIMIT 500
             """
     with Session(engine) as db:
         cur = db.execute(query)
@@ -133,7 +133,7 @@ def get_wallet(wallet_id):
 
 def get_wallets(block_hash):
     query = f"""
-    SELECT block_hash, addr, pca_1 as x ,pca_2 as y
+    SELECT *, pca_1 as x ,pca_2 as y
     FROM 
         (SELECT DISTINCT transactions.block_hash, inputs.address
         FROM inputs, transactions
@@ -144,11 +144,11 @@ def get_wallets(block_hash):
         FROM outputs, transactions
         WHERE 
         outputs.transaction_id = transactions.id
-        ) AS io, wallets_pca
+        ) AS io, wallets_pca, wallets
     WHERE 
         io.block_hash = '{block_hash}'
             AND 
-        io.address = wallets_pca.addr
+        io.address = wallets_pca.addr AND wallets_pca.addr = wallets.addr 
     ORDER BY block_hash, wallets_pca.addr
     """
 

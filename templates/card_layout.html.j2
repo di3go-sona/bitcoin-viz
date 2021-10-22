@@ -1,0 +1,34 @@
+<div class="card card-styled m-2     {% block classes %}{% endblock %}">
+  {# Head #}
+  <div class="card-header d-flex align-items-center  justify-content-between p-2 align-"> 
+    {# Left #}    
+    <div class="d-inline-flex">
+    {% block header_left %}
+      Header Left
+    {% endblock %}
+    </div>
+
+      {# Center #}
+    <div class="d-inline-flex">  
+    {% block header_center %}
+      
+    {% endblock %}
+    </div>
+    
+    {# Right #}
+    <div class="d-inline-flex">  
+    {% block header_right %}
+      Header Right
+    {% endblock %}
+    </div>
+  </div>
+
+  {# Divider #}
+  <hr class="m-0" />
+  {# Body #}
+  <div class="card-body p-0">
+    {% block body %}
+      Body
+    {% endblock %}
+  </div>
+</div>

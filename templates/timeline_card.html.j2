@@ -1,0 +1,26 @@
+{% extends "card_layout.html.j2" %}
+{% block classes %}timeline{% endblock %}
+{% block header_left %}
+    Blockchain timeline 
+{% endblock %}
+{% block header_right %}
+<div class="d-inline-block float-right">
+    <div id="radio-buttons-group " role="group">
+        <div class="form-check form-check-inline">
+            <input class="form-check-input radio_transactions" type="radio" name="inlineRadioOptions" id="radio_transactions" value="transactions" checked>
+            <label class="form-check-label" for="radio_transactions">#Tx</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input radio_bitcoins" type="radio" name="inlineRadioOptions" id="radio_bitcoins" value="bitcoins">
+            <label class="form-check-label" for="radio_bitcoins">mBTC</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input radio_size" type="radio" name="inlineRadioOptions" id="radio_size" value="size">
+            <label class="form-check-label" for="radio_size">Size</label>
+        </div>
+    </div>
+</div>  
+{% endblock %}
+{% block body %}
+        <div class="m-2" style="overflow: auto;" id="timeline"></div>
+{% endblock %}
