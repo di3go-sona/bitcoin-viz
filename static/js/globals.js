@@ -4,8 +4,7 @@ const globals =
     BITCOIN_IMAGE_URL: "static/images/bitcoin_image.png"
 }
 
-var graph = {
+var graph = 
+{
     loading: false
-  }
-
-
+}
