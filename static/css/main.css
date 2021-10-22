@@ -6,6 +6,18 @@ html, body {
   height: 100%;
 }
 
+.card.card-styled.filters,
+.card.card-styled.clusters,
+.card.card-styled.wallets {
+  margin: .5rem;
+}
+
+.card.card-styled.graph,
+.card.card-styled.timeline {
+  margin: .5rem;
+  margin-left: 0;
+}
+
 body {
   background-color: #1e1e1ef0;
   font-family: Courier New;
