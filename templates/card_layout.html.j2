@@ -1,4 +1,4 @@
-<div class="card card-styled m-2     {% block classes %}{% endblock %}">
+<div class="card card-styled m-2 {% block classes %}{% endblock %}">
   {# Head #}
   <div class="card-header d-flex align-items-center  justify-content-between p-2 align-"> 
     {# Left #}    
@@ -7,14 +7,11 @@
       Header Left
     {% endblock %}
     </div>
-
       {# Center #}
     <div class="d-inline-flex">  
     {% block header_center %}
-      
     {% endblock %}
     </div>
-    
     {# Right #}
     <div class="d-inline-flex">  
     {% block header_right %}
@@ -22,7 +19,6 @@
     {% endblock %}
     </div>
   </div>
-
   {# Divider #}
   <hr class="m-0" />
   {# Body #}

@@ -1,7 +1,6 @@
 <div class="graph-header-wrapper" >
     <div class="graph-header" style="align-items: center;">
     {% if g.n_clusters is none%}
-        
         <div class="ml-auto" style="display: table;" role="group">
             <div class="form-check form-check-inline mx-0" style="display: display:table-cell; vertical-align:middle;">
                 <span class="legend-dot wallets mx-1"></span>
@@ -10,7 +9,6 @@
     {% else %}
         <div class="ml-auto clustered" style="display: table;" role="group">
             <div class="form-check form-check-inline mx-0" style="display: display:table-cell; vertical-align:middle; cursor:pointer">
-                
                 {% for i in range(g.n_clusters) %}
                     <span cluster="{{i}}" class="legend-dot wallets mx-1 "></span>
                 {% endfor %}
