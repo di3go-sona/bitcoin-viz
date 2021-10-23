@@ -1,7 +1,7 @@
-var min = 0, max = 0
-var slider_container = document.getElementById('n-tx-slider')
-var checkboxes = $("input[type='checkbox'].filters-checkbox:checked").map(function(i) { return $(this).attr("id") }).toArray()
-var timeout_filters = null
+var min = 0, max = 0;
+var slider_container = document.getElementById('n-tx-slider');
+var checkboxes = $("input[type='checkbox'].filters-checkbox:checked").map(function(i) { return $(this).attr("id") }).toArray();
+var timeout_filters = null;
 
 d3.json("/range_bitcoin").then( function(data) {
     min = data["min"]

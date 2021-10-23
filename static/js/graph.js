@@ -1,7 +1,6 @@
 var ticks = 0;
 var graph_data;
 
-
 function highlight_wallet(address) {
 
   circles = wallets.circles.filter(wallet => wallet.address == address)
@@ -346,6 +345,12 @@ $(document).ready(function(){
     }
   }
 
+  function graph_loaded() {
+    $("#filters-apply-button, #filters-reset-button").attr('disabled', false);
+    graph.loading = false;
+    $(document).trigger('graph-loaded');
+  }
+
   // Only on block changed
   function display_graph(data) {
 
@@ -404,8 +409,7 @@ $(document).ready(function(){
                         .force("charge", d3.forceManyBody().strength( d => d.type == "wa"? -100 : -400 ))
                         .alphaMin(0.2)
                         .on('end', function() { saveGraphPosition(data.block_id, nodes); 
-                                          $("#filters-apply-button, #filters-reset-button").attr('disabled', false);
-                                          graph.loading = false; });
+                                                graph_loaded(); });
           simulation.on("tick", () => {
             links
               .attr("x1", d => d.source.x)
@@ -431,8 +435,7 @@ $(document).ready(function(){
                 .attr("y1", d => nodes_dict[d['source']][1])
                 .attr("x2", d => nodes_dict[d['target']][0])
                 .attr("y2", d => nodes_dict[d['target']][1]);
-          $("#filters-apply-button, #filters-reset-button").attr('disabled', false);
-          graph.loading = false;
+                graph_loaded();
         } 
     });
   } 
@@ -458,5 +461,4 @@ $(document).ready(function(){
     });
   });
 
-  $(document).trigger('graph-loaded');
 })
