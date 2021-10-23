@@ -97,12 +97,15 @@ var wallets = {
     reset_clustering: function(){
         console.log("Reset clustering")
 
-        xhttp = new XMLHttpRequest()
+        clusters.prev_n_clusters = 2;
+        reset_clusters();
+
+        xhttp = new XMLHttpRequest();
         xhttp.open("GET", `/wallets/clusters/reset`, false);
         xhttp.send();
 
         // Stop polling for updates
-        wallets.stop_clustering()
+        wallets.stop_clustering();
 
         // Update colors
         wallets.circles
