@@ -78,6 +78,7 @@ var wallets = {
         wallets.clustering_start_button.find(".text").hide()
 
         n_clusters = parseInt(clusters.slider.get())
+        clusters.prev_n_clusters = n_clusters
         xhttp = new XMLHttpRequest()
         xhttp.open("GET", `/wallets/clusters/start?n_clusters=${n_clusters}`, true);
         xhttp.send();
