@@ -259,7 +259,7 @@ var wallets = {
         }
     },
 
-    update_visible: function(){
+    update_visible: function(event){
         t = graph.svg.attr('transform')
         re = /translate\(([0-9.-]*),([0-9.-]*)\) scale\(([0-9.-]*)\)/
 
@@ -277,7 +277,7 @@ var wallets = {
         
         
 
-        if (xmin != wallets.xmin || xmax != wallets.xmax || ymin != wallets.ymin || ymax != wallets.ymax ){
+        if ( xmin != wallets.xmin || xmax != wallets.xmax || ymin != wallets.ymin || ymax != wallets.ymax ){
             
 
             _iscontained = d3.selectAll('.graph-circle').nodes().map(n => { return [n.__data__.id,   
@@ -313,20 +313,21 @@ var wallets = {
 
             clearTimeout(wallets.rescale_lines_timer)
             wallets.rescale_lines_timer = setTimeout(function(){
-                    console.log("Updating wallets lines")
-                    wallets.lines
-                        .attr("d",  wallets.path)
-        
-                    wallets.lines_svg.selectAll("g.axis")
-                        .each(function(d) {  d3.select(this).call(d3.axisRight().ticks(wallets.LINES_TICKS).scale( wallets.lines_y[d]))}, 1500)
-        
-        
-        
-                })
+                console.log("Updating wallets lines")
+                wallets.lines.transition().duration(500)
+                    .attr("d",  wallets.path)
+    
+                wallets.lines_svg.selectAll("g.axis")
+                    .each(function(d) {  d3.select(this).transition().duration(500).call(d3.axisRight().ticks(wallets.LINES_TICKS).scale( wallets.lines_y[d]))})
+    
+    
+    
+            }, 1000)
 
 
 
-        }
+        } 
+
         wallets.xmin = xmin;
         wallets.xmax = xmax;
         wallets.ymin = ymin;
@@ -439,8 +440,4 @@ $(document).ready( function() {
     $(document).on("graph-loaded", function(){
         wallets.update_visible()
     })
-    $(document).on("clustering_changed", function(){
-        wallets.update_visible()
-    })
-
 })
