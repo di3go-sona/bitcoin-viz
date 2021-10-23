@@ -221,8 +221,9 @@ var wallets = {
             if (! wallets.update_visible_timer){
                 wallets.update_visible_timer = setInterval(wallets.update_visible, 300)
             }
+            
             $(document).trigger("wallets_loaded")
-
+            
         })
     },
 
@@ -283,7 +284,8 @@ var wallets = {
                 n.cx.baseVal.value <= xmax && 
                 n.cy.baseVal.value >= ymin &&  
                 n.cy.baseVal.value <= ymax &&
-                n.attributes.opacity.value != "0"
+                n.attributes.opacity.value != "0" &&
+                ! wallets.deselected_clusters.includes(wallets.clusters_map.get(n.__data__.id))
             ]})
 
             iscontained = new Map(_iscontained)
@@ -315,7 +317,7 @@ var wallets = {
                         .attr("d",  wallets.path)
         
                     wallets.lines_svg.selectAll("g.axis")
-                        .each(function(d) {  d3.select(this).call(d3.axisRight().ticks(wallets.LINES_TICKS).scale( wallets.lines_y[d]))}, 3000)
+                        .each(function(d) {  d3.select(this).call(d3.axisRight().ticks(wallets.LINES_TICKS).scale( wallets.lines_y[d]))}, 1500)
         
         
         
@@ -433,4 +435,11 @@ $(document).ready( function() {
     
 
     $(document).trigger("wallets_loaded")
+    $(document).on("graph-loaded", function(){
+        wallets.update_visible()
+    })
+    $(document).on("clustering_changed", function(){
+        wallets.update_visible()
+    })
+
 })
