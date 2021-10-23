@@ -95,6 +95,12 @@ input.radio_bitcoins[type="radio"]:checked {
   background-color: transparent;
 }
 
+.btn-sm.disabled {
+  background-color: white;
+  cursor: default;
+  color: black;
+}
+
 .slider-styled {
   height: 8px;
 }
