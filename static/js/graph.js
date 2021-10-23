@@ -6,9 +6,9 @@ function highlight_wallet(address) {
   circles = wallets.circles.filter(wallet => wallet.address == address)
   circles.transition()
     .duration('50')
-    // .each(function(d) {
-    //   this.classList.add("selected")
-    // })
+    .each(function(d) {
+      this.classList.add("selected")
+    })
     .attr("r",  wallets.CIRCLES_RADIUS*3  / ( wallets.transform_k || 1) )
     .attr("stroke-width",  2 )
     .style("stroke",  "#FFF" )
@@ -16,9 +16,9 @@ function highlight_wallet(address) {
   lines = wallets.lines.filter(wallet => wallet.address == address)
   lines.transition()
     .duration('50')
-    // .each(function(d) {
-    //   this.classList.add("selected")
-    // })
+    .each(function(d) {
+      this.classList.add("selected")
+    })
     .attr("stroke-width",  6)
     .attr("opacity",  1)
   
@@ -29,18 +29,18 @@ function unhighlight_wallet(address) {
   circles = wallets.circles.filter(wallet => wallet.address == address)
   circles.transition()
     .duration('50')
-    // .each(function(d) {
-    //   this.classList.remove("selected")
-    // })
+    .each(function(d) {
+      this.classList.remove("selected")
+    })
     .attr("r",  wallets.CIRCLES_RADIUS / (wallets.transform_k || 1) )
     .style("stroke",  "" )
 
   lines = wallets.lines.filter(wallet => wallet.address == address)
   lines.transition()
     .duration('50')
-    // .each(function(d) {
-    //   this.classList.remove("selected");
-    // })
+    .each(function(d) {
+      this.classList.remove("selected");
+    })
     .attr("stroke-width",  wallets.LINES_WIDTH )
     .attr("opacity",  wallets.LINES_OPACITY)
 }
