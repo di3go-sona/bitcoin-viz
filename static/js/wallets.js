@@ -12,6 +12,8 @@ var wallets = {
     LINES_WIDTH: 2,
     LINES_OPACITY: 0.2,
     CIRCLES_OPACITY: 1,
+    CIRCLES_RADIUS: 3,
+    LINES_WIDTH: 2,
 
     xmin: null,
     xmax: null,
@@ -27,9 +29,12 @@ var wallets = {
 
     update_clustering_timer: null,
     update_visible_timer : null,
+    rescale_lines_timer : null, 
+
+    CIRCLES_SCALE : 1,
 
     dimensions : [ "received_value",'deg_in',"unique_deg_in", "avg_vin",    "balance",  "avg_vout",  "unique_deg_out",  "deg_out", "total_txs"],
-    dimensions_names : new Map([ ["received_value", "BTC_IN" ],["deg_in", "TXS_IN"], ["unique_deg_in", "uTXS_IN" ], ["avg_vin", "TXS_OUT" ],    ["balance", "BALANCE" ], ["avg_vout", "AVG_OUT" ],  ["unique_deg_out", "uTXS_OUT" ],  ["deg_out", "TXS_OUT" ], ["total_txs", "TOT_TXS" ]]),
+    dimensions_names : new Map([ ["received_value", "BTC_IN" ],["deg_in", "TXS_IN"], ["unique_deg_in", "uTXS_IN" ], ["avg_vin", "AVG_VIN" ],    ["balance", "BALANCE" ], ["avg_vout", "AVG_OUT" ],  ["unique_deg_out", "uTXS_OUT" ],  ["deg_out", "TXS_OUT" ], ["total_txs", "TOT_TXS" ]]),
     deselected_clusters : [],
 
     stop_clustering : function(){
@@ -146,13 +151,15 @@ var wallets = {
 
             // Add circles X axis
             wallets.circles_x = d3.scaleLinear()
-                .domain([data_wrapper.min_x * 1.2, data_wrapper.max_x * 1.2])
-                .range([0, wallets.width]);
+                .domain([data_wrapper.min_x * 1.1, data_wrapper.max_x * 1.1])
+                .range([0, wallets.width * wallets.CIRCLES_SCALE]);
             
             // Add circles Y axis
             wallets.circles_y = d3.scaleLinear()
-                .domain([data_wrapper.min_y * 1.2, data_wrapper.max_y * 1.2])
-                .range([wallets.height /2, 0]);
+                .domain([data_wrapper.min_y * 1.1, data_wrapper.max_y * 1.1])
+                .range([wallets.height /2 * wallets.CIRCLES_SCALE, 0]);
+
+            // wallets.circles_container.attr("transform", "scale(0.5)")
 
 
             wallets.circles = wallets.circles_container
@@ -161,11 +168,13 @@ var wallets = {
                 .join("circle")
                     .attr("cx", function (d) { return wallets.circles_x(d.x); } )
                     .attr("cy", function (d) { return wallets.circles_y(d.y); } )
-                    .attr("r", 3 / ( wallets.transform_k || 1) )
+                    .attr("r", wallets.CIRCLES_RADIUS / ( wallets.transform_k || 1) )
                     .attr("cluster", function (d) { d.cluster })
                     .attr("class", "wallet-circle")
                     .style("fill",function (d) { return wallets.color(d.cluster ) })
-                    .style("opacity", 0)
+                    .attr("opacity", 0)
+
+                             
             
 
             for (i in wallets.dimensions) {
@@ -187,8 +196,8 @@ var wallets = {
                     .attr("d",  wallets.path)
                     .style("fill","none")
                     .style("stroke", function(d){ return( wallets.color(d.cluster ))} )
-                    .style("stroke-width", 2 )
-                    .style("opacity", 0)
+                    .attr("stroke-width", 2 )
+                    .attr("opacity", 0)
             
             // wallets.lines_svg.selectAll("g.axis").call(yAxis)
             // Draw the axis:
@@ -199,9 +208,6 @@ var wallets = {
                     .attr("class", "axis")
                     // I translate this element to its right position on the x axis
                     .attr("transform", function(d) { return "translate(" + wallets.lines_x(d) + ") scale(0.92)"; })
-                    // And I build the axis with the call function
-                    .each(function(d) { d3.select(this).call(d3.axisRight().ticks(wallets.LINES_TICKS).scale( wallets.lines_y[d])) })
-                    // Add axis title
                     .append("text")
                         .style("text-anchor", "middle")
                         .attr("y", -5)
@@ -237,15 +243,15 @@ var wallets = {
     },
 
     _color :  d3.scaleOrdinal()
-        .domain([0, 1, 2, 3, 4, 5, 6, 7,  null])
+        .domain([0, 1, 2, 3, 4, 5, 6, 7,  null, undefined])
         // .range(["#ff1f1f", "#78ff1f", "#1f5aff", "#ff961f", "#1fffb4", "#d21fff", "#f0ff1f", "#1fd2ff", "#ff1fb4"]),
-        .range([ "#dc3545",  "#4576ff", "#ffa845", "#45ffc1", "#7645ff", "#f3ff45", "#45daff", "#ff45c1", "#ccc"]),
+        .range([ "#dc3545",  "#4576ff", "#ffa845", "#45ffc1", "#7645ff", "#f3ff45", "#45daff", "#ff45c1", "#ccc","#ccc"]),
 
     color: function(cluster_id){
         c =  wallets._color(cluster_id)
 
         if (wallets.deselected_clusters.includes(cluster_id) ){
-           return d3.color(c).darker(3) 
+           return d3.color(c).darker(6) 
         } else {
             return c 
         }
@@ -270,7 +276,7 @@ var wallets = {
         
 
         if (xmin != wallets.xmin || xmax != wallets.xmax || ymin != wallets.ymin || ymax != wallets.ymax ){
-
+            
 
             _iscontained = d3.selectAll('.graph-circle').nodes().map(n => { return [n.__data__.id,   
                 n.cx.baseVal.value >= xmin &&  
@@ -296,25 +302,34 @@ var wallets = {
             }
             
             wallets.circles
-                .style('opacity', d => {return iscontained.get(d.address) == true ? wallets.CIRCLES_OPACITY: 0})
+                .attr('opacity', d => {return iscontained.get(d.address) == true ? wallets.CIRCLES_OPACITY: 0})
             
             wallets.lines
-                .style('opacity', d => {return iscontained.get(d.address) == true ? wallets.LINES_OPACITY: 0})
+                .attr('opacity', d => {return iscontained.get(d.address) == true ? wallets.LINES_OPACITY: 0})
 
-            // wallets.lines
-            //     .style('opacity', d => {return iscontained.get(d.address) == true ? 1: 0})
-            //     .attr("d",  wallets.path)
 
-            // wallets.lines_svg.selectAll("g.axis")
-            //     .each(function(d) {  d3.select(this).call(d3.axisRight().ticks(wallets.LINES_TICKS).scale( wallets.lines_y[d])) })
+            clearTimeout(wallets.rescale_lines_timer)
+            wallets.rescale_lines_timer = setTimeout(function(){
+                    console.log("Updating wallets lines")
+                    wallets.lines
+                        .attr("d",  wallets.path)
+        
+                    wallets.lines_svg.selectAll("g.axis")
+                        .each(function(d) {  d3.select(this).call(d3.axisRight().ticks(wallets.LINES_TICKS).scale( wallets.lines_y[d]))}, 3000)
+        
+        
+        
+                })
 
 
 
         }
-        xmin = wallets.xmin;
-        xmax = wallets.xmax;
-        ymin = wallets.ymin;
-        ymax = wallets.ymax;
+        wallets.xmin = xmin;
+        wallets.xmax = xmax;
+        wallets.ymin = ymin;
+        wallets.ymax = ymax;
+
+
     },
     path : function (d) {
         return d3.line()(wallets.dimensions.map(function(p) { return [wallets.lines_x(p), wallets.lines_y[p](d[p])]; }));
@@ -383,10 +398,10 @@ $(document).ready( function() {
 
 
 
-    d3.zoom()
-        .scaleExtent([1, 10])
-        .on("zoom", wallets.handleZoom);
-
+    wallets.zoom = d3.zoom()
+        .on("zoom", wallets.handleZoom)
+        
+        
 
 
 

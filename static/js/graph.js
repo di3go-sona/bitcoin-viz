@@ -1,6 +1,52 @@
 var ticks = 0;
 var graph_data;
 
+
+function highlight_wallet(address) {
+
+  circles = wallets.circles.filter(wallet => wallet.address == address)
+  circles.transition()
+    .duration('50')
+    // .each(function(d) {
+    //   this.classList.add("selected")
+    // })
+    .attr("r",  wallets.CIRCLES_RADIUS*3  / ( wallets.transform_k || 1) )
+    .attr("stroke-width",  2 )
+    .style("stroke",  "#FFF" )
+
+  lines = wallets.lines.filter(wallet => wallet.address == address)
+  lines.transition()
+    .duration('50')
+    // .each(function(d) {
+    //   this.classList.add("selected")
+    // })
+    .attr("stroke-width",  6)
+    .attr("opacity",  1)
+  
+}
+
+function unhighlight_wallet(address) {
+
+  circles = wallets.circles.filter(wallet => wallet.address == address)
+  circles.transition()
+    .duration('50')
+    // .each(function(d) {
+    //   this.classList.remove("selected")
+    // })
+    .attr("r",  wallets.CIRCLES_RADIUS / (wallets.transform_k || 1) )
+    .style("stroke",  "" )
+
+  lines = wallets.lines.filter(wallet => wallet.address == address)
+  lines.transition()
+    .duration('50')
+    // .each(function(d) {
+    //   this.classList.remove("selected");
+    // })
+    .attr("stroke-width",  wallets.LINES_WIDTH )
+    .attr("opacity",  wallets.LINES_OPACITY)
+}
+
+
 NODE_RADIUS = 18;
 LINK_LEN = 80;
 
@@ -200,7 +246,7 @@ $(document).ready(function(){
   }
 
   function mouse_over_node(event, d) {
-
+    // if($(`circle.graph-circle[node_id='${d['id']}']`).attr("opacity") == "0") return;
     g_tooltip.html(`${d['type'] === 'wa'? 'Address' : 'Tx id'}: ${d['id']}`);
 
     if (d['type'] === 'wa') {
@@ -231,24 +277,33 @@ $(document).ready(function(){
             </ul>`);
       }
     }
-  }
 
-  function mouse_move_node(event, d) {
+    // Graph Highlight
+
+    highlight_wallet(d.id)
+    
+
     tooltip_width = g_tooltip.node().getBoundingClientRect().width;
     tooltip_height = g_tooltip.node().getBoundingClientRect().height;
     
     g_tooltip.transition()
           .duration(200)
-          .style('opacity', 0.9)
+          .style("opacity", 0.9)
           .style("color", "white")
-          .style('left', (event.pageX < ($("#graph-container").offset()['left'] + $("#graph-container").width()/2)) ? (event.pageX + 2)+'px' : (event.pageX - 2 - tooltip_width)+'px')
-          .style('top', (event.pageY < ($("#graph-container").offset()['top'] + $("#graph-container").height()/2)) ? (event.pageY + 15)+'px' : (event.pageY - tooltip_height - 2)+'px')
-  }
+          .style('left',   $("#graph-container").offset()['left'] + $("#graph-container").width() - tooltip_width + 'px')
+          .style('top', $("#graph-container").offset()['top'] + 'px')
 
+
+    console.log()
+  }
   function mouse_out_node(event, d) {
+    // if($(`circle.graph-circle[node_id='${d['id']}']`).attr("opacity") == "0") return;
     g_tooltip.transition()
-          .duration(500)
-          .style("opacity", 0)
+    .duration(200).style("opacity", 0) //.transition()
+    //       .duration(1500)
+          
+    
+    unhighlight_wallet(d.id)
   }
 
   var counter_per_tx = null;
@@ -331,7 +386,6 @@ $(document).ready(function(){
                   .attr("fill", n => node_color(n))
                   // .call(drag(simulation))
                   .on("mouseover", mouse_over_node)
-                  .on("mousemove", mouse_move_node)
                   .on("mouseout", mouse_out_node);
 
     // On block changed we must respect the filters applied
