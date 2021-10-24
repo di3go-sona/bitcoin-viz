@@ -28,7 +28,7 @@ var wallets = {
     lines_y : {},
 
     update_clustering_timer: null,
-    update_visible_timer : null,
+    update_visibility_timer : null,
     rescale_lines_timer : null, 
 
     CIRCLES_SCALE : 1,
@@ -67,7 +67,7 @@ var wallets = {
             if ( data_wrapper.last ) {
                 wallets.stop_clustering();
             }
-            $(document).trigger("clustering_changed")
+            $(document).trigger("clustering-changed")
         })
     },
 
@@ -118,16 +118,15 @@ var wallets = {
         // Remove selected clusters
         wallets.deselected_clusters = []
 
-        $(document).trigger("clustering_reset")
+        $(document).trigger("clustering-reset")
     },
 
     handleZoom: function(e) {
-        // var new_XScale = e.transform.rescaleX(wallets.circles_x)
-        // var new_yScale = e.transform.rescaleY(wallets.circles_y)
+        var new_XScale = e.transform.rescaleX(wallets.circles_x)
+        var new_yScale = e.transform.rescaleY(wallets.circles_y)
 
-        // update axes with these new boundaries
-        // wallets.circles_x_axis.call(d3.axisTop(new_XScale))
-        // wallets.circles_y_axis.call(d3.axisRight(new_yScale))
+        wallets.circles_x_axis.call(d3.axisTop(new_XScale))
+        wallets.circles_y_axis.call(d3.axisRight(new_yScale))
 
         wallets.circles_container.attr("transform", e.transform)
 
@@ -183,7 +182,7 @@ var wallets = {
 
             for (i in wallets.dimensions) {
                 p = wallets.dimensions[i]
-                wallets.lines_y[p] = d3.scaleSymlog().clamp(true)
+                wallets.lines_y[p] = d3.scaleSymlog()
                     .domain( [Math.min(...data.map( d => d[p])) , Math.max(...data.map( d => d[p])) ] ) 
                     .range([0,wallets.height/2 - wallets.lines_margin.top - wallets.lines_margin.bot ])
             }
@@ -211,7 +210,7 @@ var wallets = {
                 .append("g")
                     .attr("class", "axis")
                     // I translate this element to its right position on the x axis
-                    .attr("transform", function(d) { return "translate(" + wallets.lines_x(d) + ") scale(0.92)"; })
+                    .attr("transform", function(d) { return "translate(" + wallets.lines_x(d) + ") "; })
                     .append("text")
                         .style("text-anchor", "middle")
                         .attr("y", -5)
@@ -222,8 +221,8 @@ var wallets = {
             if (wallets.update_clustering_timer){
                 wallets.update_clustering_timer = setInterval(wallets.update_clustering, 500)
             }
-            if (! wallets.update_visible_timer){
-                wallets.update_visible_timer = setInterval(wallets.update_visible, 300)
+            if (! wallets.update_visibility_timer){
+                wallets.update_visibility_timer = setInterval(wallets.update_visibility, 300)
             }
             
             $(document).trigger("wallets_loaded")
@@ -244,13 +243,13 @@ var wallets = {
             .filter( d => {return d.cluster == cluster_id })
             .style('fill', d => { return wallets.color(d.cluster) } )
 
-        $(document).trigger("clustering_changed")
+        $(document).trigger("clustering-changed")
     },
 
     _color :  d3.scaleOrdinal()
         .domain([0, 1, 2, 3, 4, 5, 6, 7,  null, undefined])
         // .range(["#ff1f1f", "#78ff1f", "#1f5aff", "#ff961f", "#1fffb4", "#d21fff", "#f0ff1f", "#1fd2ff", "#ff1fb4"]),
-        .range([ "#dc3545",  "#4576ff", "#ffa845", "#45ffc1", "#7645ff", "#f3ff45", "#45daff", "#ff45c1", "#ccc","#ccc"]),
+        .range([ "#0000ff",  "green", "#ff4500","#ffd700", "#ff1493", "#87cefa", "#45daff", "#8b4513", "#ccc","#ccc"]),
 
     color: function(cluster_id){
         c =  wallets._color(cluster_id)
@@ -262,7 +261,7 @@ var wallets = {
         }
     },
 
-    update_visible: function(event){
+    update_visibility: function(event, changed){
         t = graph.svg.attr('transform')
         re = /translate\(([0-9.-]*),([0-9.-]*)\) scale\(([0-9.-]*)\)/
 
@@ -280,7 +279,7 @@ var wallets = {
         
         
 
-        if ( xmin != wallets.xmin || xmax != wallets.xmax || ymin != wallets.ymin || ymax != wallets.ymax ){
+        if ( wallets.lines_y && ( changed || xmin != wallets.xmin || xmax != wallets.xmax || ymin != wallets.ymin || ymax != wallets.ymax )){
             
 
             _iscontained = d3.selectAll('.graph-circle').nodes().map(n => { return [n.__data__.id,   
@@ -439,8 +438,23 @@ $(document).ready( function() {
     });
     
 
-    $(document).trigger("wallets_loaded")
-    $(document).on("graph-loaded", function(){
-        wallets.update_visible()
+
+    $(document).on("clustering-changed-post", function(){
+        wallets.update_visibility(null, true)
+
     })
+    $(document).on("clustering-reset-post", function(){
+        wallets.update_visibility(null, true)
+
+    })
+    $(document).on("graph-loaded", function(){
+        wallets.update_visibility(null, true)
+
+    })
+
+    $(document).on("filters-changed-post", function() {
+        wallets.update_visibility(null, true)
+    })
+
+    $(document).trigger("wallets_loaded")
 })

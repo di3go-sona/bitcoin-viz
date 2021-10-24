@@ -253,6 +253,6 @@ $("input[type='radio']").click(function(){
    load_data(min, max, checkboxes);
 })
 
-$(document).on("filters_changed", function(event) {
+$(document).on("filters-changed", function(event) {
    load_data(min, max, checkboxes);
 });

@@ -75,14 +75,17 @@ $(document).ready(function(){
     d3.selectAll('.graph-circle').attr("fill", d => {return node_color(d)});
   }
 
-  $(document).on("clustering_changed",function(){
+  $(document).on("clustering-changed",function(){
     graph.svg.selectAll('circle').data().forEach(d=> {  d.cluster = wallets.clusters_map.get(d.id) });
     update_colors();
+    $(document).trigger("clustering-changed-post")
   })
 
-  $(document).on("clustering_reset",function(){
+  $(document).on("clustering-reset",function(){
     $(".graph-header").parent().load('/graph_card_header', null, update_graph_card_header);
     update_colors();
+    $(document).trigger("clustering-reset-post")
+    
   })
 
   $(document).on("clustering_started",function(){
@@ -446,8 +449,9 @@ $(document).ready(function(){
     graph.svg.selectAll("g").remove();
   }
 
-  $(document).on("filters_changed", function() {
+  $(document).on("filters-changed", function() {
     apply_fitlers_graph();
+    $(document).trigger("filters-changed-post")
   });
 
   $(document).on("block_changed", function() {

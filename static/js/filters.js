@@ -91,7 +91,7 @@ $("#filters-apply-button").click(function() {
         min = min_selected
         max = max_selected
         checkboxes = checkboxes_selected
-        $(document).trigger("filters_changed")
+        $(document).trigger("filters-changed")
     }
 })
 
@@ -104,7 +104,7 @@ $("#filters-reset-button").click(function() {
     c.prop('checked', true)
     checkboxes = c.map(function(i) { return $(this).attr("id") }).toArray()
 
-    $(document).trigger("filters_changed")
+    $(document).trigger("filters-changed")
 })
 
 // Copied from internet lol for merging tooltips
