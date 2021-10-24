@@ -29,7 +29,7 @@ def get_transactions_ids(block):
     query = f"""
                 SELECT transactions_ext.id as id, (n_inputs+n_outputs) as n_links, tot_value, type
                 FROM transactions_ext
-                WHERE transactions_ext.block_hash = '{block}' LIMIT 500
+                WHERE transactions_ext.block_hash = '{block}'
             """
     with Session(engine) as db:
         cur = db.execute(query)

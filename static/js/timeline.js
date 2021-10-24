@@ -1,10 +1,10 @@
 function format_date(date, isFull) {
-   year = date.getFullYear();
+   year = date.getFullYear().toString().substr(-2);
    month = date.getMonth().toString().padStart(2, "0");
    day = date.getDay().toString().padStart(2, "0");
    hours = date.getHours().toString().padStart(2, "0");
    minutes = date.getMinutes().toString().padStart(2, "0");
-   seconds = date.getSeconds().toString().padStart(2, "0");
+   // seconds = date.getSeconds().toString().padStart(2, "0");
    
    if (isFull) return `${day}/${month}/${year} ${hours}:${minutes}`;
    else        return `${hours}:${minutes}`;

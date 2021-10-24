@@ -301,9 +301,7 @@ $(document).ready(function(){
   function mouse_out_node(event, d) {
     // if($(`circle.graph-circle[node_id='${d['id']}']`).attr("opacity") == "0") return;
     g_tooltip.transition()
-    .duration(200).style("opacity", 0) //.transition()
-    //       .duration(1500)
-          
+              .duration(200).style("opacity", 0)
     
     unhighlight_wallet(d.id)
   }
