@@ -237,11 +237,6 @@ $(document).ready(function(){
     var wallets_show = wallets.filter(w => links_show_ids_source.includes($(w).attr("node_id")) || links_show_ids_target.includes($(w).attr("node_id")))
     var wallets_hide = wallets.filter(w => !links_show_ids_source.includes($(w).attr("node_id")) && !links_show_ids_target.includes($(w).attr("node_id")))
 
-    console.log(txs_show);
-    console.log(txs_hide);
-    console.log(txs_show.filter(t => $(t).attr("opacity") == "0"));
-    console.log(txs_hide.filter(t => $(t).attr("opacity") == "0"));
-    
     $(txs_show.filter(t => $(t).attr("opacity") == "0")).attr("opacity", 1);
     $(txs_hide.filter(t => $(t).attr("opacity") == "1")).attr("opacity", 0);
 

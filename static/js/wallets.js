@@ -20,7 +20,6 @@ var wallets = {
     ymin: null,
     ymax: null,
 
-
     clusters_map: new Map(),
     transform : null, 
     circles_svg : null,
@@ -33,8 +32,8 @@ var wallets = {
 
     CIRCLES_SCALE : 1,
 
-    dimensions : [ "received_value",'deg_in',"unique_deg_in", "avg_vin",    "balance",  "avg_vout",  "unique_deg_out",  "deg_out", "total_txs"],
-    dimensions_names : new Map([ ["received_value", "BTC_IN" ],["deg_in", "TXS_IN"], ["unique_deg_in", "uTXS_IN" ], ["avg_vin", "AVG_VIN" ],    ["balance", "BALANCE" ], ["avg_vout", "AVG_OUT" ],  ["unique_deg_out", "uTXS_OUT" ],  ["deg_out", "TXS_OUT" ], ["total_txs", "TOT_TXS" ]]),
+    dimensions : [ "received_value", 'deg_in', "unique_deg_in", "avg_vin", "balance", "avg_vout", "unique_deg_out", "deg_out", "total_txs"],
+    dimensions_names : new Map([ ["received_value", "BTC_IN" ], ["deg_in", "TXS_IN"], ["unique_deg_in", "uTXS_IN" ], ["avg_vin", "AVG_VIN" ], ["balance", "BALANCE" ], ["avg_vout", "AVG_OUT" ], ["unique_deg_out", "uTXS_OUT" ], ["deg_out", "TXS_OUT" ], ["total_txs", "TOT_TXS" ]]),
     deselected_clusters : [],
 
     stop_clustering : function(){
@@ -123,19 +122,6 @@ var wallets = {
         $(document).trigger("clustering-reset")
     },
 
-    // handleZoom: function(e) {
-    //     var new_XScale = e.transform.rescaleX(wallets.circles_x)
-    //     var new_yScale = e.transform.rescaleY(wallets.circles_y)
-
-    //     wallets.circles_x_axis.call(d3.axisTop(new_XScale))
-    //     wallets.circles_y_axis.call(d3.axisRight(new_yScale))
-
-    //     wallets.circles_container.attr("transform", e.transform)
-
-    //     // wallets.circles.selectAll('circle')
-    //     //     .attr("r", 3 / ( e.transform.k || 1) )
-    // },
-
     //Read the data
     load_wallets: function(block){
 
@@ -156,16 +142,23 @@ var wallets = {
 
             // Add circles X axis
             wallets.circles_x = d3.scaleLinear()
-                .domain([data_wrapper.min_x * 1.1, data_wrapper.max_x * 1.1])
+                .domain([data_wrapper.min_x * 1.2, data_wrapper.max_x * 1.1])
                 .range([0, wallets.width * wallets.CIRCLES_SCALE]);
             
             // Add circles Y axis
             wallets.circles_y = d3.scaleLinear()
-                .domain([data_wrapper.min_y * 1.1, data_wrapper.max_y * 1.1])
-                .range([wallets.height /2 * wallets.CIRCLES_SCALE, 0]);
+                .domain([data_wrapper.min_y * 1.4, data_wrapper.max_y * 1.1])
+                .range([wallets.height / 2 * wallets.CIRCLES_SCALE, 0]);
 
-            // wallets.circles_container.attr("transform", "scale(0.5)")
+            wallets.x_axis = wallets.circles_svg.append("g")
+                .attr("class", "circle-axis")
+                .attr("transform", `translate(0, ${wallets.height/2})`)
+                .call(d3.axisTop(wallets.circles_x))
 
+            wallets.y_axis = wallets.circles_svg.append("g")
+                .attr("class", "circle-axis")
+                .attr("transform", `translate(-2, -1)`)
+                .call(d3.axisRight(wallets.circles_y))
 
             wallets.circles = wallets.circles_container
                 .selectAll("Dummy")
@@ -189,7 +182,6 @@ var wallets = {
             }
             
             // Build the X scale -> it find the best position for each Y axis
-
 
             wallets.lines = wallets.lines_container.append("g")
                 .selectAll(null)
@@ -230,7 +222,6 @@ var wallets = {
             $(document).trigger("wallets_loaded")
         })
     },
-
 
     toggle_cluster : function(cluster_id){
         if (graph.loading) return;
@@ -313,12 +304,12 @@ var wallets = {
             clearTimeout(wallets.rescale_lines_timer)
             wallets.rescale_lines_timer = setTimeout(function(){
                 console.log("Updating wallets lines")
-                wallets.lines
-                    // .transition().duration(500)
-                    .attr("d",  wallets.path)
     
                 wallets.lines_svg.selectAll("g.axis")
-                    .each(function(d) {  d3.select(this).transition().duration(500).call(d3.axisRight().ticks(wallets.LINES_TICKS).scale( wallets.lines_y[d]))})
+                    .each(function(d) { d3.select(this).call(d3.axisRight().ticks(wallets.LINES_TICKS).scale(wallets.lines_y[d])) })
+                wallets.lines
+                    .attr("d",  wallets.path)
+                    
             }, 1000)
         } 
 
@@ -327,6 +318,7 @@ var wallets = {
         wallets.ymin = ymin;
         wallets.ymax = ymax;
     },
+
     path : function (d) {
         return d3.line()(wallets.dimensions.map(function(p) { return [wallets.lines_x(p), wallets.lines_y[p](d[p])]; }));
     }
@@ -341,7 +333,6 @@ $(document).ready( function() {
 
     wallets.clustering_start_button.click(wallets.start_clustering)
     wallets.clustering_reset_button.click(wallets.reset_clustering)
-
 
     wallets.lines_margin = {left:30, top:20, right:50, bot:10}
     update_graph_card_header()
@@ -367,32 +358,19 @@ $(document).ready( function() {
             .attr("transform",
                 `translate(${wallets.lines_margin.left},${wallets.lines_margin.top})`);
 
-    wallets.circles_container = wallets.circles_svg
-            // .append("g")
-            // .attr("clip-path", "url(#clip-clusters)")
-            .append("g")
+    wallets.circles_container = wallets.circles_svg.append("g")
 
     wallets.lines_x = d3.scalePoint()
         .range([0, wallets.width - wallets.lines_margin.left - wallets.lines_margin.right ])
         .domain(wallets.dimensions);
     
-    // wallets.circles_svg.append("clipPath")
-    //     .attr("id", "clip-clusters")
-    //     .append("rect")
-    //         .attr("x", wallets.margin_left + 25)
-    //         .attr("y", wallets.margin_top)
-    //         .attr("width", wallets.width - wallets.margin_left - wallets.margin_right - 15)
-    //         .attr("height", wallets.height /2 - wallets.margin_top - wallets.margin_bottom - 15)
-
-    // wallets.zoom = d3.zoom()
-    //     .on("zoom", wallets.handleZoom)
-        
-    // wallets.circles_svg.call(d3.zoom().on('zoom', wallets.handleZoom))
-
     $(document).on("block_changed", function() {
         
         if (wallets.update_clustering_timer) clearInterval(wallets.update_clustering_timer)
-        if (wallets.circles) wallets.circles.remove()
+        if (wallets.circles) { 
+            wallets.circles_svg.selectAll("g.circle-axis").remove()
+            wallets.circles.remove()
+        }
         if (wallets.lines) wallets.lines_container.selectAll("g").remove()
 
         wallets.load_wallets(timeline.current_block)
