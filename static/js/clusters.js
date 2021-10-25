@@ -33,6 +33,5 @@ $(document).ready(function() {
     clusters.slider.on('set.two', set_timer_reset_clusters);
     clusters.slider.on('slide.two', set_n_clusters_value);
     clusters.prev_n_clusters = parseInt($("#n_clusters_value").text());
-    console.log(clusters.prev_n_clusters);
     reset_clusters();
 })

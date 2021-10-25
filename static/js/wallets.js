@@ -10,7 +10,7 @@ const percentile = (arr, val) =>
 var wallets = {
     LINES_TICKS :5,
     LINES_WIDTH: 2,
-    LINES_OPACITY: 0.2,
+    LINES_OPACITY: 0.4,
     CIRCLES_OPACITY: 1,
     CIRCLES_RADIUS: 3,
     LINES_WIDTH: 2,
@@ -123,18 +123,18 @@ var wallets = {
         $(document).trigger("clustering-reset")
     },
 
-    handleZoom: function(e) {
-        var new_XScale = e.transform.rescaleX(wallets.circles_x)
-        var new_yScale = e.transform.rescaleY(wallets.circles_y)
+    // handleZoom: function(e) {
+    //     var new_XScale = e.transform.rescaleX(wallets.circles_x)
+    //     var new_yScale = e.transform.rescaleY(wallets.circles_y)
 
-        wallets.circles_x_axis.call(d3.axisTop(new_XScale))
-        wallets.circles_y_axis.call(d3.axisRight(new_yScale))
+    //     wallets.circles_x_axis.call(d3.axisTop(new_XScale))
+    //     wallets.circles_y_axis.call(d3.axisRight(new_yScale))
 
-        wallets.circles_container.attr("transform", e.transform)
+    //     wallets.circles_container.attr("transform", e.transform)
 
-        // wallets.circles.selectAll('circle')
-        //     .attr("r", 3 / ( e.transform.k || 1) )
-    },
+    //     // wallets.circles.selectAll('circle')
+    //     //     .attr("r", 3 / ( e.transform.k || 1) )
+    // },
 
     //Read the data
     load_wallets: function(block){
@@ -384,38 +384,35 @@ $(document).ready( function() {
     //         .attr("width", wallets.width - wallets.margin_left - wallets.margin_right - 15)
     //         .attr("height", wallets.height /2 - wallets.margin_top - wallets.margin_bottom - 15)
 
-    wallets.zoom = d3.zoom()
-        .on("zoom", wallets.handleZoom)
+    // wallets.zoom = d3.zoom()
+    //     .on("zoom", wallets.handleZoom)
         
-    wallets.circles_svg.call(d3.zoom().on('zoom', wallets.handleZoom))
+    // wallets.circles_svg.call(d3.zoom().on('zoom', wallets.handleZoom))
 
     $(document).on("block_changed", function() {
         
         if (wallets.update_clustering_timer) clearInterval(wallets.update_clustering_timer)
         if (wallets.circles) wallets.circles.remove()
-        if (wallets.lines) wallets.lines.remove()
+        if (wallets.lines) wallets.lines_container.selectAll("g").remove()
 
         wallets.load_wallets(timeline.current_block)
     });
     
-
-
     $(document).on("clustering-changed-post", function(){
         wallets.update_visibility(null, true)
-
     })
+
     $(document).on("clustering-reset-post", function(){
         wallets.update_visibility(null, true)
-
     })
+
     $(document).on("graph-loaded", function(){
         wallets.update_visibility(null, true)
-
     })
 
     $(document).on("filters-changed-post", function() {
         wallets.update_visibility(null, true)
     })
 
-    $(document).trigger("wallets_loaded")
+    // $(document).trigger("wallets_loaded")
 })

@@ -237,14 +237,19 @@ $(document).ready(function(){
     var wallets_show = wallets.filter(w => links_show_ids_source.includes($(w).attr("node_id")) || links_show_ids_target.includes($(w).attr("node_id")))
     var wallets_hide = wallets.filter(w => !links_show_ids_source.includes($(w).attr("node_id")) && !links_show_ids_target.includes($(w).attr("node_id")))
 
-    $(txs_show).attr("opacity", 1);
-    $(txs_hide).attr("opacity", 0);
+    console.log(txs_show);
+    console.log(txs_hide);
+    console.log(txs_show.filter(t => $(t).attr("opacity") == "0"));
+    console.log(txs_hide.filter(t => $(t).attr("opacity") == "0"));
+    
+    $(txs_show.filter(t => $(t).attr("opacity") == "0")).attr("opacity", 1);
+    $(txs_hide.filter(t => $(t).attr("opacity") == "1")).attr("opacity", 0);
 
-    $(links_show).attr("opacity", 1);
-    $(links_hide).attr("opacity", 0);
+    $(links_show.filter(l => $(l).attr("opacity") == "0")).attr("opacity", 1);
+    $(links_hide.filter(l => $(l).attr("opacity") == "1")).attr("opacity", 0);
 
-    $(wallets_show).attr("opacity", 1);
-    $(wallets_hide).attr("opacity", 0);
+    $(wallets_show.filter(w => $(w).attr("opacity") == "0")).attr("opacity", 1);
+    $(wallets_hide.filter(w => $(w).attr("opacity") == "1")).attr("opacity", 0);
   }
 
   function mouse_over_node(event, d) {
@@ -370,6 +375,7 @@ $(document).ready(function(){
                   .attr("target", l => l.target)
                   .attr("class", "graph-line")
                   .attr("stroke-width", 2)
+                  .attr("opacity", 1)
                   .attr("marker-end", l => { if (l.type=='out') 
                                               {return `url(${new URL(`#arrow-in`, location)})`}
                                             else 
@@ -390,7 +396,7 @@ $(document).ready(function(){
                   .attr("r", NODE_RADIUS)
                   .attr("cursor", "pointer")
                   .attr("fill", n => node_color(n))
-                  // .call(drag(simulation))
+                  .attr("opacity", 1)
                   .on("mouseover", mouse_over_node)
                   .on("mouseout", mouse_out_node);
 
@@ -458,7 +464,12 @@ $(document).ready(function(){
   });
 
   $(document).on("wallets_loaded", function() {
-    d3.json(`/graph?&block=${timeline.current_block}`).then(function(data) {
+    if (!timeline.current_block){
+      var endpoint = d3.json("/graph")
+    } else {
+        var endpoint = d3.json(`/graph?&block=${timeline.current_block}`)
+    }
+    endpoint.then(function(data) {
       display_graph(data);
     });
   });
