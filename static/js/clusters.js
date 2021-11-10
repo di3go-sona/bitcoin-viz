@@ -4,7 +4,7 @@ var clusters = {
         'start' : 2,     
         range: {
             'min': 2,
-            'max': 7
+            'max': 8
         },
         step: 1,
         format: wNumb({

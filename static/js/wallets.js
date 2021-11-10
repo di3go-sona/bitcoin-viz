@@ -10,7 +10,7 @@ const percentile = (arr, val) =>
 var wallets = {
     LINES_TICKS :5,
     LINES_WIDTH: 2,
-    LINES_OPACITY: 0.4,
+    LINES_OPACITY: 0.2,
     CIRCLES_OPACITY: 1,
     CIRCLES_RADIUS: 3,
     LINES_WIDTH: 2,
@@ -33,8 +33,15 @@ var wallets = {
     CIRCLES_SCALE : 1,
 
     dimensions : [ "received_value", 'deg_in', "unique_deg_in", "avg_vin", "balance", "avg_vout", "unique_deg_out", "deg_out", "total_txs"],
-    dimensions_names : new Map([ ["received_value", "BTC_IN" ], ["deg_in", "TXS_IN"], ["unique_deg_in", "uTXS_IN" ], ["avg_vin", "AVG_VIN" ], ["balance", "BALANCE" ], ["avg_vout", "AVG_OUT" ], ["unique_deg_out", "uTXS_OUT" ], ["deg_out", "TXS_OUT" ], ["total_txs", "TOT_TXS" ]]),
-    deselected_clusters : [],
+    dimensions_names : new Map([ ["received_value", "<text y='-5' class='green'>TOT(&#8383;)</text>" ],
+                                 ["deg_in", "<text y='-5' class='green'>#TXS</text>"], ["unique_deg_in", "<text y='-5' class='green'>#uTXS</text>" ],
+                                 ["avg_vin", "<text y='-5' class='green'>AVG(&#8383;) </text>" ],
+                                 ["balance", "<text y='-5'>BAL(&#8383;)</text>" ],
+                                 ["avg_vout", "<text y='-5' class='red'> AVG(&#8383;) </text>" ],
+                                 ["unique_deg_out", "<text y='-5' class='red'>#uTXS </text>" ],
+                                 ["deg_out", "<text y='-5' class='red'>#TXS </text>" ],
+                                 ["total_txs", "<text y='-5'>#TXS</text>" ]]),
+    deselected_clusters : [],  
 
     stop_clustering : function(){
         console.log("Ended clustering")
@@ -79,19 +86,22 @@ var wallets = {
 
         n_clusters = parseInt(clusters.slider.get())
         clusters.prev_n_clusters = n_clusters
-        xhttp = new XMLHttpRequest()
-        xhttp.open("GET", `/wallets/clusters/start?n_clusters=${n_clusters}`, true);
-        xhttp.send();
+        
+        $.ajax( `/wallets/clusters/start?n_clusters=${n_clusters}`).then(function(){
 
         // Update colors
         wallets.circles_svg.selectAll(".wallet-circle")
                 .style("fill",function (d) { return wallets.color(null); }) 
         wallets.lines_svg.selectAll(".wallet-line")
                 .style("stroke",function (d) { return wallets.color(null); }) 
-        
+
         // Start polling for updates
         wallets.update_clustering_timer = setInterval(wallets.update_clustering, 300)
         setTimeout(d => {$(document).trigger("clustering_started")}, 300)
+        
+        })
+
+
     },
 
     reset_clustering: function(){
@@ -172,13 +182,23 @@ var wallets = {
                     .style("fill",function (d) { return wallets._color(d.cluster) })
                     .attr("opacity", 0)
 
-                             
+            s = new Set([ "received_value",  "balance"])                 
             for (i in wallets.dimensions) {
                 p = wallets.dimensions[i]
-
-                wallets.lines_y[p] = d3.scaleSymlog()
+                
+                if (s.has(p)){
+                    wallets.lines_y[p] = d3.scaleLinear()
                     .domain( [Math.min(...data.map( d => d[p])) , Math.max(...data.map( d => d[p])) ] ) 
                     .range([0,wallets.height/2 - wallets.lines_margin.top - wallets.lines_margin.bot ])
+
+                }else {
+                    wallets.lines_y[p] = d3.scaleLinear()
+                    .domain( [Math.min(...data.map( d => d[p])) , Math.max(...data.map( d => d[p])) ] ) 
+                    .range([0,wallets.height/2 - wallets.lines_margin.top - wallets.lines_margin.bot ])
+
+                }
+
+
             }
             
             // Build the X scale -> it find the best position for each Y axis
@@ -204,11 +224,12 @@ var wallets = {
                     .attr("class", "axis")
                     // I translate this element to its right position on the x axis
                     .attr("transform", function(d) { return "translate(" + wallets.lines_x(d) + ") "; })
-                    .append("text")
+                    .append("g")
+                        
+                        .html(function(d) { return wallets.dimensions_names.get(d); })
                         .style("text-anchor", "middle")
-                        .attr("y", -5)
-                        .style("font-size", "12px")
-                        .text(function(d) { return wallets.dimensions_names.get(d); })
+                        
+                        .style("font-size", "14px")
                         .style("fill", "white")
                         
 
@@ -242,9 +263,10 @@ var wallets = {
     },
 
     _color :  d3.scaleOrdinal()
-        .domain([0, 1, 2, 3, 4, 5, 6, 7,  null, undefined])
+        .domain( [...Array(20).keys(),  null, undefined])
         // .range(["#ff1f1f", "#78ff1f", "#1f5aff", "#ff961f", "#1fffb4", "#d21fff", "#f0ff1f", "#1fd2ff", "#ff1fb4"]),
-        .range(["#0000ff", "green", "#ff4500","#ffd700", "#ff1493", "#87cefa", "#45daff", "#8b4513", "#ccc", "#ccc"]),
+        .range(['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#42d4f4', '#f032e6', '#bfef45', '#fabed4', '#469990', '#dcbeff', '#9A6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#a9a9a9',"#ccc", "#ccc"]),
+        // .range(["#0000ff", "green", "#ff4500","#ffd700", "#ff1493", "#87cefa", "#45daff", "#8b4513", "#ccc", "#ccc"]),
 
     color: function(cluster_id){
         c =  wallets._color(cluster_id)
@@ -277,6 +299,7 @@ var wallets = {
         if ( loaded && ( changed || xmin != wallets.xmin || xmax != wallets.xmax || ymin != wallets.ymin || ymax != wallets.ymax )){
             
             _iscontained = d3.selectAll('.graph-circle').nodes().map(n => { return [n.__data__.id,   
+                n.classList.contains('selected') ||
                 n.cx.baseVal.value >= xmin &&  
                 n.cx.baseVal.value <= xmax && 
                 n.cy.baseVal.value >= ymin &&  

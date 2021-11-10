@@ -31,8 +31,9 @@ query = f"""
 """
 
 wallets_df = pd.read_sql_query(query, engine)
-wallets_data = wallets_df.drop(['addr','address', 'block_hash', 'balance'], axis=1).to_numpy()
-X = sklearn.preprocessing.normalize(wallets_data)
+wallets_data = wallets_df.drop(['addr','address', 'block_hash'], axis=1).to_numpy()
+# X = sklearn.preprocessing.normalize(wallets_data)
+X = sklearn.preprocessing.StandardScaler(with_mean=False).fit_transform(wallets_data)
 
 
 def reset_clustering():
@@ -48,13 +49,13 @@ def start_clustering(n_clusters):
     for n in range(100):
         print(n)
 
-        centroids, labels, inertia = sklearn.cluster.k_means(X, n_clusters, init=last_centroids if last_centroids is not None else 'random', 
+        centroids, labels, inertia = sklearn.cluster.k_means(X, n_clusters, init=last_centroids if last_centroids is not None else 'k-means++', 
                                                                             max_iter=1,
-                                                                            n_init=1)
+                                                                            n_init=10)
                                                                             
         
 
-        if n < 2  or np.linalg.norm(centroids-last_centroids) > 1e-6 :
+        if n < 2  or np.linalg.norm(centroids-last_centroids) > 1e-3 :
             last_centroids = centroids
             centroids_queue.put((centroids, False))
         else:
@@ -74,6 +75,7 @@ def get_clustering(block):
         if available:
             centroids, last = (last_centroids, True)
         else:
+            return pd.DataFrame(), False
             raise Exception("No available nor running clustering ")
     else:
         centroids, last = centroids_queue.get(True, 2)

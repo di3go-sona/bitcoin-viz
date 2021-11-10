@@ -1,7 +1,17 @@
 var ticks = 0;
 var graph_data;
 
+NODE_RADIUS = 18;
+NODE_HRADIUS = NODE_RADIUS*3;
+LINK_LEN = 80;
+
+graph_transorm = {k:0.1};
+var highlighted_wallets = new Set()
 function highlight_wallet(address) {
+
+  d3.selectAll('.graph-circle').filter(d => d.id == address).attr('r', NODE_HRADIUS ).attr("class", "graph-circle selected")
+
+
 
   circles = wallets.circles.filter(wallet => wallet.address == address)
   circles.transition()
@@ -26,6 +36,8 @@ function highlight_wallet(address) {
 
 function unhighlight_wallet(address) {
 
+  d3.selectAll('.graph-circle').filter(d => d.id == address).attr('r', NODE_RADIUS).attr("class", "graph-circle")
+
   circles = wallets.circles.filter(wallet => wallet.address == address)
   circles.transition()
     .duration('50')
@@ -46,8 +58,7 @@ function unhighlight_wallet(address) {
 }
 
 
-NODE_RADIUS = 18;
-LINK_LEN = 80;
+
 
 $(document).ready(function(){
 
@@ -100,6 +111,8 @@ $(document).ready(function(){
 
   // Add zoom stuff
   function handleZoom(e) {
+    graph_transorm = e.transform
+    // d3.selectAll('.graph-circle').filter(d => highlighted_wallets.has(d.id)).attr('r', NODE_HRADIUS / graph_transorm.k )
     graph.svg.attr('transform', e.transform);
   }
 
@@ -282,7 +295,7 @@ $(document).ready(function(){
 
     // Graph Highlight
 
-    highlight_wallet(d.id)
+    // highlight_wallet(d.id)
     
 
     tooltip_width = g_tooltip.node().getBoundingClientRect().width;
@@ -303,7 +316,19 @@ $(document).ready(function(){
     g_tooltip.transition()
               .duration(200).style("opacity", 0)
     
-    unhighlight_wallet(d.id)
+    // unhighlight_wallet(d.id)
+  }
+
+  function mouse_click_node(event, d) {
+    navigator.clipboard.writeText(d.id)
+    if (! highlighted_wallets.has(d.id) ){
+      highlighted_wallets.add(d.id)
+      highlight_wallet(d.id)
+    } else {
+      highlighted_wallets.delete(d.id)
+      unhighlight_wallet(d.id)
+    }
+    
   }
 
   var counter_per_tx = null;
@@ -393,7 +418,8 @@ $(document).ready(function(){
                   .attr("fill", n => node_color(n))
                   .attr("opacity", 1)
                   .on("mouseover", mouse_over_node)
-                  .on("mouseout", mouse_out_node);
+                  .on("mouseout", mouse_out_node)
+                  .on("click", mouse_click_node);
 
     // On block changed we must respect the filters applied
     apply_fitlers_graph();
@@ -457,6 +483,11 @@ $(document).ready(function(){
     graph.loading = true;
     remove_graph();
   });
+
+  $('#selection-reset-button').on("click", function(){
+    highlighted_wallets.forEach(id => unhighlight_wallet(id))
+    wallets.update_visibility(null, true)
+  })
 
   $(document).on("wallets_loaded", function() {
     if (!timeline.current_block){
